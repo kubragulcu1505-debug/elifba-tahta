@@ -1,0 +1,271 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --bg: #fdf8ef;
+  --surface: #ffffff;
+  --surface-2: #f6efe2;
+  --ink: #1f2430;
+  --ink-soft: #545b6b;
+  --line: #e6dccb;
+  --brand: #0f766e;
+  --brand-ink: #ffffff;
+  --left: #1d4ed8;
+  --left-soft: #e3ebff;
+  --right: #c2410c;
+  --right-soft: #ffe9dc;
+  --ok: #15803d;
+  --ok-soft: #dcfce7;
+  --bad: #b91c1c;
+  --bad-soft: #fee2e2;
+  --warn: #a16207;
+  --warn-soft: #fef3c7;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-left: var(--left);
+  --color-left-soft: var(--left-soft);
+  --color-right: var(--right);
+  --color-right-soft: var(--right-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --font-sans: "Segoe UI", "Nunito", "Trebuchet MS", system-ui, -apple-system, Roboto, sans-serif;
+  --font-arabic: var(--font-scheherazade), "Scheherazade New", serif;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* ── Arapça metin ──
+   Satır yüksekliği geniş tutulur, harf aralığı verilmez, taşma kesilmez; harekeler ve üst işaretler görünür kalır. */
+.ar {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  unicode-bidi: isolate;
+  letter-spacing: normal !important;
+  word-spacing: 0.08em;
+  /* Ölçüm: içerikteki en yüksek metin (şedde + dikey üstün, dikey esre) font boyutunun 2,0 katı. */
+  line-height: 2.1;
+  font-weight: 400;
+  font-kerning: normal;
+  font-variant-ligatures: normal;
+  overflow: visible;
+  padding-block: 0.15em;
+  text-rendering: optimizeLegibility;
+}
+.ar-inline {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  unicode-bidi: isolate;
+  letter-spacing: normal !important;
+  font-size: 1.35em;
+  line-height: 1;
+  padding-inline: 0.08em;
+}
+
+/* ── Oyun alanı ── */
+.game-root {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--bg);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  overflow: hidden;
+}
+.game-root * {
+  -webkit-tap-highlight-color: transparent;
+}
+.halves {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8px minmax(0, 1fr);
+  min-height: 0;
+}
+.divider {
+  background: repeating-linear-gradient(to bottom, var(--ink) 0 18px, transparent 18px 30px);
+  opacity: 0.55;
+}
+.team-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: clamp(8px, 1.4vh, 22px) clamp(10px, 1.2vw, 28px);
+  gap: clamp(6px, 1.2vh, 18px);
+  position: relative;
+}
+.team-panel[data-side="left"] {
+  background: linear-gradient(180deg, var(--left-soft), var(--bg) 40%);
+}
+.team-panel[data-side="right"] {
+  background: linear-gradient(180deg, var(--right-soft), var(--bg) 40%);
+}
+.prompt-text {
+  font-size: clamp(18px, 3.3vh, 38px);
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+.stimulus {
+  font-size: clamp(64px, 14vh, 168px);
+  text-align: center;
+}
+.stimulus.long {
+  font-size: clamp(48px, 9.5vh, 120px);
+}
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 1.8vh, 26px);
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: stretch;
+}
+.option-btn {
+  touch-action: none;
+  min-height: clamp(84px, 16vh, 200px);
+  border-radius: clamp(14px, 2vh, 28px);
+  border: 4px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 4px 0 var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2em 0.5em;
+  transition: transform 80ms ease, background-color 120ms ease, border-color 120ms ease;
+  color: var(--ink);
+  cursor: pointer;
+}
+.option-btn[data-pressed="true"] {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--line);
+}
+.option-btn:focus-visible {
+  outline: 5px solid var(--brand);
+  outline-offset: 3px;
+}
+.option-btn[data-state="correct"] {
+  background: var(--ok-soft);
+  border-color: var(--ok);
+}
+.option-btn[data-state="wrong"] {
+  background: var(--bad-soft);
+  border-color: var(--bad);
+}
+.option-btn[data-state="dim"] {
+  opacity: 0.45;
+}
+.option-btn .opt-ar {
+  font-size: clamp(42px, 8.2vh, 104px);
+  /* Düğme içinde satır kutusu düğmeden taşmasın; en yüksek mürekkep (2,0 × font) yine düğmenin içinde kalır. */
+  line-height: 1.8;
+  padding-block: 0;
+}
+.option-btn .opt-ar.long {
+  font-size: clamp(30px, 5.4vh, 70px);
+}
+.option-btn .opt-text {
+  font-size: clamp(17px, 3vh, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+.option-btn .opt-text.long {
+  font-size: clamp(14px, 2.3vh, 26px);
+}
+.big-btn {
+  touch-action: manipulation;
+  min-height: 64px;
+  border-radius: 18px;
+  padding: 0.4em 1.2em;
+  font-weight: 800;
+  font-size: clamp(18px, 2.6vh, 30px);
+}
+
+/* Genel sayfalar */
+.card {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 22px;
+}
+.btn {
+  touch-action: manipulation;
+  border-radius: 14px;
+  padding: 0.6em 1.1em;
+  font-weight: 700;
+  border: 2px solid transparent;
+  min-height: 48px;
+}
+.btn-primary {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+.btn-ghost {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+.btn:disabled,
+.big-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  border-radius: 999px;
+  padding: 0.15em 0.7em;
+  font-size: 0.85em;
+  font-weight: 700;
+}
+
+/* Hareket azaltma: sistem tercihi ya da uygulama ayarı */
+@keyframes pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes slide-in {
+  0% { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.anim-pop { animation: pop 220ms ease-out both; }
+.anim-in { animation: slide-in 200ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

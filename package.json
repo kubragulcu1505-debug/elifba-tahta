@@ -1,0 +1,35 @@
+{
+  "name": "elifba-tahta",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "node --experimental-strip-types --no-warnings --test \"tests/**/*.test.ts\"",
+    "content:stats": "node --experimental-strip-types --no-warnings scripts/content-stats.ts",
+    "content:docs": "node --experimental-strip-types --no-warnings scripts/gen-docs.ts"
+  },
+  "dependencies": {
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@fontsource/amiri": "^5.3.0",
+    "@fontsource/noto-naskh-arabic": "^5.3.0",
+    "@fontsource/scheherazade-new": "^5.3.0",
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22.6"
+  }
+}
