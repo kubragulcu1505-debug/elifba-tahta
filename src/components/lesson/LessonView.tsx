@@ -190,7 +190,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             <li>Üstte halat çekme animasyonu vardır. Doğru cevap veren takım halatı bir adım kendi tarafına çeker.</li>
             <li>Sorular sınırsızdır ve kendiliğinden geçer. Önce bu dersin bütün harfleri/heceleri karışık gelir, bitince yeniden karışır.</li>
             <li>Yanlış cevapta o takım 5 saniye bekler; doğru cevap ekranda gösterilir.</li>
-            <li>Bayrağı {settings.tugTarget} çekiş farkla kendi çizgisine ilk çeken takım kazanır.</li>
+            <li>Ortada bir çukur vardır. Rakibini {settings.tugTarget} çekiş farkla çukura ilk düşüren takım kazanır.</li>
           </ul>
           <TapButton
             className="big-btn btn-primary mt-5"

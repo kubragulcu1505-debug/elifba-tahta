@@ -29,6 +29,7 @@ const TYPE_TR: Record<string, string> = {
   "rule-judgement": "Kural yargısı",
   "rule-compare": "Kurala uyan örneği seç",
   transition: "Tenvinli geçiş",
+  reading: "Arapça yazının Türkçe okunuşunu seç",
 };
 
 let map = `# Ders haritası\n\nBu dosya \`npm run content:docs\` ile ders verisinden (src/content) üretilir. Elle düzenlemeyin.\n\n`;

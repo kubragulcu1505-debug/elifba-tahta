@@ -27,6 +27,7 @@ export type QuestionType =
   | "rule-judgement" // Zamir, lafzatullah, elif-lâm, râ, vakf yargısı
   | "rule-compare" // Kurala uyan örneği seç
   | "transition" // Tenvinli geçiş
+  | "reading" // Arapçayı gör, Türkçe okunuşunu seç (öğretmen kararı)
   | "audio-choice"; // Dinlediğini seç (yalnızca onaylı kayıt varsa, alıştırma modunda)
 
 export type OptionKind = "arabic" | "text";

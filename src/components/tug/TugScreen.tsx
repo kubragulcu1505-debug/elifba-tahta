@@ -12,6 +12,7 @@ import { TapButton } from "@/components/TapButton";
 import { TeamIcon } from "@/components/TeamBadge";
 import { Ar, RichText } from "@/components/Arabic";
 import { RopeStage } from "./RopeStage";
+import { Confetti, Trophy } from "@/components/Celebration";
 
 const isLongArabic = (s: string) => [...s].filter((c) => c !== " ").length > 7 || s.includes(" ");
 const isLongText = (s: string) => s.length > 22;
@@ -52,6 +53,14 @@ function TugInner() {
   const [state, setState] = useState<TugState | null>(loadInitial);
   const [isFs, setIsFs] = useState(false);
   const [confirmRestart, setConfirmRestart] = useState(false);
+  // Kazanma kartı, kaybedenlerin çukura düşme animasyonundan sonra açılır.
+  const [showWin, setShowWin] = useState(false);
+  const winner = state?.winner ?? null;
+  useEffect(() => {
+    if (!winner) return;
+    const t = setTimeout(() => setShowWin(true), 1600);
+    return () => clearTimeout(t);
+  }, [winner]);
 
   const lessonId = state?.lessonId;
   const pool = useMemo(() => (lessonId ? (TUG_POOLS[lessonId] ?? []).map(toLite) : []), [lessonId]);
@@ -148,7 +157,7 @@ function TugInner() {
         </TapButton>
       </header>
 
-      <RopeStage rope={state.rope} target={state.settings.target} names={names} pulls={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
+      <RopeStage rope={state.rope} target={state.settings.target} names={names} winner={state.winner} pulls={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
 
       <div className="relative min-h-0">
         <div className="halves h-full">
@@ -166,12 +175,15 @@ function TugInner() {
           </div>
         )}
 
-        {state.winner && (
+        {state.winner && showWin && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/45 p-4" data-testid="tug-winner">
-            <div className="card anim-pop flex w-full max-w-3xl flex-col items-center gap-5 p-8 text-center">
+            <Confetti />
+            <div className="card anim-pop flex w-full max-w-3xl flex-col items-center gap-4 p-8 text-center">
+              <Trophy />
               <div className={`text-[clamp(28px,5vh,56px)] font-extrabold ${state.winner === "left" ? "text-left" : "text-right"}`}>
-                <TeamIcon side={state.winner} size={48} /> <span className="text-ink">{names[state.winner]} halatı kendi tarafına çekti!</span>
+                <TeamIcon side={state.winner} size={48} /> <span className="text-ink">{names[state.winner]} kazandı!</span>
               </div>
+              <p className="text-[clamp(16px,2.6vh,28px)]">Rakip takım ortadaki çukura düştü.</p>
               <p className="text-[clamp(16px,2.6vh,28px)] font-semibold">İki takım da çok güzel çekti. Tebrikler!</p>
               <div className="grid w-full grid-cols-2 gap-4 text-[clamp(16px,2.4vh,26px)]">
                 {(["left", "right"] as Side[]).map((side) => (
@@ -182,7 +194,7 @@ function TugInner() {
                 ))}
               </div>
               <p className="text-base text-ink-soft">
-                Kazanmak için bayrağı {state.settings.target} çekiş farkla kendi çizgisine çekmek gerekir. Takım sonucu tek tek öğrencilerin düzeyini göstermez.
+                Kazanmak için rakibi {state.settings.target} çekiş farkla ortadaki çukura çekmek gerekir. Takım sonucu tek tek öğrencilerin düzeyini göstermez.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <TapButton className="big-btn btn-primary" onTap={restart}>↻ Yeniden oyna</TapButton>

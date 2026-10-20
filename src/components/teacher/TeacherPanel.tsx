@@ -152,7 +152,7 @@ function TeacherPanelInner() {
                 onChange={(e) => setSettings({ tugTarget: Math.min(20, Math.max(3, Number(e.target.value) || 7)) })}
                 className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
               />
-              <span className="text-base text-ink-soft">Varsayılan 7. Bayrak, bir takım bu kadar çekiş öne geçince o takımın çizgisine ulaşır. Yeni başlatılan oyunlarda geçerlidir.</span>
+              <span className="text-base text-ink-soft">Varsayılan 7. Bir takım bu kadar çekiş öne geçince rakip takım ortadaki çukura düşer. Yeni başlatılan oyunlarda geçerlidir.</span>
             </label>
             <label className="flex flex-col gap-2 text-lg">
               <span className="font-bold">Hareket ve animasyon</span>

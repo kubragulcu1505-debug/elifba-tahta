@@ -83,7 +83,8 @@ Her ders birkaç ölçülebilir kazanıma bölündü. Kazanımların tam listesi
 - Hareke, harfin okunmasını sağlayan işarettir. Üstün (fetha), esre (kesra) ve ötre (damme) olarak adlandırılır. [Kaynak: K1 s.9]
 - Platform harekeli harfleri önce tek tek, sonra beşli gruplar hâlinde "ritmik usulle" okutuyor. [Kaynak: K2 ders 2, 5, 8]
 - Harfin adı ile harekeli sesi farklıdır. Örneğin harfin adı "Be"dir, ama بَ, بِ ve بُ üç farklı hecedir. Uygulama bu farkı korumak için heceleme dilini kullanıyor: "Be üstün", "Be esre" gibi. Doğru hece Arapça yazıdan seçiliyor. [Öneri]
-- Türkçe harflerle yazılmış okunuş (transliterasyon) şık olarak kullanılmıyor. Kaynak, hareke seslerini anlatırken "e", "i", "u" gibi Türkçe sesleri yalnızca açıklama olarak kullanıyor. Uygulama da yalnızca açıklamalarda böyle yapıyor. [Kaynak: K2 ders 2, 5, 8; Öneri]
+- İlk sürümde Türkçe harflerle yazılmış okunuş şık olarak kullanılmadı. **20 Ekim 2026 öğretmen kararıyla** hareke, cezm ve şedde ünitelerinin takım oyununda şıklar Türkçe okunuş oldu (ör. ⟪فَتَحَ⟫ → “feteha”). Okunuş, geleneksel Türkçe elifba hecelemesine göre yazılır: Be üstün “be”, Ha üstün “ha”, Sad üstün “sa”; kalın harflerde a/ı/u, ح ع ر harflerinde a/i/u, diğerlerinde e/i/ü. Kaynak da hareke seslerini anlatırken "e", "i", "u" gibi Türkçe sesler kullanır. [Kaynak: K2 ders 2, 5, 8; öğretmen kararı]
+- Türkçe yazı Arapça sesleri tam karşılamaz: ث ve س ikisi de “s”, ذ ز ظ “z” olur; ayn cezmde ‘ ile yazılır. Okunuşu aynı çıkan çeldiriciler oyunda elenir. Cezmli ve şeddeli hece derslerinde ayn harfi okunuş sorularına alınmaz. Bu sorular “öğretmen incelemesi bekliyor” olarak işaretlidir ve doğru ses öğretmenden dinlenmelidir. Okunuş tablosu `src/content/reading.ts` dosyasındadır. [Öneri]
 - Doğru ses ancak öğretmen dinleyerek değerlendirilebilir. Bu yüzden her dersin bir öğretmen değerlendirme bölümü var. [Öneri]
 
 ### 3.5 Çocukların sık yaptığı hatalar

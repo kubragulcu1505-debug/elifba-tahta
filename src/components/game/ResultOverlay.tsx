@@ -3,6 +3,7 @@ import Link from "next/link";
 import { computeResult, formatMs, type GameState, type Side } from "@/lib/game";
 import { TapButton } from "@/components/TapButton";
 import { TeamIcon } from "@/components/TeamBadge";
+import { Confetti, Trophy } from "@/components/Celebration";
 
 export function ResultOverlay({
   game,
@@ -38,7 +39,13 @@ export function ResultOverlay({
 
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/45 p-4" data-testid="result-overlay">
+      {competition && <Confetti />}
       <div className="card anim-pop flex max-h-full w-full max-w-5xl flex-col gap-5 overflow-auto p-[clamp(16px,3vh,40px)] text-center">
+        {competition && (
+          <div className="flex justify-center">
+            <Trophy size={72} />
+          </div>
+        )}
         <div className="text-[clamp(28px,5vh,56px)] font-extrabold" data-testid="winner-line">
           {competition && r.winner && r.winner !== "tie" && (
             <span className={`mr-3 inline-block align-middle ${r.winner === "left" ? "text-left" : "text-right"}`}>

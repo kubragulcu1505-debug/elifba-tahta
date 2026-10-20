@@ -296,7 +296,7 @@ export const LESSONS: Lesson[] = [
     ],
     objectives: [
       { id: "u3-l1-o1", text: "Hecelenişi verilen üstünlü harfi seçer.", assessedBy: "game" },
-      { id: "u3-l1-o2", text: "Üstünlü harfin hecelenişini seçer.", assessedBy: "game" },
+      { id: "u3-l1-o2", text: "Üstünlü hecenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u3-l1-o3", text: "Üstünlü harfleri uzatmadan doğru sesle okur.", assessedBy: "teacher" },
     ],
     teacherChecklist: ["Üstünlü harfleri uzatmadan okuyor.", "Kalın harflerde sesi kalınlaştırıyor (ص ض ط ظ غ ق خ)."],
@@ -315,7 +315,7 @@ export const LESSONS: Lesson[] = [
     ],
     objectives: [
       { id: "u3-l2-o1", text: "Hecelenişi verilen esreli harfi seçer.", assessedBy: "game" },
-      { id: "u3-l2-o2", text: "Esreli harfin hecelenişini seçer.", assessedBy: "game" },
+      { id: "u3-l2-o2", text: "Esreli hecenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u3-l2-o3", text: "Esreli harfleri uzatmadan okur.", assessedBy: "teacher" },
     ],
     teacherChecklist: ["Esreli harfleri uzatmadan okuyor.", "Üstün ile esreyi karıştırmıyor."],
@@ -334,7 +334,7 @@ export const LESSONS: Lesson[] = [
     ],
     objectives: [
       { id: "u3-l3-o1", text: "Hecelenişi verilen ötreli harfi seçer.", assessedBy: "game" },
-      { id: "u3-l3-o2", text: "Ötreli harfin hecelenişini seçer.", assessedBy: "game" },
+      { id: "u3-l3-o2", text: "Ötreli hecenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u3-l3-o3", text: "Ötreli harfleri uzatmadan okur.", assessedBy: "teacher" },
     ],
     teacherChecklist: ["Ötreli harfleri uzatmadan okuyor."],
@@ -347,7 +347,7 @@ export const LESSONS: Lesson[] = [
     examples: [{ arabic: "قَ قِ قُ", note: "Kaf üstün • Kaf esre • Kaf ötre" }, { arabic: "كَ كِ كُ", note: "Kef üstün • Kef esre • Kef ötre" }],
     objectives: [
       { id: "u3-l4-o1", text: "Harekeli harfteki harekenin adını seçer.", assessedBy: "game" },
-      { id: "u3-l4-o2", text: "Harekeli harfleri karşılaştırarak doğru olanı seçer.", assessedBy: "game" },
+      { id: "u3-l4-o2", text: "Karışık harekeli hecelerin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u3-l4-o3", text: "Karışık harekeli harfleri ritmik okur.", assessedBy: "teacher" },
     ],
     teacherChecklist: ["Karışık harekeli harf satırını ritmik ve uzatmadan okuyor."],
@@ -366,7 +366,7 @@ export const LESSONS: Lesson[] = [
       { arabic: "رُسُلُ", note: "Ra ötre · Sin ötre · Lam ötre" },
     ],
     objectives: [
-      { id: "u3-l5-o1", text: "Harekeli kelimenin hecelenişini seçer.", assessedBy: "game" },
+      { id: "u3-l5-o1", text: "Harekeli kelimenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u3-l5-o2", text: "Hecelenişi verilen kelimeyi seçer.", assessedBy: "game" },
       { id: "u3-l5-o3", text: "Harekeli kelimeleri birleştirerek okur.", assessedBy: "teacher" },
     ],
@@ -389,7 +389,7 @@ export const LESSONS: Lesson[] = [
     ],
     objectives: [
       { id: "u4-l1-o1", text: "Hecelenişi verilen cezmli heceyi seçer.", assessedBy: "game" },
-      { id: "u4-l1-o2", text: "Cezmli hecenin hecelenişini seçer.", assessedBy: "game" },
+      { id: "u4-l1-o2", text: "Cezmli hecenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u4-l1-o3", text: "Cezmli harfe hareke sesi vermeden okur.", assessedBy: "teacher" },
     ],
     teacherChecklist: ["Cezmli harfi önceki harekeyle birleştiriyor.", "Cezmden önceki harekeyi uzatmıyor."],
@@ -402,7 +402,7 @@ export const LESSONS: Lesson[] = [
     examples: [{ arabic: "قُلْ", note: "Kaf ötre · Lam cezm" }, { arabic: "لَمْ", note: "Lam üstün · Mim cezm" }, { arabic: "كُنْتُمْ", note: "İki cezm var." }],
     objectives: [
       { id: "u4-l2-o1", text: "Kelimedeki cezmli harfi bulur.", assessedBy: "game" },
-      { id: "u4-l2-o2", text: "Cezmli kelimenin hecelenişini seçer.", assessedBy: "game" },
+      { id: "u4-l2-o2", text: "Cezmli kelimenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u4-l2-o3", text: "Kelimedeki cezm sayısını bulur.", assessedBy: "game" },
       { id: "u4-l2-o4", text: "Cezmli kelimeleri birleştirerek okur.", assessedBy: "teacher" },
     ],
@@ -421,7 +421,7 @@ export const LESSONS: Lesson[] = [
     ],
     examples: [{ arabic: "اَبَّ", note: "= اَبْ + بَ" }, { arabic: "اِنَّ", note: "= اِنْ + نَ" }, { arabic: "ثُمَّ", note: "= ثُمْ + مَ" }],
     objectives: [
-      { id: "u5-l1-o1", text: "Hecelenişi verilen şeddeli heceyi seçer.", assessedBy: "game" },
+      { id: "u5-l1-o1", text: "Şeddeli hecenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u5-l1-o2", text: "Şeddeli heceyi cezmli ve harekeli iki parçaya ayırır.", assessedBy: "game" },
       { id: "u5-l1-o3", text: "Şeddeli harfi sesi bölmeden iki kez okur.", assessedBy: "teacher" },
     ],
@@ -435,7 +435,7 @@ export const LESSONS: Lesson[] = [
     examples: [{ arabic: "عَلَّمَ", note: "عَلْ + لَمَ" }, { arabic: "رَبِّ", note: "رَبْ + بِ" }],
     objectives: [
       { id: "u5-l2-o1", text: "Kelimedeki şeddeli harfi bulur.", assessedBy: "game" },
-      { id: "u5-l2-o2", text: "Şeddeli kelimenin hecelenişini seçer.", assessedBy: "game" },
+      { id: "u5-l2-o2", text: "Şeddeli kelimenin Türkçe okunuşunu seçer.", assessedBy: "game" },
       { id: "u5-l2-o3", text: "Şeddeli kelimeleri doğru okur.", assessedBy: "teacher" },
     ],
     teacherChecklist: ["Şeddeli kelimeleri akıcı ve şeddeyi belirterek okuyor."],

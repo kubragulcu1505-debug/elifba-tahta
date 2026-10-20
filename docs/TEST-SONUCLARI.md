@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 38/38 geçti |
+| Otomatik testler (`npm test`) | 40/40 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,12 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Türkçe okunuş şıkları, kutlama ve çukur (20 Ekim 2026)
+
+- Okunuş çevirisi bilinen örneklerle doğrulandı: فَتَحَ “feteha”, ظَهَرَ “zahera”, قُلْ “kul”, اِنَّ “inne”, ثُمَّ “sümme”, رَبِّ “rabbi”, عَلَّمَ “alleme”, كُنْتُمْ “küntüm”, اُقْ “uk”, اِسْتَكْبَرَ “istekbera”: geçti.
+- Hareke, cezm ve şedde ünitelerinin 9 oyununda her soru “okunuş” türünde; doğru şık uyaranın okunuşu; şıklarda Arapça harf yok; iki şık aynı okunmuyor: geçti.
+- Tarayıcıda halat çekme (Harekeli kelimeler dersi, eşik geçici olarak 3): ortadaki çukur çizildi; kazanınca kaybeden takımın çocukları sırayla çukura düştü, kazananlar zıpladı; ardından kupa ve konfetili “Yıldız Takımı kazandı!” ekranı açıldı.
 
 ## Halat çekme oyunu (20 Ekim 2026)
 

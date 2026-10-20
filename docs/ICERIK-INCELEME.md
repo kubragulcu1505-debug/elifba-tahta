@@ -16,14 +16,14 @@ Durum anlamları:
 | Sonda yazılış | 30 | 30 | 0 | 56 |
 | Bağlanmayan harfler ve kelimede harf | 30 | 14 | 16 | 90 |
 | Yazılışlar karma tekrar | 30 | 30 | 0 | 40 |
-| Üstün (fetha) | 30 | 30 | 0 | 56 |
-| Esre (kesra) | 30 | 30 | 0 | 56 |
-| Ötre (damme) | 30 | 30 | 0 | 56 |
-| Harekeleri karşılaştırma | 30 | 30 | 0 | 56 |
-| Harekeli kelimeler | 30 | 0 | 30 | 40 |
-| Cezmli heceler | 30 | 30 | 0 | 50 |
-| Cezmli kelimeler | 30 | 0 | 30 | 78 |
-| Şeddeli heceler | 30 | 30 | 0 | 50 |
+| Üstün (fetha) | 30 | 0 | 30 | 56 |
+| Esre (kesra) | 30 | 0 | 30 | 56 |
+| Ötre (damme) | 30 | 0 | 30 | 56 |
+| Harekeleri karşılaştırma | 30 | 0 | 30 | 56 |
+| Harekeli kelimeler | 30 | 0 | 30 | 80 |
+| Cezmli heceler | 30 | 0 | 30 | 48 |
+| Cezmli kelimeler | 30 | 0 | 30 | 68 |
+| Şeddeli heceler | 30 | 0 | 30 | 48 |
 | Şeddeli kelimeler | 30 | 0 | 30 | 60 |
 | Med harfleriyle uzatma | 30 | 30 | 0 | 75 |
 | Uzatmalı kelimeler | 30 | 0 | 30 | 84 |
@@ -35,8 +35,8 @@ Durum anlamları:
 | Elif lâm takısı | 30 | 0 | 30 | 30 |
 | Râ harfi | 30 | 0 | 30 | 30 |
 | Duruş (vakf) ve tenvinli geçiş | 30 | 0 | 30 | 42 |
-| Genel tekrar ve yüzüne okuma | 30 | 9 | 21 | (önceki derslerden seçilir) |
-| **Toplam (oyun başına sayım; 12. ünite önceki soruları tekrar kullanır)** | 780 | 416 | 364 | |
+| Genel tekrar ve yüzüne okuma | 30 | 7 | 23 | (önceki derslerden seçilir) |
+| **Toplam (oyun başına sayım; 12. ünite önceki soruları tekrar kullanır)** | 780 | 234 | 546 | |
 
 ## Bilinen içerik sınırları
 

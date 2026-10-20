@@ -17,15 +17,15 @@ Ana omurga Diyanet'in basılı Elifbâ kitabının (K1, 4. baskı 2025) konu sı
 | 2. Harflerin yazılışları | Sonda yazılış | Harflerin kelime sonundaki yazılışını tanır. | Yazılıştan harfi bul | 10/12/8 |
 | 2. Harflerin yazılışları | Bağlanmayan harfler ve kelimede harf | Bağlanmayan altı harfi bilir; harekesiz bir kelimede harfleri sağdan sola bulur. | Kelimede harf bul; Bağlanan / bağlanmayan harf | 10/12/8 |
 | 2. Harflerin yazılışları | Yazılışlar karma tekrar | Harfi herhangi bir yazılışından tanır. | Yazılıştan harfi bul | 11/12/7 |
-| 3. Harekeler | Üstün (fetha) | Üstünü tanır; harf adı ile üstünü birleştirerek doğru heceyi seçer. | Hecenin hecelenişini seç | 10/12/8 |
-| 3. Harekeler | Esre (kesra) | Esreyi tanır ve üstünden ayırır. | Hecenin hecelenişini seç | 10/12/8 |
-| 3. Harekeler | Ötre (damme) | Ötreyi tanır ve diğer harekelerden ayırır. | Hecenin hecelenişini seç | 10/12/8 |
-| 3. Harekeler | Harekeleri karşılaştırma | Üç harekeyi birbirinden ayırır ve karışık harekeli harfleri tanır. | Hecenin hecelenişini seç; Harekeyi / tenvini tanı | 10/12/8 |
-| 3. Harekeler | Harekeli kelimeler | Üç harfli harekeli kelimeleri heceleyerek çözer. | Kelimenin hecelenişini seç | 14/0/16 |
-| 4. Cezm | Cezmli heceler | Cezmi tanır; cezmli harfi önceki harekeyle birleştirir. | Hecenin hecelenişini seç | 10/12/8 |
-| 4. Cezm | Cezmli kelimeler | Cezm içeren kelimelerde cezmli harfi bulur ve kelimeyi heceler. | İşaretli harfi bul; İşaret sayısı; Kelimenin hecelenişini seç | 10/12/8 |
-| 5. Şedde | Şeddeli heceler | Şeddeyi tanır; şeddeli harfin iki kez okunduğunu bilir. | Hecenin hecelenişini seç | 10/12/8 |
-| 5. Şedde | Şeddeli kelimeler | Şeddeli kelimelerde şeddeli harfi bulur ve doğru böler. | İşaretli harfi bul; İşaret sayısı; Kelimenin hecelenişini seç | 8/13/9 |
+| 3. Harekeler | Üstün (fetha) | Üstünü tanır; harf adı ile üstünü birleştirerek doğru heceyi seçer. | Arapça yazının Türkçe okunuşunu seç | 10/13/7 |
+| 3. Harekeler | Esre (kesra) | Esreyi tanır ve üstünden ayırır. | Arapça yazının Türkçe okunuşunu seç | 10/12/8 |
+| 3. Harekeler | Ötre (damme) | Ötreyi tanır ve diğer harekelerden ayırır. | Arapça yazının Türkçe okunuşunu seç | 10/12/8 |
+| 3. Harekeler | Harekeleri karşılaştırma | Üç harekeyi birbirinden ayırır ve karışık harekeli harfleri tanır. | Arapça yazının Türkçe okunuşunu seç | 0/17/13 |
+| 3. Harekeler | Harekeli kelimeler | Üç harfli harekeli kelimeleri heceleyerek çözer. | Arapça yazının Türkçe okunuşunu seç | 10/12/8 |
+| 4. Cezm | Cezmli heceler | Cezmi tanır; cezmli harfi önceki harekeyle birleştirir. | Arapça yazının Türkçe okunuşunu seç | 10/12/8 |
+| 4. Cezm | Cezmli kelimeler | Cezm içeren kelimelerde cezmli harfi bulur ve kelimeyi heceler. | Arapça yazının Türkçe okunuşunu seç | 10/12/8 |
+| 5. Şedde | Şeddeli heceler | Şeddeyi tanır; şeddeli harfin iki kez okunduğunu bilir. | Arapça yazının Türkçe okunuşunu seç | 10/12/8 |
+| 5. Şedde | Şeddeli kelimeler | Şeddeli kelimelerde şeddeli harfi bulur ve doğru böler. | Arapça yazının Türkçe okunuşunu seç | 11/12/7 |
 | 6. Med harfleri | Med harfleriyle uzatma | Med harflerini (ا و ى) tanır; uzatılan ve uzatılmayan heceyi ayırır. | Hecenin hecelenişini seç; Med harfini bul | 10/12/8 |
 | 6. Med harfleri | Uzatmalı kelimeler | Kelimede uzatılan yerleri bulur. | Med harfini bul; Uzatma olan örneği ayırt et; İşaret sayısı | 11/13/6 |
 | 7. Âsar, med ve kasr | Dikey üstün (âsar) ve uzatma işaretleri | Âsarı ve dört elif uzatma işaretini tanır. | İşaretin anlamı; İşaretli harfi bul | 4/18/8 |
@@ -36,7 +36,7 @@ Ana omurga Diyanet'in basılı Elifbâ kitabının (K1, 4. baskı 2025) konu sı
 | 10. Elif lâm takısı ve râ | Elif lâm takısı | Elif lâm takısında lâmın okunup okunmadığını belirler. | Kural yargısı | 15/15/0 |
 | 10. Elif lâm takısı ve râ | Râ harfi | Harekeli râ harfinin kalın veya ince okunduğunu belirler. | Kural yargısı | 12/18/0 |
 | 11. Duruş ve geçiş | Duruş (vakf) ve tenvinli geçiş | Kelime sonunda dururken harekenin nasıl değiştiğini ve tenvinli kelimeden geçişi bilir. | Tenvinli geçiş; Kural yargısı | 11/14/5 |
-| 12. Kur'an okumaya hazırlık | Genel tekrar ve yüzüne okuma | Öğrenilen bütün kuralları karışık sorularda uygular; öğretmenle kısa sûreleri yüzüne okumaya hazırlanır. | Harfin adını seç; Yazılıştan harfi bul; Hecenin hecelenişini seç; Kelimenin hecelenişini seç; İşaret sayısı; Med harfini bul; Uzatma olan örneği ayırt et; İşaretli harfi bul; İşaretin anlamı; Harekeyi / tenvini tanı; Kural yargısı; Tenvinli geçiş | 0/19/11 |
+| 12. Kur'an okumaya hazırlık | Genel tekrar ve yüzüne okuma | Öğrenilen bütün kuralları karışık sorularda uygular; öğretmenle kısa sûreleri yüzüne okumaya hazırlanır. | Harfin adını seç; Yazılıştan harfi bul; Arapça yazının Türkçe okunuşunu seç; Hecenin hecelenişini seç; Med harfini bul; Uzatma olan örneği ayırt et; İşaretli harfi bul; İşaretin anlamı; Harekeyi / tenvini tanı; Kural yargısı; Tenvinli geçiş | 0/21/9 |
 
 ## Derslerin ayrıntısı
 
@@ -220,7 +220,7 @@ Başta, ortada, sonda ve ayrı yazılışlar; bağlanmayan harfler. Kaynak: K1 s
 
 **Kazanımlar:**
 - Hecelenişi verilen üstünlü harfi seçer. _(oyunla ölçülür)_
-- Üstünlü harfin hecelenişini seçer. _(oyunla ölçülür)_
+- Üstünlü hecenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Üstünlü harfleri uzatmadan doğru sesle okur. _(öğretmen dinleyerek değerlendirir)_
 
 **Öğretmen değerlendirmesi:**
@@ -235,7 +235,7 @@ Başta, ortada, sonda ve ayrı yazılışlar; bağlanmayan harfler. Kaynak: K1 s
 
 **Kazanımlar:**
 - Hecelenişi verilen esreli harfi seçer. _(oyunla ölçülür)_
-- Esreli harfin hecelenişini seçer. _(oyunla ölçülür)_
+- Esreli hecenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Esreli harfleri uzatmadan okur. _(öğretmen dinleyerek değerlendirir)_
 
 **Öğretmen değerlendirmesi:**
@@ -250,7 +250,7 @@ Başta, ortada, sonda ve ayrı yazılışlar; bağlanmayan harfler. Kaynak: K1 s
 
 **Kazanımlar:**
 - Hecelenişi verilen ötreli harfi seçer. _(oyunla ölçülür)_
-- Ötreli harfin hecelenişini seçer. _(oyunla ölçülür)_
+- Ötreli hecenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Ötreli harfleri uzatmadan okur. _(öğretmen dinleyerek değerlendirir)_
 
 **Öğretmen değerlendirmesi:**
@@ -264,7 +264,7 @@ Başta, ortada, sonda ve ayrı yazılışlar; bağlanmayan harfler. Kaynak: K1 s
 
 **Kazanımlar:**
 - Harekeli harfteki harekenin adını seçer. _(oyunla ölçülür)_
-- Harekeli harfleri karşılaştırarak doğru olanı seçer. _(oyunla ölçülür)_
+- Karışık harekeli hecelerin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Karışık harekeli harfleri ritmik okur. _(öğretmen dinleyerek değerlendirir)_
 
 **Öğretmen değerlendirmesi:**
@@ -277,7 +277,7 @@ Başta, ortada, sonda ve ayrı yazılışlar; bağlanmayan harfler. Kaynak: K1 s
 **Hedef:** Üç harfli harekeli kelimeleri heceleyerek çözer.
 
 **Kazanımlar:**
-- Harekeli kelimenin hecelenişini seçer. _(oyunla ölçülür)_
+- Harekeli kelimenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Hecelenişi verilen kelimeyi seçer. _(oyunla ölçülür)_
 - Harekeli kelimeleri birleştirerek okur. _(öğretmen dinleyerek değerlendirir)_
 
@@ -296,7 +296,7 @@ Cezmli harfi önceki harekeyle birleştirme. Kaynak: K1 s.12–13, K2 Ders 11.
 
 **Kazanımlar:**
 - Hecelenişi verilen cezmli heceyi seçer. _(oyunla ölçülür)_
-- Cezmli hecenin hecelenişini seçer. _(oyunla ölçülür)_
+- Cezmli hecenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Cezmli harfe hareke sesi vermeden okur. _(öğretmen dinleyerek değerlendirir)_
 
 **Öğretmen değerlendirmesi:**
@@ -311,7 +311,7 @@ Cezmli harfi önceki harekeyle birleştirme. Kaynak: K1 s.12–13, K2 Ders 11.
 
 **Kazanımlar:**
 - Kelimedeki cezmli harfi bulur. _(oyunla ölçülür)_
-- Cezmli kelimenin hecelenişini seçer. _(oyunla ölçülür)_
+- Cezmli kelimenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Kelimedeki cezm sayısını bulur. _(oyunla ölçülür)_
 - Cezmli kelimeleri birleştirerek okur. _(öğretmen dinleyerek değerlendirir)_
 
@@ -329,7 +329,7 @@ Cezmli harfi önceki harekeyle birleştirme. Kaynak: K1 s.12–13, K2 Ders 11.
 **Hedef:** Şeddeyi tanır; şeddeli harfin iki kez okunduğunu bilir.
 
 **Kazanımlar:**
-- Hecelenişi verilen şeddeli heceyi seçer. _(oyunla ölçülür)_
+- Şeddeli hecenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Şeddeli heceyi cezmli ve harekeli iki parçaya ayırır. _(oyunla ölçülür)_
 - Şeddeli harfi sesi bölmeden iki kez okur. _(öğretmen dinleyerek değerlendirir)_
 
@@ -344,7 +344,7 @@ Cezmli harfi önceki harekeyle birleştirme. Kaynak: K1 s.12–13, K2 Ders 11.
 
 **Kazanımlar:**
 - Kelimedeki şeddeli harfi bulur. _(oyunla ölçülür)_
-- Şeddeli kelimenin hecelenişini seçer. _(oyunla ölçülür)_
+- Şeddeli kelimenin Türkçe okunuşunu seçer. _(oyunla ölçülür)_
 - Şeddeli kelimeleri doğru okur. _(öğretmen dinleyerek değerlendirir)_
 
 **Öğretmen değerlendirmesi:**

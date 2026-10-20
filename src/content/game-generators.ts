@@ -5,9 +5,11 @@ import type { Question, QuestionType, ReviewStatus, SourceRef } from "./types.ts
 import { FATHA, KASRA, DAMMA, SUKUN, SHADDA, FATHATAN, SUP_ALEF, MADDAH, ALEF_MADDA, clusters, canonical } from "./arabic.ts";
 import { LETTERS, GROUPS, NON_CONNECTORS, forms, dotsText, letterByChar, type Letter } from "./letters.ts";
 import { makeQuestion, takeDistinct, spellWord, VOWEL_NAME, ar } from "./build.ts";
+import { readArabic } from "./reading.ts";
 import {
   K1, K2, T, VOWELS, diffFrom, upToGroup, family, soundMates, others, names, syl, longSyl, tanSyl, TANWEEN_NAME, TANWEENS,
   vowelOfTanween, MADD_LETTER_NAME, byMode, capital, POS_NAME, formFamily, spell1, VOWEL_EXPLAIN, wordSpellingQ,
+  changeVowel as changeVowelG, swapLetter as swapLetterG,
   SYLLABLE_LETTERS, elifV, countMark, lettersOfWord, countQ, maddLetters, lastCluster, tanweenOf, tanName, VOWEL_KEY,
   genZamir, genLafza, genElifLam, genRa,
   type Pos,
@@ -536,3 +538,119 @@ export function gameVakf(lessonId: string): Question[] {
   return p.qs;
 }
 
+
+// ───────────────────────── Ünite 3–5: Arapçayı gör, Türkçe okunuşunu seç (öğretmen kararı) ─────────────────────────
+const uniq = (xs: string[]) => [...new Set(xs)];
+/** Ayn, cezmli/şeddeli hecede Türkçe harflerle anlaşılır yazılamadığı için okunuş hecelerine alınmaz. */
+const READ_SYLLABLE_LETTERS = SYLLABLE_LETTERS.filter((l) => l.id !== "ayn");
+const noTatweel = (s: string) => s.split(String.fromCharCode(0x640)).join("");
+
+function readQ(p: GamePool, g: { id: string; lessonId: string; objectiveId: string; prompt: string; stimulus: string; confusers: string[]; plain: string[]; mode: number; source: SourceRef }) {
+  const correct = readArabic(g.stimulus);
+  const conf = uniq(g.confusers.map(readArabic)).filter((x) => x !== correct);
+  const plain = uniq(g.plain.map(readArabic)).filter((x) => x !== correct && !conf.includes(x));
+  p.add({
+    id: g.id, lessonId: g.lessonId, objectiveId: g.objectiveId, type: "reading", prompt: g.prompt, stimulus: g.stimulus, correct,
+    confusers: conf, plain, mode: g.mode,
+    explanation: `${ar(g.stimulus)}: ${spellWord(noTatweel(g.stimulus))} → “${correct}”. Türkçe yazı yaklaşık okunuştur; doğru sesi öğretmeninizden dinleyin.`,
+    source: g.source, reviewStatus: "needs-teacher-review",
+  });
+}
+
+export function gameReadVowel(lessonId: string, v: string, allowed: string[], src: SourceRef): Question[] {
+  const p = new GamePool();
+  const otherV = allowed.filter((x) => x !== v);
+  for (const l of LETTERS) {
+    const mates = [...family(l, LETTERS), ...soundMates(l, LETTERS)];
+    for (let k = 0; k < 2; k++) {
+      readQ(p, {
+        id: `${lessonId}-g-read-${l.id}-${k}`, lessonId, objectiveId: `${lessonId}-o2`, prompt: "Bu hece nasıl okunur?", stimulus: syl(l, v),
+        confusers: [...otherV.map((x) => syl(l, x)), ...mates.map((m) => syl(m, v))], plain: others(l, LETTERS).map((x) => syl(x, v)),
+        mode: (l.order + k) % 3, source: src,
+      });
+    }
+  }
+  return p.qs;
+}
+
+export function gameReadVowelCompare(lessonId: string): Question[] {
+  const p = new GamePool();
+  for (const l of LETTERS) {
+    const mates = [...family(l, LETTERS), ...soundMates(l, LETTERS)];
+    for (let k = 0; k < 2; k++) {
+      const v = VOWELS[(l.order + k) % 3];
+      readQ(p, {
+        id: `${lessonId}-g-read-${l.id}-${k}`, lessonId, objectiveId: `${lessonId}-o2`, prompt: "Bu hece nasıl okunur?", stimulus: syl(l, v),
+        confusers: [...VOWELS.filter((x) => x !== v).map((x) => syl(l, x)), ...mates.map((m) => syl(m, v))], plain: others(l, LETTERS).map((x) => syl(x, v)),
+        mode: 1 + ((l.order + k) % 2), source: K1("s.9"),
+      });
+    }
+  }
+  return p.qs;
+}
+
+/** Kelimenin anlamlı yanlış okunuşları: hareke değişikliği, benzer harf, ters sıra, (cezm/şedde dersine göre) ek hata. */
+function wordVariants(w: string, extra: "sukun" | "shadda" | "none"): string[] {
+  const reversed = clusters(w).reverse().map((c) => c.base + c.marks.join("")).join("");
+  const vs: (string | undefined)[] = [changeVowelG(w, 0), changeVowelG(w, 1), changeVowelG(w, 2), swapLetterG(w, w), reversed];
+  if (extra === "sukun") vs.unshift(canonical(w.split(SUKUN).join(FATHA)));
+  if (extra === "shadda") vs.unshift(canonical(w.split(SHADDA).join("")));
+  return vs.filter((x): x is string => !!x && canonical(x) !== canonical(w));
+}
+
+function readWords(lessonId: string, objectiveId: string, words: string[], extra: "sukun" | "shadda" | "none", src: SourceRef): Question[] {
+  const p = new GamePool();
+  words.forEach((w, i) => {
+    for (let k = 0; k < 2; k++) {
+      readQ(p, {
+        id: `${lessonId}-g-read-${i}-${k}`, lessonId, objectiveId, prompt: "Bu kelime nasıl okunur?", stimulus: w,
+        confusers: wordVariants(w, extra), plain: words.filter((x) => x !== w), mode: (i + k) % 3, source: src,
+      });
+    }
+  });
+  return p.qs;
+}
+
+export const gameReadHarakaWords = (id: string) => readWords(id, `${id}-o1`, HARAKA_WORDS, "none", K1("s.10–11"));
+export const gameReadSukunWords = (id: string) => readWords(id, `${id}-o2`, SUKUN_WORDS, "sukun", K1("s.13"));
+export const gameReadShaddaWords = (id: string) => readWords(id, `${id}-o2`, SHADDA_WORDS, "shadda", K1("s.15"));
+
+export function gameReadSukunSyllables(lessonId: string): Question[] {
+  const p = new GamePool();
+  for (const l of READ_SYLLABLE_LETTERS) {
+    const mates = [...family(l, READ_SYLLABLE_LETTERS), ...soundMates(l, READ_SYLLABLE_LETTERS)];
+    for (let k = 0; k < 2; k++) {
+      const v = VOWELS[(l.order + k) % 3];
+      readQ(p, {
+        id: `${lessonId}-g-read-${l.id}-${k}`, lessonId, objectiveId: `${lessonId}-o2`, prompt: "Bu hece nasıl okunur?",
+        stimulus: canonical(elifV(v) + l.base + SUKUN),
+        confusers: [canonical(elifV(v) + l.base + v), ...VOWELS.filter((x) => x !== v).map((x) => canonical(elifV(x) + l.base + SUKUN)), ...mates.map((m) => canonical(elifV(v) + m.base + SUKUN))],
+        plain: others(l, READ_SYLLABLE_LETTERS).map((x) => canonical(elifV(v) + x.base + SUKUN)), mode: (l.order + k) % 3, source: K1("s.12"),
+      });
+    }
+  }
+  return p.qs;
+}
+
+export function gameReadShaddaSyllables(lessonId: string): Question[] {
+  const p = new GamePool();
+  for (const l of READ_SYLLABLE_LETTERS) {
+    const mates = [...family(l, READ_SYLLABLE_LETTERS), ...soundMates(l, READ_SYLLABLE_LETTERS)];
+    for (let k = 0; k < 2; k++) {
+      const v1 = VOWELS[(l.order + k) % 3];
+      const v2 = VOWELS[(l.order + k + 1) % 3];
+      readQ(p, {
+        id: `${lessonId}-g-read-${l.id}-${k}`, lessonId, objectiveId: `${lessonId}-o1`, prompt: "Bu hece nasıl okunur?",
+        stimulus: canonical(elifV(v1) + l.base + SHADDA + v2),
+        confusers: [
+          canonical(elifV(v1) + l.base + SUKUN),
+          canonical(elifV(v1) + l.base + v2),
+          canonical(elifV(v2) + l.base + SHADDA + v1),
+          ...mates.map((m) => canonical(elifV(v1) + m.base + SHADDA + v2)),
+        ],
+        plain: others(l, READ_SYLLABLE_LETTERS).map((x) => canonical(elifV(v1) + x.base + SHADDA + v2)), mode: (l.order + k) % 3, source: K1("s.14"),
+      });
+    }
+  }
+  return p.qs;
+}
