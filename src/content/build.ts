@@ -90,8 +90,11 @@ export function takeDistinct(correct: string, prioritized: string[][], n: number
 }
 
 /**
- * Havuzdan dengeli 30 soru seçer: kolay 10, orta 12, zor 8 hedeflenir. Her zorluk içinde
- * soru türleri sırayla (round-robin) seçilir. Eksik zorluk komşudan tamamlanır.
+ * Havuzdan 30 soru seçer.
+ * 1) Uyaranlar (harf, hece, kelime) arasında denge: tur tur seçilir; önce her uyaranın bir sorusu,
+ *    sonra ikinci sorusu… Bir uyaranın ilk sorusu en kolay olanıdır.
+ * 2) Bir tur 30'u aşarsa, zorluk hedefine (kolay 10, orta 12, zor 8) en çok ihtiyaç duyulan ve
+ *    en az seçilmiş türdeki sorular önce alınır.
  */
 export function select30(pool: Question[], lessonId: string): Question[] {
   const ids = new Set<string>();
@@ -103,38 +106,40 @@ export function select30(pool: Question[], lessonId: string): Question[] {
     throw new Error(`${lessonId}: havuzda yalnızca ${pool.length} soru var (30 gerekli)`);
   }
   const quota: Record<Difficulty, number> = { 1: 10, 2: 12, 3: 8 };
-  const byDiff = (d: Difficulty) => pool.filter((q) => q.difficulty === d);
-  const counts: Record<Difficulty, number> = { 1: byDiff(1).length, 2: byDiff(2).length, 3: byDiff(3).length };
-  // Eksikleri dağıt
-  const take: Record<Difficulty, number> = { 1: Math.min(quota[1], counts[1]), 2: Math.min(quota[2], counts[2]), 3: Math.min(quota[3], counts[3]) };
-  let missing = QUESTIONS_PER_GAME - (take[1] + take[2] + take[3]);
-  for (const d of [2, 1, 3] as Difficulty[]) {
-    if (missing <= 0) break;
-    const extra = Math.min(missing, counts[d] - take[d]);
-    take[d] += extra;
-    missing -= extra;
+  const groups = new Map<string, Question[]>();
+  for (const q of stableSort(pool, (x) => x.id)) {
+    const k = q.stimulus ?? q.id;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k)!.push(q);
   }
-  if (missing > 0) throw new Error(`${lessonId}: 30 soru seçilemedi`);
   const chosen: Question[] = [];
-  for (const d of [1, 2, 3] as Difficulty[]) {
-    const items = byDiff(d);
-    const types = [...new Set(items.map((q) => q.type))].sort();
-    const queues = types.map((t) => stableSort(items.filter((q) => q.type === t), (q) => q.id));
-    let picked = 0;
-    while (picked < take[d]) {
-      let progressed = false;
-      for (const qu of queues) {
-        if (picked >= take[d]) break;
-        const q = qu.shift();
-        if (q) {
-          chosen.push(q);
-          picked++;
-          progressed = true;
+  const diffCount: Record<Difficulty, number> = { 1: 0, 2: 0, 3: 0 };
+  const typeCount = new Map<string, number>();
+  const need = (q: Question) => quota[q.difficulty] - diffCount[q.difficulty];
+  const lists = [...groups.values()];
+  while (chosen.length < QUESTIONS_PER_GAME && lists.some((g) => g.length > 0)) {
+    // Bu turda her uyarandan en fazla bir soru. Her seçimden sonra zorluk ihtiyacı yeniden hesaplanır.
+    const round = lists.filter((g) => g.length > 0);
+    while (round.length > 0 && chosen.length < QUESTIONS_PER_GAME) {
+      let best = -1;
+      let bestQ: Question | undefined;
+      const score = (q: Question) => need(q) * 100 - (typeCount.get(q.type) ?? 0);
+      round.forEach((g, gi) => {
+        for (const q of g) {
+          if (!bestQ || score(q) > score(bestQ) || (score(q) === score(bestQ) && hash(q.id) < hash(bestQ.id))) {
+            bestQ = q;
+            best = gi;
+          }
         }
-      }
-      if (!progressed) break;
+      });
+      const g = round.splice(best, 1)[0];
+      g.splice(g.indexOf(bestQ!), 1);
+      chosen.push(bestQ!);
+      diffCount[bestQ!.difficulty]++;
+      typeCount.set(bestQ!.type, (typeCount.get(bestQ!.type) ?? 0) + 1);
     }
   }
+  if (chosen.length < QUESTIONS_PER_GAME) throw new Error(`${lessonId}: 30 soru seçilemedi`);
   return chosen;
 }
 

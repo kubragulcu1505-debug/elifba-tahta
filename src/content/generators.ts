@@ -13,50 +13,50 @@ import {
   ZAMIR_WORDS, LAFZA_PHRASES, ELIF_LAM_WORDS, RA_WORDS, VAKF_WORDS, TRANSITION_PAIRS,
 } from "./words.ts";
 
-const K1 = (locator: string): SourceRef => ({ id: "K1", locator });
-const K2 = (locator: string): SourceRef => ({ id: "K2", locator });
+export const K1 = (locator: string): SourceRef => ({ id: "K1", locator });
+export const K2 = (locator: string): SourceRef => ({ id: "K2", locator });
 
 const A = (label: string): OptSpec => ({ label, kind: "arabic" });
-const T = (label: string): OptSpec => ({ label, kind: "text" });
+export const T = (label: string): OptSpec => ({ label, kind: "text" });
 
-const VOWELS = [FATHA, KASRA, DAMMA];
-const diffFrom = (confusable: number): Difficulty => (confusable >= 2 ? 3 : confusable === 1 ? 2 : 1);
+export const VOWELS = [FATHA, KASRA, DAMMA];
+export const diffFrom = (confusable: number): Difficulty => (confusable >= 2 ? 3 : confusable === 1 ? 2 : 1);
 
 // ───────────────────────── harf yardımcıları ─────────────────────────
-const upToGroup = (g: number) => LETTERS.filter((l) => l.group <= g);
-const family = (l: Letter, pool: Letter[]) => pool.filter((x) => x.id !== l.id && l.family && x.family === l.family);
-const soundMates = (l: Letter, pool: Letter[]) => pool.filter((x) => x.id !== l.id && l.soundGroup && x.soundGroup === l.soundGroup);
-const others = (l: Letter, pool: Letter[]) => pool.filter((x) => x.id !== l.id);
-const disp = (ls: Letter[]) => ls.map((l) => l.display);
-const names = (ls: Letter[]) => ls.map((l) => l.name);
+export const upToGroup = (g: number) => LETTERS.filter((l) => l.group <= g);
+export const family = (l: Letter, pool: Letter[]) => pool.filter((x) => x.id !== l.id && l.family && x.family === l.family);
+export const soundMates = (l: Letter, pool: Letter[]) => pool.filter((x) => x.id !== l.id && l.soundGroup && x.soundGroup === l.soundGroup);
+export const others = (l: Letter, pool: Letter[]) => pool.filter((x) => x.id !== l.id);
+export const disp = (ls: Letter[]) => ls.map((l) => l.display);
+export const names = (ls: Letter[]) => ls.map((l) => l.name);
 
 /** Harekeli tek hece. He harfi K1 s.9'daki gibi tatvil ile yazılır (هَـ). */
-function syl(l: Letter, v: string): string {
+export function syl(l: Letter, v: string): string {
   if (l.id === "he") return canonical(HEH + v + TATWEEL);
   return canonical(l.base + v);
 }
 /** Med harfiyle uzatılmış hece: بَا بٖى بُو */
-function longSyl(l: Letter, v: string): string {
+export function longSyl(l: Letter, v: string): string {
   if (v === FATHA) return canonical(l.base + FATHA + ALEF);
   if (v === KASRA) return canonical(l.base + SUB_ALEF + ALEF_MAKSURA);
   return canonical(l.base + DAMMA + WAW);
 }
 /** Tenvinli hece: بًا بٍ بٌ (K1 s.19) */
-function tanSyl(l: Letter, t: string): string {
+export function tanSyl(l: Letter, t: string): string {
   if (t === FATHATAN) return canonical(l.base + FATHATAN + ALEF);
   if (l.id === "he") return canonical(HEH + t + TATWEEL);
   return canonical(l.base + t);
 }
-const TANWEEN_NAME: Record<string, string> = { [FATHATAN]: "iki üstün", [KASRATAN]: "iki esre", [DAMMATAN]: "iki ötre" };
-const TANWEENS = [FATHATAN, KASRATAN, DAMMATAN];
-const vowelOfTanween: Record<string, string> = { [FATHATAN]: FATHA, [KASRATAN]: KASRA, [DAMMATAN]: DAMMA };
-const MADD_LETTER_OF: Record<string, string> = { [FATHA]: ALEF, [KASRA]: ALEF_MAKSURA, [DAMMA]: WAW };
-const MADD_LETTER_NAME: Record<string, string> = { [FATHA]: "Elif", [KASRA]: "Ye", [DAMMA]: "Vav" };
+export const TANWEEN_NAME: Record<string, string> = { [FATHATAN]: "iki üstün", [KASRATAN]: "iki esre", [DAMMATAN]: "iki ötre" };
+export const TANWEENS = [FATHATAN, KASRATAN, DAMMATAN];
+export const vowelOfTanween: Record<string, string> = { [FATHATAN]: FATHA, [KASRATAN]: KASRA, [DAMMATAN]: DAMMA };
+export const MADD_LETTER_OF: Record<string, string> = { [FATHA]: ALEF, [KASRA]: ALEF_MAKSURA, [DAMMA]: WAW };
+export const MADD_LETTER_NAME: Record<string, string> = { [FATHA]: "Elif", [KASRA]: "Ye", [DAMMA]: "Vav" };
 
-const join = (cl: Cluster[]) => canonical(cl.map((c) => c.base + c.marks.join("")).join(""));
+export const join = (cl: Cluster[]) => canonical(cl.map((c) => c.base + c.marks.join("")).join(""));
 
 /** Kelimedeki ilk benzer (aile/ses) harfi değiştirir. */
-function swapLetter(word: string, seed: string): string | undefined {
+export function swapLetter(word: string, seed: string): string | undefined {
   const cl = clusters(word);
   for (let i = 0; i < cl.length; i++) {
     const l = letterByChar(cl[i].base);
@@ -71,7 +71,7 @@ function swapLetter(word: string, seed: string): string | undefined {
   return undefined;
 }
 /** n'inci harekeli kümenin harekesini değiştirir. */
-function changeVowel(word: string, nth: number): string | undefined {
+export function changeVowel(word: string, nth: number): string | undefined {
   const cl = clusters(word).map((c) => ({ ...c, marks: [...c.marks] }));
   let k = 0;
   for (const c of cl) {
@@ -86,7 +86,7 @@ function changeVowel(word: string, nth: number): string | undefined {
   }
   return undefined;
 }
-function reversedSpelling(word: string): string {
+export function reversedSpelling(word: string): string {
   return clusters(word).filter((c) => c.base !== " ").reverse().map((c) => spellWord(c.base + c.marks.join(""))).join(" · ");
 }
 
@@ -157,13 +157,13 @@ function letterQuestions(lessonId: string, targets: Letter[], pool: Letter[], sr
 }
 
 /** Zorluk kipi: 0 = benzer olmayan çeldiriciler önce, 1 = bir karışık çeldirici, 2 = hepsi karışık. */
-function byMode<T>(mode: number, confusers: T[], plain: T[]): T[][] {
+export function byMode<T>(mode: number, confusers: T[], plain: T[]): T[][] {
   if (mode === 0) return [plain, confusers];
   if (mode === 1) return [confusers.slice(0, 1), plain, confusers];
   return [confusers, plain];
 }
 
-function capital(s: string) {
+export function capital(s: string) {
   return s.charAt(0).toLocaleUpperCase("tr") + s.slice(1);
 }
 
@@ -178,10 +178,10 @@ export function genLetterMix(lessonId: string): Question[] {
 }
 
 // ───────────────────────── Ünite 2: yazılışlar ─────────────────────────
-type Pos = "initial" | "medial" | "final" | "isolated";
-const POS_NAME: Record<Pos, string> = { initial: "başta", medial: "ortada", final: "sonda", isolated: "ayrı" };
+export type Pos = "initial" | "medial" | "final" | "isolated";
+export const POS_NAME: Record<Pos, string> = { initial: "başta", medial: "ortada", final: "sonda", isolated: "ayrı" };
 /** Yazılışta şekil ailesi: başta/ortada yâ da ب ailesine benzer. */
-function formFamily(l: Letter, pos: Pos): Letter[] {
+export function formFamily(l: Letter, pos: Pos): Letter[] {
   const fam = family(l, LETTERS);
   if ((pos === "initial" || pos === "medial") && (l.family === "beh" || l.id === "ye")) {
     const beh = LETTERS.filter((x) => (x.family === "beh" || x.id === "ye") && x.id !== l.id);
@@ -316,7 +316,7 @@ export function genFormsMix(lessonId: string): Question[] {
 }
 
 // ───────────────────────── Ünite 3: harekeler ─────────────────────────
-const spell1 = (l: Letter, v: string) => `${l.name} ${VOWEL_NAME[v]}`;
+export const spell1 = (l: Letter, v: string) => `${l.name} ${VOWEL_NAME[v]}`;
 
 export function genVowel(lessonId: string, v: string, allowed: string[], src: SourceRef): Question[] {
   const qs: Question[] = [];
@@ -351,8 +351,8 @@ export function genVowel(lessonId: string, v: string, allowed: string[], src: So
   }
   return qs;
 }
-const VOWEL_KEY: Record<string, string> = { [FATHA]: "fatha", [KASRA]: "kasra", [DAMMA]: "damma" };
-const VOWEL_EXPLAIN: Record<string, string> = {
+export const VOWEL_KEY: Record<string, string> = { [FATHA]: "fatha", [KASRA]: "kasra", [DAMMA]: "damma" };
+export const VOWEL_EXPLAIN: Record<string, string> = {
   [FATHA]: "Üstün harfin üstündeki eğik çizgidir.",
   [KASRA]: "Esre harfin altındaki eğik çizgidir.",
   [DAMMA]: "Ötre harfin üstündeki küçük vav biçimli işarettir.",
@@ -379,10 +379,10 @@ export function genVowelCompare(lessonId: string): Question[] {
   }
   return qs;
 }
-const cap = (s: string) => capital(s);
+export const cap = (s: string) => capital(s);
 
 /** Kelime heceleme soruları (Ünite 3–5). */
-function wordSpellingQ(lessonId: string, objectiveId: string, word: string, i: number, src: SourceRef, extra: string[] = []): Question {
+export function wordSpellingQ(lessonId: string, objectiveId: string, word: string, i: number, src: SourceRef, extra: string[] = []): Question {
   const correct = spellWord(word);
   const variants = [reversedSpelling(word), ...extra, changeVowel(word, 1) && spellWord(changeVowel(word, 1)!), swapLetter(word, word) && spellWord(swapLetter(word, word)!), changeVowel(word, 0) && spellWord(changeVowel(word, 0)!)]
     .filter((x): x is string => !!x && x !== correct);
@@ -411,8 +411,8 @@ export function genHarakaWords(lessonId: string): Question[] {
 }
 
 // ───────────────────────── Ünite 4: cezm ─────────────────────────
-const SYLLABLE_LETTERS = LETTERS.filter((l) => !["elif", "vav", "ye"].includes(l.id));
-const elifV = (v: string) => canonical(ALEF + v);
+export const SYLLABLE_LETTERS = LETTERS.filter((l) => !["elif", "vav", "ye"].includes(l.id));
+export const elifV = (v: string) => canonical(ALEF + v);
 
 export function genSukunSyllables(lessonId: string): Question[] {
   const qs: Question[] = [];
@@ -444,10 +444,10 @@ export function genSukunSyllables(lessonId: string): Question[] {
   return qs;
 }
 
-function countMark(word: string, mark: string): number {
+export function countMark(word: string, mark: string): number {
   return [...word].filter((c) => c === mark).length;
 }
-function lettersOfWord(word: string): Letter[] {
+export function lettersOfWord(word: string): Letter[] {
   const seen = new Set<string>();
   const out: Letter[] = [];
   for (const c of clusters(word)) {
@@ -459,7 +459,7 @@ function lettersOfWord(word: string): Letter[] {
   }
   return out;
 }
-const COUNT_TEXT = (n: number, what: string) => (n === 0 ? `${cap(what)} yok` : `${n} ${what}`);
+export const COUNT_TEXT = (n: number, what: string) => (n === 0 ? `${cap(what)} yok` : `${n} ${what}`);
 
 function whichLetterQ(lessonId: string, objectiveId: string, word: string, i: number, mark: string, markName: string, src: SourceRef): Question | undefined {
   const cl = clusters(word);
@@ -475,7 +475,7 @@ function whichLetterQ(lessonId: string, objectiveId: string, word: string, i: nu
     explanation: `${ar(word)} kelimesinde ${markName} ${target.name} harfinin üstünde.`, difficulty: 2, source: src, reviewStatus: "needs-teacher-review",
   });
 }
-function countQ(lessonId: string, objectiveId: string, word: string, i: number, mark: string, what: string, src: SourceRef): Question {
+export function countQ(lessonId: string, objectiveId: string, word: string, i: number, mark: string, what: string, src: SourceRef): Question {
   const n = countMark(word, mark);
   const opts = [0, 1, 2, 3].map((k) => COUNT_TEXT(k, what));
   return makeQuestion({
@@ -615,7 +615,7 @@ export function genMaddSyllables(lessonId: string): Question[] {
 }
 
 /** Kelimedeki med harflerinin konumları. */
-function maddLetters(word: string): string[] {
+export function maddLetters(word: string): string[] {
   const cl = clusters(word);
   const out: string[] = [];
   for (let i = 0; i < cl.length - 1; i++) {
@@ -699,7 +699,7 @@ export function genAsar(lessonId: string): Question[] {
 }
 
 // ───────────────────────── Ünite 8: tenvin ─────────────────────────
-const tanName = (t: string) => cap(TANWEEN_NAME[t]);
+export const tanName = (t: string) => cap(TANWEEN_NAME[t]);
 
 export function genTanweenSyllables(lessonId: string): Question[] {
   const qs: Question[] = [];
@@ -728,12 +728,12 @@ export function genTanweenSyllables(lessonId: string): Question[] {
   return qs;
 }
 
-function lastCluster(word: string) {
+export function lastCluster(word: string) {
   const cl = clusters(word);
   return { cl, i: cl.length - 1, last: cl[cl.length - 1] };
 }
 /** Tenvinli kelimenin sonundaki tenvin (iki üstünde son küme elif olur). */
-function tanweenOf(word: string): { t: string; idx: number } | undefined {
+export function tanweenOf(word: string): { t: string; idx: number } | undefined {
   const cl = clusters(word);
   for (let i = cl.length - 1; i >= 0; i--) {
     const t = cl[i].marks.find((m) => TANWEENS.includes(m));
@@ -796,7 +796,7 @@ interface RuleSpec<R extends string> {
   src: SourceRef;
 }
 
-function genRule<R extends string>(spec: RuleSpec<R>): Question[] {
+export function genRule<R extends string>(spec: RuleSpec<R>): Question[] {
   const qs: Question[] = [];
   const reasons = Object.keys(spec.labels) as R[];
   spec.items.forEach((it, i) => {

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LESSON_BY_ID, UNIT_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
-import { LESSON_POOLS, LESSON_QUESTION_IDS, questionsForLesson, AUDIO_CATALOG } from "@/content/index";
+import { PRACTICE_POOLS, questionsForLesson, AUDIO_CATALOG } from "@/content/index";
 import { usePersisted } from "@/lib/storage";
 import { startCompetition, startReview } from "@/lib/session";
 import { Ar, RichText } from "@/components/Arabic";
@@ -41,9 +41,9 @@ export function LessonView({ lessonId }: { lessonId: string }) {
   const last = games[0];
   const qs = questionsForLesson(lessonId);
   const review = { auto: qs.filter((q) => q.reviewStatus === "auto-validated").length, teacher: qs.filter((q) => q.reviewStatus === "needs-teacher-review").length, verified: qs.filter((q) => q.reviewStatus === "verified-source").length };
-  const gameIds = new Set(LESSON_QUESTION_IDS[lessonId]);
-  const extra = (LESSON_POOLS[lessonId] ?? []).filter((q) => !gameIds.has(q.id));
-  const practice = (extra.length >= 6 ? extra : qs).slice(0, 6);
+  // Alıştırma, oyundan farklı etkinlik türlerini kullanır (harfi bul, benzer harf, Arapça şıklar…).
+  const extra = PRACTICE_POOLS[lessonId] ?? [];
+  const practice = (extra.length >= 6 ? [...extra].sort((a, b) => a.type.localeCompare(b.type) || a.id.localeCompare(b.id)).filter((_, i, arr) => i % Math.max(1, Math.floor(arr.length / 6)) === 0) : qs).slice(0, 6);
   const audioItems = AUDIO_CATALOG.filter((a) => a.lessonId === lessonId);
   const activeHere = active && active.state.lessonId === lessonId;
 
@@ -147,7 +147,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
         </Section>
 
         <Section id="alistirma" title="Alıştırma (puansız)">
-          <p className="mb-4 text-lg text-ink-soft">Sınıfça birlikte çözün. Bu sorular takım oyununa dahil değildir{extra.length >= 6 ? "" : " (bu derste oyun sorularından seçildi)"}.</p>
+          <p className="mb-4 text-lg text-ink-soft">Sınıfça birlikte çözün. Alıştırma, oyundan farklı etkinlik türleri içerir ve takım puanına sayılmaz.</p>
           <PracticePanel questions={practice} />
         </Section>
 
@@ -159,6 +159,9 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             <Link href="/ogretmen#ayarlar" className="underline">İsimleri değiştir</Link>
           </div>
           <ul className="mt-4 list-disc pl-6 text-lg">
+            <li>
+              <RichText text="Ekranda Arapça harf, hece veya kelime görünür; şıklar Türkçedir. Örneğin ⟪ا⟫ gösterilir, şıklar “Elif, Cim, Ha, Dal” olur." />
+            </li>
             <li>İki takım aynı 30 soruyu kendi sıralarıyla çözer. Her öğrenci bir soruyu cevaplayıp yerini arkadaşına bırakır.</li>
             <li>Doğru cevap 10 puan, yanlış cevap 0 puan. Her soruda ilk dokunuş geçerlidir.</li>
             <li>Kazanan önce doğru sayısına, eşitlikte toplam süreye göre belirlenir.</li>

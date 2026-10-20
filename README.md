@@ -8,6 +8,7 @@ Akıllı tahtada iki takımın aynı anda oynadığı, çocuklara aşama aşama 
 
 - **12 ünite, 30 ders.** Harflerden başlar; yazılışlar, üstün/esre/ötre, cezm, şedde, med, âsar, tenvin, zamir, lafzatullah, elif-lâm, râ, duruş ve geçişle devam eder. Son ünite genel tekrar ve öğretmenle yüzüne okumadır. Ayrıntı: [docs/DERS-HARITASI.md](docs/DERS-HARITASI.md).
 - **Her ders** somut bir hedef, kısa anlatım, büyük gösterilebilen rehberli örnekler, puansız alıştırma, 30 soruluk takım oyunu, yanlışlara yönelik tekrar ve öğretmen değerlendirmesi içerir.
+- **Soru biçimi:** Oyunda ekranda Arapça harf, hece veya kelime görünür; şıklar Türkçedir. Örneğin ا gösterilir, şıklar “Elif, Cim, Ha, Dal” olur. Az harfli derslerde aynı harf, her seferinde farklı şıklarla en fazla 5 kez sorulur ve arka arkaya gelmez. Harfi bul, benzer harfi bul gibi diğer etkinlikler ders sayfasındaki puansız alıştırmadadır.
 - **Takım oyunu:** Ekran dikey çizgiyle ikiye ayrılır. Sol takım ve sağ takım aynı 30 soruyu kendi sıralarıyla, birbirinden bağımsız çözer. Öğrenciler sırayla tahtaya gelir. Hesap gerekmez.
 - **Puanlama:** Doğru 10, yanlış 0. Her soruda ilk dokunuş geçerlidir. Yanlıştan sonra doğru cevap ve kısa açıklama gösterilir. Kazanan önce doğru sayısına, eşitlikte toplam süreye göre belirlenir. Duraklama, yükleme ve geri bildirim süreleri sayılmaz.
 - **Öğretmen paneli:** Ders seçme, takım adları, başarı eşiği (varsayılan %80, ürün ayarı), sonuçlar ve yanlış yapılan kazanımlar, yanlışlarla tekrar, soru bankasını doğru cevaplarıyla inceleme, ses kayıtları, öğrenci değerlendirmesi ve “Kur'an okumaya hazır” onayı, JSON dışa aktarma ve sıfırlama.
@@ -44,7 +45,7 @@ npm start
 npm test
 ```
 
-25 test: içerik doğrulama (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
+27 test: içerik doğrulama (oyunda Arapça uyaran ve Türkçe şıklar, harflerin dengeli tekrarı dahil) (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
 
 Diğer denetimler:
 

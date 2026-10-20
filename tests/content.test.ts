@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { LESSONS, LESSON_BY_ID, UNITS } from "../src/content/lessons.ts";
-import { LESSON_QUESTION_IDS, QUESTION_BY_ID, questionsForLesson, LESSON_POOLS, AUDIO_CATALOG } from "../src/content/index.ts";
+import { LESSON_QUESTION_IDS, QUESTION_BY_ID, questionsForLesson, LESSON_POOLS, PRACTICE_POOLS, AUDIO_CATALOG } from "../src/content/index.ts";
 import { checkArabicChars, detectFeatures, canonical, skeleton } from "../src/content/arabic.ts";
 import { LETTERS, forms } from "../src/content/letters.ts";
 import { TANZIL_EXCERPT } from "../src/content/quran.ts";
@@ -58,9 +58,18 @@ test("her sorunun zorunlu alanları ve tek doğru cevabı var", () => {
   }
 });
 
+const ALL_WITH_PRACTICE = () => [...QUESTION_BY_ID.values(), ...Object.values(PRACTICE_POOLS).flat()];
+
+test("takım oyununda ekranda Arapça gösterilir, şıkların hepsi Türkçedir", () => {
+  for (const q of QUESTION_BY_ID.values()) {
+    assert.ok(q.stimulus && q.stimulus.trim().length > 0, `${q.id}: Arapça uyaran yok`);
+    assert.ok(q.options.every((o) => o.kind === "text"), `${q.id}: Arapça şık var`);
+  }
+});
+
 test("Arapça metinlerde yasak/beklenmeyen karakter yok", () => {
   const problems: string[] = [];
-  for (const q of QUESTION_BY_ID.values()) {
+  for (const q of ALL_WITH_PRACTICE()) {
     for (const s of [...arabicStringsOf(q), ...arabicSegments(q.explanation)]) {
       const issues = checkArabicChars(s);
       if (issues.length) problems.push(`${q.id}: "${s}" → ${issues.map((i) => i.code + " " + i.reason).join(", ")}`);
@@ -77,7 +86,7 @@ test("Arapça metinlerde yasak/beklenmeyen karakter yok", () => {
 
 test("henüz öğretilmemiş kural önceki derslerin sorularına girmiyor", () => {
   const problems: string[] = [];
-  for (const q of QUESTION_BY_ID.values()) {
+  for (const q of ALL_WITH_PRACTICE()) {
     const lesson = LESSON_BY_ID.get(q.lessonId)!;
     const allowed = new Set(lesson.allowedFeatures);
     for (const s of arabicStringsOf(q)) {
@@ -93,15 +102,19 @@ test("henüz öğretilmemiş kural önceki derslerin sorularına girmiyor", () =
   assert.deepEqual(problems, []);
 });
 
-test("bir dersin 30 sorusu kendi içinde farklı (aynı soru farklı şıklarla tekrar etmiyor)", () => {
+test("bir dersin 30 sorusu kendi içinde farklı; tekrar eden harf farklı şıklarla ve en fazla 5 kez sorulur", () => {
+  // Öğretmen kararı: az harfli derslerde aynı harf birden fazla kez sorulabilir.
   for (const lesson of LESSONS) {
     const qs = questionsForLesson(lesson.id);
-    const sigs = qs.map((q) => {
-      const correct = q.options.find((o) => o.id === q.correctOptionId)!.label;
-      return `${q.type}|${q.prompt}|${q.stimulus ?? ""}|${correct}`;
-    });
+    const sigs = qs.map((q) => `${q.type}|${q.prompt}|${q.stimulus ?? ""}|${q.options.map((o) => o.label).sort().join("/")}`);
     const dup = sigs.filter((s, i) => sigs.indexOf(s) !== i);
-    assert.deepEqual(dup, [], `${lesson.id}: tekrar eden soru`);
+    assert.deepEqual(dup, [], `${lesson.id}: aynı şık kümesiyle tekrar eden soru`);
+    const perStim = new Map<string, number>();
+    for (const q of qs) perStim.set(q.stimulus ?? q.id, (perStim.get(q.stimulus ?? q.id) ?? 0) + 1);
+    const max = Math.max(...perStim.values());
+    assert.ok(max <= 5, `${lesson.id}: aynı uyaran ${max} kez`);
+    const min = Math.min(...perStim.values());
+    assert.ok(max - min <= 1, `${lesson.id}: harf dağılımı dengesiz (${min}–${max})`);
   }
 });
 
@@ -129,7 +142,7 @@ test("her derste hedef, anlatım, kazanım ve öğretmen değerlendirmesi var", 
 });
 
 test("havuz kimlikleri tüm derslerde benzersiz", () => {
-  const all = Object.values(LESSON_POOLS).flat().map((q) => q.id);
+  const all = [...Object.values(LESSON_POOLS).flat(), ...Object.values(PRACTICE_POOLS).flat()].map((q) => q.id);
   assert.equal(new Set(all).size, all.length);
 });
 

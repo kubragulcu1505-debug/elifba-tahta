@@ -82,7 +82,7 @@ export const LAFZA_PHRASES: { phrase: string; reason: LafzaReason }[] = [
   ["عِنْدَ اللّٰهِ", "thick-fatha"], ["خَلَقَ اللّٰهُ", "thick-fatha"], ["هُوَ اللّٰهُ", "thick-fatha"], ["شَهِدَ اللّٰهُ", "thick-fatha"],
   ["مَعَ اللّٰهِ", "thick-fatha"], ["وَاللّٰهُ", "thick-fatha"],
   ["رَسُولُ اللّٰهِ", "thick-damma"], ["نَصْرُ اللّٰهِ", "thick-damma"], ["عَبْدُ اللّٰهِ", "thick-damma"], ["يُرٖيدُ اللّٰهُ", "thick-damma"],
-  ["يَعْلَمُ اللّٰهُ", "thick-damma"], ["وَعْدُ اللّٰهِ", "thick-damma"],
+  ["يَعْلَمُ اللّٰهُ", "thick-damma"], ["وَعْدُ اللّٰهِ", "thick-damma"], ["كِتَابُ اللّٰهِ", "thick-damma"], ["عَلَى اللّٰهِ", "thick-fatha"],
   ["بِسْمِ اللّٰهِ", "thin-kasra"], ["بِاللّٰهِ", "thin-kasra"], ["لِلّٰهِ", "thin-kasra"], ["خَلْقِ اللّٰهِ", "thin-kasra"],
   ["رَسُولِ اللّٰهِ", "thin-kasra"], ["سَبٖيلِ اللّٰهِ", "thin-kasra"], ["قُلِ اللّٰهُمَّ", "thin-kasra"], ["مِنْ دُونِ اللّٰهِ", "thin-kasra"],
   ["اَمْرِ اللّٰهِ", "thin-kasra"], ["فَضْلِ اللّٰهِ", "thin-kasra"], ["ذِكْرِ اللّٰهِ", "thin-kasra"], ["رَحْمَتِ اللّٰهِ", "thin-kasra"],

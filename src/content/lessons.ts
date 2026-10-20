@@ -161,7 +161,7 @@ export const LESSONS: Lesson[] = [
       { arabic: "ط ظ  ع غ  ف ق", note: "Tı / Zı, Ayn / Ğayn, Fe / Kaf." },
     ],
     objectives: [
-      { id: "u1-l5-o1", text: "Gösterilen harfin aynısını benzer harfler arasından seçer.", assessedBy: "game" },
+      { id: "u1-l5-o1", text: "Gösterilen harfin adını, benzer harflerin adları arasından seçer.", assessedBy: "game" },
       { id: "u1-l5-o2", text: "Nokta sayısı ve yeri verilen harfi bulur.", assessedBy: "game" },
       { id: "u1-l5-o3", text: "Benzer harfleri karıştırmadan adlandırır.", assessedBy: "teacher" },
     ],

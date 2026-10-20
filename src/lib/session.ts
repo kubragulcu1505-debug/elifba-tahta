@@ -7,7 +7,7 @@ import type { Question } from "@/content/types";
 import { read, update, write, type GameRecord } from "./storage";
 
 export function toLite(q: Question): QuestionLite {
-  return { id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty };
+  return { id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus };
 }
 
 export function lookupLite(id: string): QuestionLite | undefined {

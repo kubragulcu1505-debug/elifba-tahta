@@ -6,37 +6,37 @@ Ana omurga Diyanet'in basılı Elifbâ kitabının (K1, 4. baskı 2025) konu sı
 
 | Ünite | Ders | Hedef | Oyun soru türleri | Zorluk (kolay/orta/zor) |
 |---|---|---|---|---|
-| 1. Harfler | Harfler 1: ا ب ت ث ج ح خ | İlk yedi harfi şekli ve adıyla tanır, noktalarına göre ayırır. | Nokta sayısı ve yerine göre ayırt et; Adı verilen harfi bul; Harfin adını seç; Benzer harfler arasından aynısını bul; Elifba sırası | 10/12/8 |
-| 1. Harfler | Harfler 2: د ذ ر ز س ش ص | İkinci yedi harfi şekli ve adıyla tanır, önceki harflerden ayırır. | Nokta sayısı ve yerine göre ayırt et; Adı verilen harfi bul; Harfin adını seç; Benzer harfler arasından aynısını bul; Elifba sırası | 9/19/2 |
-| 1. Harfler | Harfler 3: ض ط ظ ع غ ف ق | Üçüncü yedi harfi tanır ve benzerlerinden ayırır. | Adı verilen harfi bul; Harfin adını seç; Benzer harfler arasından aynısını bul; Nokta sayısı ve yerine göre ayırt et; Elifba sırası | 7/21/2 |
-| 1. Harfler | Harfler 4: ك ل م ن و هـ ى | Son yedi harfi tanır; 28 harfin tamamını şekliyle bilir. | Nokta sayısı ve yerine göre ayırt et; Adı verilen harfi bul; Harfin adını seç; Benzer harfler arasından aynısını bul; Elifba sırası | 18/10/2 |
-| 1. Harfler | Benzer harfler | Şekli benzeyen harfleri nokta sayısına ve noktanın yerine bakarak ayırır. | Nokta sayısı ve yerine göre ayırt et; Benzer harfler arasından aynısını bul | 10/12/8 |
-| 1. Harfler | Harfler karma tekrar | 28 harfi karışık sırada tanır ve adlandırır. | Adı verilen harfi bul; Harfin adını seç | 10/12/8 |
-| 2. Harflerin yazılışları | Başta yazılış | Harflerin kelime başındaki yazılışını tanır. | Yazılıştan harfi bul; Harfin yazılışını eşleştir | 3/10/17 |
-| 2. Harflerin yazılışları | Ortada yazılış | Harflerin kelime ortasındaki yazılışını tanır. | Yazılıştan harfi bul; Harfin yazılışını eşleştir | 6/14/10 |
-| 2. Harflerin yazılışları | Sonda yazılış | Harflerin kelime sonundaki yazılışını tanır. | Yazılıştan harfi bul; Harfin yazılışını eşleştir | 7/14/9 |
-| 2. Harflerin yazılışları | Bağlanmayan harfler ve kelimede harf | Bağlanmayan altı harfi bilir; harekesiz bir kelimede harfleri sağdan sola bulur. | Kelimede harf bul; Bağlanan / bağlanmayan harf; Harfin yazılışını eşleştir | 6/16/8 |
-| 2. Harflerin yazılışları | Yazılışlar karma tekrar | Harfi herhangi bir yazılışından tanır. | Yazılıştan harfi bul; Harfin yazılışını eşleştir; Kelimede harf bul | 6/16/8 |
-| 3. Harekeler | Üstün (fetha) | Üstünü tanır; harf adı ile üstünü birleştirerek doğru heceyi seçer. | Hecenin hecelenişini seç; Hecelenişten doğru heceyi seç | 10/12/8 |
-| 3. Harekeler | Esre (kesra) | Esreyi tanır ve üstünden ayırır. | Hecenin hecelenişini seç; Hecelenişten doğru heceyi seç | 10/12/8 |
-| 3. Harekeler | Ötre (damme) | Ötreyi tanır ve diğer harekelerden ayırır. | Hecenin hecelenişini seç; Hecelenişten doğru heceyi seç | 10/12/8 |
-| 3. Harekeler | Harekeleri karşılaştırma | Üç harekeyi birbirinden ayırır ve karışık harekeli harfleri tanır. | Harekeyi / tenvini tanı; Hecelenişten doğru heceyi seç | 17/5/8 |
-| 3. Harekeler | Harekeli kelimeler | Üç harfli harekeli kelimeleri heceleyerek çözer. | Kelimenin hecelenişini seç; Hecelenişi verilen kelimeyi seç | 7/15/8 |
-| 4. Cezm | Cezmli heceler | Cezmi tanır; cezmli harfi önceki harekeyle birleştirir. | Hecelenişten doğru heceyi seç; Hecenin hecelenişini seç | 9/10/11 |
-| 4. Cezm | Cezmli kelimeler | Cezm içeren kelimelerde cezmli harfi bulur ve kelimeyi heceler. | İşaret sayısı; Kelimenin hecelenişini seç; İşaretli harfi bul | 15/15/0 |
-| 5. Şedde | Şeddeli heceler | Şeddeyi tanır; şeddeli harfin iki kez okunduğunu bilir. | Hecelenişten doğru heceyi seç; Şeddeli yapıyı ayır | 9/13/8 |
-| 5. Şedde | Şeddeli kelimeler | Şeddeli kelimelerde şeddeli harfi bulur ve doğru böler. | Kelimenin hecelenişini seç; İşaret sayısı; İşaretli harfi bul; Şeddeli yapıyı ayır | 5/16/9 |
-| 6. Med harfleri | Med harfleriyle uzatma | Med harflerini (ا و ى) tanır; uzatılan ve uzatılmayan heceyi ayırır. | Uzatma olan örneği ayırt et; Med harfini bul; Hecelenişten doğru heceyi seç | 10/12/8 |
-| 6. Med harfleri | Uzatmalı kelimeler | Kelimede uzatılan yerleri bulur. | Uzatma olan örneği ayırt et; Med harfini bul; İşaret sayısı | 10/16/4 |
-| 7. Âsar, med ve kasr | Dikey üstün (âsar) ve uzatma işaretleri | Âsarı ve dört elif uzatma işaretini tanır. | Kurala uyan örneği seç; İşaretin anlamı; İşaretli harfi bul | 10/12/8 |
-| 8. Tenvin | Tenvini tanıma | İki üstün, iki esre ve iki ötreyi tanır; tek harekeden ve medden ayırır. | Hecelenişten doğru heceyi seç; Harekeyi / tenvini tanı | 9/13/8 |
-| 8. Tenvin | Tenvinli kelimeler | Kelime sonundaki tenvini tanır ve tenvinli kelimeyi ayırt eder. | Harekeyi / tenvini tanı; İşaretin anlamı; Kurala uyan örneği seç | 14/10/6 |
-| 9. Zamir ve lafzatullah | Zamir | Kelime sonundaki zamirin ne zaman uzatıldığını bilir. | Kural yargısı; Kurala uyan örneği seç | 15/7/8 |
-| 9. Zamir ve lafzatullah | Lafzatullah | Allah lafzının kalın veya ince okunacağını önceki harekeye göre belirler. | Kural yargısı; Kurala uyan örneği seç | 10/16/4 |
-| 10. Elif lâm takısı ve râ | Elif lâm takısı | Elif lâm takısında lâmın okunup okunmadığını belirler. | Kural yargısı; Kurala uyan örneği seç | 11/15/4 |
-| 10. Elif lâm takısı ve râ | Râ harfi | Harekeli râ harfinin kalın veya ince okunduğunu belirler. | Kural yargısı; Kurala uyan örneği seç | 10/16/4 |
-| 11. Duruş ve geçiş | Duruş (vakf) ve tenvinli geçiş | Kelime sonunda dururken harekenin nasıl değiştiğini ve tenvinli kelimeden geçişi bilir. | Kural yargısı; Tenvinli geçiş | 10/13/7 |
-| 12. Kur'an okumaya hazırlık | Genel tekrar ve yüzüne okuma | Öğrenilen bütün kuralları karışık sorularda uygular; öğretmenle kısa sûreleri yüzüne okumaya hazırlanır. | Adı verilen harfi bul; Yazılıştan harfi bul; Harfin yazılışını eşleştir; Hecelenişten doğru heceyi seç; Kelimenin hecelenişini seç; İşaretli harfi bul; Şeddeli yapıyı ayır; Med harfini bul; Kurala uyan örneği seç; Kural yargısı; Tenvinli geçiş | 0/19/11 |
+| 1. Harfler | Harfler 1: ا ب ت ث ج ح خ | İlk yedi harfi şekli ve adıyla tanır, noktalarına göre ayırır. | Harfin adını seç | 10/12/8 |
+| 1. Harfler | Harfler 2: د ذ ر ز س ش ص | İkinci yedi harfi şekli ve adıyla tanır, önceki harflerden ayırır. | Harfin adını seç | 10/13/7 |
+| 1. Harfler | Harfler 3: ض ط ظ ع غ ف ق | Üçüncü yedi harfi tanır ve benzerlerinden ayırır. | Harfin adını seç | 11/14/5 |
+| 1. Harfler | Harfler 4: ك ل م ن و هـ ى | Son yedi harfi tanır; 28 harfin tamamını şekliyle bilir. | Harfin adını seç | 20/8/2 |
+| 1. Harfler | Benzer harfler | Şekli benzeyen harfleri nokta sayısına ve noktanın yerine bakarak ayırır. | Harfin adını seç | 0/23/7 |
+| 1. Harfler | Harfler karma tekrar | 28 harfi karışık sırada tanır ve adlandırır. | Harfin adını seç | 11/12/7 |
+| 2. Harflerin yazılışları | Başta yazılış | Harflerin kelime başındaki yazılışını tanır. | Yazılıştan harfi bul | 10/12/8 |
+| 2. Harflerin yazılışları | Ortada yazılış | Harflerin kelime ortasındaki yazılışını tanır. | Yazılıştan harfi bul | 10/12/8 |
+| 2. Harflerin yazılışları | Sonda yazılış | Harflerin kelime sonundaki yazılışını tanır. | Yazılıştan harfi bul | 10/12/8 |
+| 2. Harflerin yazılışları | Bağlanmayan harfler ve kelimede harf | Bağlanmayan altı harfi bilir; harekesiz bir kelimede harfleri sağdan sola bulur. | Kelimede harf bul; Bağlanan / bağlanmayan harf | 10/12/8 |
+| 2. Harflerin yazılışları | Yazılışlar karma tekrar | Harfi herhangi bir yazılışından tanır. | Yazılıştan harfi bul | 11/12/7 |
+| 3. Harekeler | Üstün (fetha) | Üstünü tanır; harf adı ile üstünü birleştirerek doğru heceyi seçer. | Hecenin hecelenişini seç | 10/12/8 |
+| 3. Harekeler | Esre (kesra) | Esreyi tanır ve üstünden ayırır. | Hecenin hecelenişini seç | 10/12/8 |
+| 3. Harekeler | Ötre (damme) | Ötreyi tanır ve diğer harekelerden ayırır. | Hecenin hecelenişini seç | 10/12/8 |
+| 3. Harekeler | Harekeleri karşılaştırma | Üç harekeyi birbirinden ayırır ve karışık harekeli harfleri tanır. | Hecenin hecelenişini seç; Harekeyi / tenvini tanı | 10/12/8 |
+| 3. Harekeler | Harekeli kelimeler | Üç harfli harekeli kelimeleri heceleyerek çözer. | Kelimenin hecelenişini seç | 14/0/16 |
+| 4. Cezm | Cezmli heceler | Cezmi tanır; cezmli harfi önceki harekeyle birleştirir. | Hecenin hecelenişini seç | 10/12/8 |
+| 4. Cezm | Cezmli kelimeler | Cezm içeren kelimelerde cezmli harfi bulur ve kelimeyi heceler. | İşaretli harfi bul; İşaret sayısı; Kelimenin hecelenişini seç | 10/12/8 |
+| 5. Şedde | Şeddeli heceler | Şeddeyi tanır; şeddeli harfin iki kez okunduğunu bilir. | Hecenin hecelenişini seç | 10/12/8 |
+| 5. Şedde | Şeddeli kelimeler | Şeddeli kelimelerde şeddeli harfi bulur ve doğru böler. | İşaretli harfi bul; İşaret sayısı; Kelimenin hecelenişini seç | 8/13/9 |
+| 6. Med harfleri | Med harfleriyle uzatma | Med harflerini (ا و ى) tanır; uzatılan ve uzatılmayan heceyi ayırır. | Hecenin hecelenişini seç; Med harfini bul | 10/12/8 |
+| 6. Med harfleri | Uzatmalı kelimeler | Kelimede uzatılan yerleri bulur. | Med harfini bul; Uzatma olan örneği ayırt et; İşaret sayısı | 11/13/6 |
+| 7. Âsar, med ve kasr | Dikey üstün (âsar) ve uzatma işaretleri | Âsarı ve dört elif uzatma işaretini tanır. | İşaretin anlamı; İşaretli harfi bul | 4/18/8 |
+| 8. Tenvin | Tenvini tanıma | İki üstün, iki esre ve iki ötreyi tanır; tek harekeden ve medden ayırır. | Harekeyi / tenvini tanı; Hecenin hecelenişini seç | 10/12/8 |
+| 8. Tenvin | Tenvinli kelimeler | Kelime sonundaki tenvini tanır ve tenvinli kelimeyi ayırt eder. | Harekeyi / tenvini tanı; İşaretin anlamı | 10/19/1 |
+| 9. Zamir ve lafzatullah | Zamir | Kelime sonundaki zamirin ne zaman uzatıldığını bilir. | Kural yargısı | 15/7/8 |
+| 9. Zamir ve lafzatullah | Lafzatullah | Allah lafzının kalın veya ince okunacağını önceki harekeye göre belirler. | Kural yargısı | 11/19/0 |
+| 10. Elif lâm takısı ve râ | Elif lâm takısı | Elif lâm takısında lâmın okunup okunmadığını belirler. | Kural yargısı | 15/15/0 |
+| 10. Elif lâm takısı ve râ | Râ harfi | Harekeli râ harfinin kalın veya ince okunduğunu belirler. | Kural yargısı | 12/18/0 |
+| 11. Duruş ve geçiş | Duruş (vakf) ve tenvinli geçiş | Kelime sonunda dururken harekenin nasıl değiştiğini ve tenvinli kelimeden geçişi bilir. | Tenvinli geçiş; Kural yargısı | 11/14/5 |
+| 12. Kur'an okumaya hazırlık | Genel tekrar ve yüzüne okuma | Öğrenilen bütün kuralları karışık sorularda uygular; öğretmenle kısa sûreleri yüzüne okumaya hazırlanır. | Harfin adını seç; Yazılıştan harfi bul; Hecenin hecelenişini seç; Kelimenin hecelenişini seç; İşaret sayısı; Med harfini bul; Uzatma olan örneği ayırt et; İşaretli harfi bul; İşaretin anlamı; Harekeyi / tenvini tanı; Kural yargısı; Tenvinli geçiş | 0/19/11 |
 
 ## Derslerin ayrıntısı
 
@@ -117,7 +117,7 @@ Ana omurga Diyanet'in basılı Elifbâ kitabının (K1, 4. baskı 2025) konu sı
 **Hedef:** Şekli benzeyen harfleri nokta sayısına ve noktanın yerine bakarak ayırır.
 
 **Kazanımlar:**
-- Gösterilen harfin aynısını benzer harfler arasından seçer. _(oyunla ölçülür)_
+- Gösterilen harfin adını, benzer harflerin adları arasından seçer. _(oyunla ölçülür)_
 - Nokta sayısı ve yeri verilen harfi bulur. _(oyunla ölçülür)_
 - Benzer harfleri karıştırmadan adlandırır. _(öğretmen dinleyerek değerlendirir)_
 

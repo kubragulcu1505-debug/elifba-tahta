@@ -1,11 +1,11 @@
 // Oyun motoru testleri. Çalıştırma: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createGame, reduce, computeResult, snapshotForSave, restoreFromSave, liveTotalMs, currentItem, DEFAULT_SETTINGS, type GameState, type QuestionLite, type Side } from "../src/lib/game.ts";
+import { createGame, spreadSameStimulus, reduce, computeResult, snapshotForSave, restoreFromSave, liveTotalMs, currentItem, DEFAULT_SETTINGS, type GameState, type QuestionLite, type Side } from "../src/lib/game.ts";
 import { questionsForLesson } from "../src/content/index.ts";
 
 const qs: QuestionLite[] = questionsForLesson("u3-l1").map((q) => ({
-  id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty,
+  id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus,
 }));
 const byId = new Map(qs.map((q) => [q.id, q]));
 const lookup = (id: string) => byId.get(id);
@@ -39,6 +39,21 @@ test("iki takım aynı 30 soru kümesini farklı sırada alıyor", () => {
   assert.deepEqual([...L].sort(), [...R].sort());
   assert.notDeepEqual(L, R);
   assert.equal(new Set(L).size, 30);
+});
+
+test("aynı harf iki takımın sırasında da arka arkaya gelmiyor", () => {
+  const letters: QuestionLite[] = questionsForLesson("u1-l1").map((q) => ({
+    id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus,
+  }));
+  for (const seed of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
+    const s = createGame({ lessonId: "u1-l1", mode: "competition", seed, questions: letters });
+    for (const side of ["left", "right"] as Side[]) {
+      const stim = s.teams[side].queue.map((x) => letters.find((q) => q.id === x.questionId)!.stimulus);
+      for (let i = 1; i < stim.length; i++) assert.notEqual(stim[i], stim[i - 1], `${seed}/${side}: ${i}. sırada aynı harf`);
+    }
+  }
+  const one = spreadSameStimulus([{ id: "x", objectiveId: "o", correctOptionId: "c", optionIds: ["c"], difficulty: 1, stimulus: "ا" }]);
+  assert.equal(one.length, 1);
 });
 
 test("şık sırası değişse de doğru cevap eşlemesi korunuyor", () => {

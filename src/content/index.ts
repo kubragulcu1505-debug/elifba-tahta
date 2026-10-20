@@ -5,8 +5,10 @@ import { select30, stableSort, QUESTIONS_PER_GAME } from "./build.ts";
 import { LETTERS } from "./letters.ts";
 import { FATHA, KASRA, DAMMA, HEH, TATWEEL, canonical } from "./arabic.ts";
 import * as G from "./generators.ts";
+import * as GG from "./game-generators.ts";
 
-const POOL_BUILDERS: Record<string, (id: string) => Question[]> = {
+/** Ders sayfasındaki puansız alıştırma: çeşitli etkinlik türleri (harfi bul, benzer harf, Arapça şıklar…). */
+const PRACTICE_BUILDERS: Record<string, (id: string) => Question[]> = {
   "u1-l1": (id) => G.genLetterGroup(id, 1),
   "u1-l2": (id) => G.genLetterGroup(id, 2),
   "u1-l3": (id) => G.genLetterGroup(id, 3),
@@ -39,14 +41,55 @@ const POOL_BUILDERS: Record<string, (id: string) => Question[]> = {
   "u11-l1": G.genVakf,
 };
 
-/** Ders havuzları (seçimden önceki bütün sorular). */
+/**
+ * Takım oyunu: ekranda Arapça (harf, hece, kelime) görünür, şıklar Türkçedir (öğretmen kararı, 2026-10).
+ * Az harfli derslerde aynı harf farklı şık kümeleriyle birden fazla kez sorulabilir.
+ */
+const GAME_BUILDERS: Record<string, (id: string) => Question[]> = {
+  "u1-l1": (id) => GG.gameLetterGroup(id, 1),
+  "u1-l2": (id) => GG.gameLetterGroup(id, 2),
+  "u1-l3": (id) => GG.gameLetterGroup(id, 3),
+  "u1-l4": (id) => GG.gameLetterGroup(id, 4),
+  "u1-l5": GG.gameSimilar,
+  "u1-l6": GG.gameLetterMix,
+  "u2-l1": (id) => GG.gameForms(id, "initial"),
+  "u2-l2": (id) => GG.gameForms(id, "medial"),
+  "u2-l3": (id) => GG.gameForms(id, "final"),
+  "u2-l4": GG.gameJoining,
+  "u2-l5": GG.gameFormsMix,
+  "u3-l1": (id) => GG.gameVowel(id, FATHA, [FATHA], { id: "K1", locator: "s.9" }),
+  "u3-l2": (id) => GG.gameVowel(id, KASRA, [FATHA, KASRA], { id: "K1", locator: "s.9" }),
+  "u3-l3": (id) => GG.gameVowel(id, DAMMA, [FATHA, KASRA, DAMMA], { id: "K1", locator: "s.9" }),
+  "u3-l4": GG.gameVowelCompare,
+  "u3-l5": GG.gameHarakaWords,
+  "u4-l1": GG.gameSukunSyllables,
+  "u4-l2": GG.gameSukunWords,
+  "u5-l1": GG.gameShaddaSyllables,
+  "u5-l2": GG.gameShaddaWords,
+  "u6-l1": GG.gameMaddSyllables,
+  "u6-l2": GG.gameMaddWords,
+  "u7-l1": GG.gameAsar,
+  "u8-l1": GG.gameTanweenSyllables,
+  "u8-l2": GG.gameTanweenWords,
+  "u9-l1": GG.gameZamir,
+  "u9-l2": GG.gameLafza,
+  "u10-l1": GG.gameElifLam,
+  "u10-l2": GG.gameRa,
+  "u11-l1": GG.gameVakf,
+};
+
+/** Takım oyunu havuzları (seçimden önceki bütün sorular). */
 export const LESSON_POOLS: Record<string, Question[]> = {};
+/** Alıştırma havuzları. */
+export const PRACTICE_POOLS: Record<string, Question[]> = {};
 /** Her dersin oyun sorusu kimlikleri (tam 30). */
 export const LESSON_QUESTION_IDS: Record<string, string[]> = {};
 export const QUESTION_BY_ID = new Map<string, Question>();
 
 for (const lesson of LESSONS) {
-  const build = POOL_BUILDERS[lesson.id];
+  const practice = PRACTICE_BUILDERS[lesson.id];
+  if (practice) PRACTICE_POOLS[lesson.id] = practice(lesson.id);
+  const build = GAME_BUILDERS[lesson.id];
   if (!build) continue;
   const pool = build(lesson.id);
   LESSON_POOLS[lesson.id] = pool;

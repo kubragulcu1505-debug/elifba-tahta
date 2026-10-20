@@ -13,6 +13,8 @@ export interface QuestionLite {
   correctOptionId: string;
   optionIds: string[];
   difficulty: 1 | 2 | 3;
+  /** Ekrandaki Arapça uyaran; aynı uyaranın arka arkaya gelmemesi için kullanılır. */
+  stimulus?: string;
 }
 
 export interface AnswerRecord {
@@ -97,6 +99,25 @@ function bandOrder(qs: QuestionLite[], rand: () => number, banded: boolean): Que
   return out;
 }
 
+/**
+ * Aynı uyaranın (ör. aynı harf) arka arkaya gelmesini önler. Önce aynı zorluktaki,
+ * sonra herhangi bir sonraki soruyla yer değiştirir. Mümkün değilse sıra olduğu gibi kalır.
+ */
+export function spreadSameStimulus(list: QuestionLite[]): QuestionLite[] {
+  const a = [...list];
+  const key = (q: QuestionLite) => q.stimulus ?? q.id;
+  for (let i = 1; i < a.length; i++) {
+    if (key(a[i]) !== key(a[i - 1])) continue;
+    const ok = (j: number) => key(a[j]) !== key(a[i - 1]) && (j + 1 >= a.length || key(a[j + 1]) !== key(a[i])) && (j - 1 < 0 || j - 1 === i || key(a[j - 1]) !== key(a[i]));
+    let j = -1;
+    for (let k = i + 1; k < a.length; k++) if (a[k].difficulty === a[i].difficulty && ok(k)) { j = k; break; }
+    if (j < 0) for (let k = i + 1; k < a.length; k++) if (ok(k)) { j = k; break; }
+    if (j < 0) for (let k = 0; k < i - 1; k++) if (key(a[k]) !== key(a[i]) && (k === 0 || key(a[k - 1]) !== key(a[i])) && key(a[k + 1]) !== key(a[i]) && key(a[k]) !== key(a[i - 1]) && (i + 1 >= a.length || key(a[i + 1]) !== key(a[k]))) { j = k; break; }
+    if (j >= 0) [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function sameOrder(a: QueueItem[], b: QueueItem[]) {
   return a.length === b.length && a.every((x, i) => x.questionId === b[i].questionId);
 }
@@ -140,7 +161,7 @@ export function createGame(args: {
   for (const side of SIDES) {
     const rand = mulberry32(hashSeed(args.seed + ":" + side));
     const list = args.perTeam?.[side] ?? args.questions;
-    queues[side] = bandOrder(list, rand, args.mode === "competition").map((q) => ({
+    queues[side] = spreadSameStimulus(bandOrder(list, rand, args.mode === "competition")).map((q) => ({
       questionId: q.id,
       optionOrder: shuffle(q.optionIds, rand),
     }));

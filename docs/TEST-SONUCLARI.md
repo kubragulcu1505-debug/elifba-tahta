@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 25/25 geçti |
+| Otomatik testler (`npm test`) | 27/27 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -29,6 +29,17 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 | Eksik ses dosyaları uygulamayı bozmuyor | Tarayıcı: kayıt yokken ders sayfası “Ses kaydı gerekli” gösterdi, dinleme soruları kapalı kaldı. Test için sessiz bir kayıt onaylı olarak eklenince alıştırma açıldı; kayıt sonra silindi | Geçti |
 | Sayfa yenilendiğinde kayıtlı ayarlar korunuyor | Tarayıcı: takım adı, eşik (%90) ve hareket azaltma değiştirilip sayfa yenilendi; değerler korundu. Oyun sırasında yenilemede oyun aynı sorularla, duraklatılmış olarak döndü | Geçti |
 | Production build başarılı | `npm run build` | Geçti |
+
+## Soru biçimi değişikliği (20 Ekim 2026)
+
+Öğretmen kararıyla takım oyunu “ekranda Arapça, şıklar Türkçe” biçimine geçirildi. Az harfli derslerde harflerin tekrarına izin verildi. Eklenen denetimler:
+
+- Her oyun sorusunda Arapça uyaran var ve şıkların hepsi Türkçe: geçti.
+- Bir derste aynı harf aynı şık kümesiyle tekrar etmiyor, en fazla 5 kez soruluyor ve harfler arasındaki fark en fazla 1: geçti. İlk derste 7 harfin her biri 4 veya 5 kez soruluyor.
+- Aynı harf iki takımın sırasında arka arkaya gelmiyor (8 farklı karıştırmada): geçti.
+- Tarayıcıda “Harfler 1” oyunu açıldı. Bir tarafta ا için “Ha, Hı, Elif, Cim”, diğer tarafta ح için “Se, Ha, Be, Te” şıkları çıktı.
+
+Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe şıklar en uzun hâliyle (ör. “Be üstün, Elif ile uzatılır”) daha önce ölçülen heceleme şıklarıyla aynı boyut sınıfındadır, ama bu yeni metinlerle ayrıca ölçülmedi.
 
 ## Ekran yerleşimi ölçümleri
 
