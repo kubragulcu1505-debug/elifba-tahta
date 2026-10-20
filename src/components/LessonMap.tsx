@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { UNITS, lessonsOfUnit } from "@/content/lessons";
+import { UNITS, lessonsOfUnit, LESSON_BY_ID } from "@/content/lessons";
 import { usePersisted } from "@/lib/storage";
 import { RichText } from "@/components/Arabic";
 
@@ -34,7 +34,7 @@ export function LessonMap() {
           </div>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {lessonsOfUnit(u.id).map((l) => {
-              const b = best(l.id);
+              const b = l.gameLessonId ? null : best(l.id);
               return (
                 <li key={l.id}>
                   <Link
@@ -46,7 +46,9 @@ export function LessonMap() {
                     </span>
                     <span className="text-ink-soft">{l.goal}</span>
                     <span className="mt-auto flex flex-wrap gap-2">
-                      {b ? (
+                      {l.gameLessonId ? (
+                        <span className="chip bg-left-soft text-left">Oyun: {LESSON_BY_ID.get(l.gameLessonId)?.title}</span>
+                      ) : b ? (
                         <>
                           <span className="chip bg-surface">{b.count} oyun</span>
                           <span className={`chip ${b.pct >= settings.threshold ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>

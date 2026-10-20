@@ -1,8 +1,8 @@
 // Ders haritası ve içerik inceleme raporunu ders verisinden üretir.
 // Çalıştırma: npm run content:docs
 import { writeFileSync } from "node:fs";
-import { LESSONS, UNITS, lessonsOfUnit, SOURCE_TITLES } from "../src/content/lessons.ts";
-import { questionsForLesson, LESSON_POOLS, AUDIO_CATALOG } from "../src/content/index.ts";
+import { UNITS, lessonsOfUnit, SOURCE_TITLES } from "../src/content/lessons.ts";
+import { questionsForLesson, LESSON_POOLS, AUDIO_CATALOG, GAME_LESSONS } from "../src/content/index.ts";
 
 const strip = (s: string) => s.replace(/⟪([^⟫]*)⟫/g, "$1");
 const TYPE_TR: Record<string, string> = {
@@ -36,6 +36,10 @@ map += `Ana omurga Diyanet'in basılı Elifbâ kitabının (K1, 4. baskı 2025) 
 map += `| Ünite | Ders | Hedef | Oyun soru türleri | Zorluk (kolay/orta/zor) |\n|---|---|---|---|---|\n`;
 for (const u of UNITS) {
   for (const l of lessonsOfUnit(u.id)) {
+    if (l.gameLessonId) {
+      map += `| ${u.order}. ${u.title} | ${strip(l.title)} | ${strip(l.goal)} | Kendi oyunu yok; ünitenin tek oyunu: “${strip(lessonsOfUnit(u.id).find((x) => x.id === l.gameLessonId)!.title)}” | – |\n`;
+      continue;
+    }
     const qs = questionsForLesson(l.id);
     const d = [1, 2, 3].map((k) => qs.filter((q) => q.difficulty === k).length).join("/");
     const types = [...new Set(qs.map((q) => TYPE_TR[q.type] ?? q.type))].join("; ");
@@ -60,7 +64,7 @@ let rev = `# İçerik inceleme durumu\n\nBu dosya \`npm run content:docs\` ile �
 rev += `Durum anlamları:\n\n- **Kural tabanlı, otomatik denetlendi:** Harf tablosundan ve kitaptaki hece tablolarından kural ile üretildi. Otomatik testlerden geçti, ama bir insan uzman tarafından tek tek incelenmedi.\n- **Öğretmen/uzman incelemesi bekliyor:** Elle yazılmış Arapça kelime veya kural yargısı içerir (zamir, lafzatullah, râ, elif-lâm, vakf, geçiş). Kullanmadan önce öğretmen panelindeki “Soru bankası” bölümünden incelenmelidir.\n- **Doğrulanmış kaynak:** Tanzil metninden değiştirilmeden alındı.\n\n`;
 rev += `| Ders | Oyun sorusu | Otomatik denetlendi | İnceleme bekliyor | Havuzdaki toplam soru |\n|---|---|---|---|---|\n`;
 let tA = 0, tT = 0;
-for (const l of LESSONS) {
+for (const l of GAME_LESSONS) {
   const qs = questionsForLesson(l.id);
   const a = qs.filter((q) => q.reviewStatus === "auto-validated").length;
   const t = qs.filter((q) => q.reviewStatus === "needs-teacher-review").length;
@@ -68,7 +72,7 @@ for (const l of LESSONS) {
   tT += t;
   rev += `| ${strip(l.title)} | ${qs.length} | ${a} | ${t} | ${LESSON_POOLS[l.id]?.length ?? "(önceki derslerden seçilir)"} |\n`;
 }
-rev += `| **Toplam (ders başına sayım; 12. ünite önceki soruları tekrar kullanır)** | ${LESSONS.length * 30} | ${tA} | ${tT} | |\n`;
+rev += `| **Toplam (oyun başına sayım; 12. ünite önceki soruları tekrar kullanır)** | ${GAME_LESSONS.length * 30} | ${tA} | ${tT} | |\n`;
 rev += `\n## Bilinen içerik sınırları\n\n`;
 rev += `- Hiçbir ses kaydı yoktur. Katalogdaki ${AUDIO_CATALOG.length} kayıt (harf adları ve harekeli heceler) “Ses kaydı gerekli” durumundadır. Dinleme soruları yalnızca öğretmen kayıt yükleyip onaylayınca, ders sayfasındaki alıştırmada açılır.\n`;
 rev += `- Mushafa özgü “med” ve “kasr” yazı işaretleri (K1 s.18) açık lisanslı fontlarda gösterilemediği için oyunda sorulmaz; öğretmen kitaptan çalıştırmalıdır.\n`;

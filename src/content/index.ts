@@ -46,11 +46,7 @@ const PRACTICE_BUILDERS: Record<string, (id: string) => Question[]> = {
  * Az harfli derslerde aynı harf farklı şık kümeleriyle birden fazla kez sorulabilir.
  */
 const GAME_BUILDERS: Record<string, (id: string) => Question[]> = {
-  "u1-l1": (id) => GG.gameLetterGroup(id, 1),
-  "u1-l2": (id) => GG.gameLetterGroup(id, 2),
-  "u1-l3": (id) => GG.gameLetterGroup(id, 3),
-  "u1-l4": (id) => GG.gameLetterGroup(id, 4),
-  "u1-l5": GG.gameSimilar,
+  // Harfler ünitesinde tek oyun: 28 harfin hepsi (u1-l1…u1-l5 buraya yönlendirir).
   "u1-l6": GG.gameLetterMix,
   "u2-l1": (id) => GG.gameForms(id, "initial"),
   "u2-l2": (id) => GG.gameForms(id, "medial"),
@@ -89,6 +85,8 @@ export const QUESTION_BY_ID = new Map<string, Question>();
 for (const lesson of LESSONS) {
   const practice = PRACTICE_BUILDERS[lesson.id];
   if (practice) PRACTICE_POOLS[lesson.id] = practice(lesson.id);
+  // Kendi oyunu olmayan dersler (ör. Harfler 1–5) oyun için başka derse yönlendirir.
+  if (lesson.gameLessonId) continue;
   const build = GAME_BUILDERS[lesson.id];
   if (!build) continue;
   const pool = build(lesson.id);
@@ -113,6 +111,14 @@ const REVIEW_PLAN: [string, number][] = [
   }
   LESSON_QUESTION_IDS["u12-l1"] = ids;
 }
+
+/** Dersin takım oyununun bulunduğu ders (kendisi ya da yönlendirdiği ders). */
+export function gameLessonOf(lessonId: string): string {
+  return LESSON_BY_ID.get(lessonId)?.gameLessonId ?? lessonId;
+}
+
+/** Kendi takım oyunu olan dersler. */
+export const GAME_LESSONS = LESSONS.filter((l) => !l.gameLessonId);
 
 export function questionsForLesson(lessonId: string): Question[] {
   const ids = LESSON_QUESTION_IDS[lessonId];

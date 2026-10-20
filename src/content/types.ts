@@ -124,6 +124,11 @@ export interface Lesson {
   sources: SourceRef[];
   /** Ek uyarılar (ör. fontta gösterilemeyen işaretler). */
   notes?: string[];
+  /**
+   * Bu dersin kendi takım oyunu yoksa, oyunun bulunduğu ders. Harfler ünitesinde tek oyun vardır
+   * (öğretmen kararı): 1–5. dersler oyun için 6. derse ("Harfler oyunu: 28 harf") yönlendirir.
+   */
+  gameLessonId?: string;
 }
 
 export interface Unit {

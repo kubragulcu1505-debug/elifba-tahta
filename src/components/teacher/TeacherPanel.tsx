@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
-import { questionsForLesson } from "@/content/index";
+import { questionsForLesson, GAME_LESSONS } from "@/content/index";
 import { usePersisted, update, write, exportAll, resetAll, downloadJson, storageAvailable, useHydrated, DEFAULT_SETTINGS, type Settings } from "@/lib/storage";
 import { startCompetition, startReview } from "@/lib/session";
 import { formatMs } from "@/lib/game";
@@ -39,7 +39,8 @@ export function TeacherPanel() {
 
 function initialBankLesson(): string {
   const p = new URLSearchParams(window.location.search).get("ders");
-  return p && LESSON_BY_ID.has(p) ? p : "u1-l1";
+  const id = p && LESSON_BY_ID.has(p) ? (LESSON_BY_ID.get(p)!.gameLessonId ?? p) : GAME_LESSONS[0].id;
+  return id;
 }
 
 function TeacherPanelInner() {
@@ -93,9 +94,13 @@ function TeacherPanelInner() {
                         <RichText text={l.title.replace(/([؀-ۿ][؀-ۿ\s]*[؀-ۿ])/g, "⟪$1⟫")} />
                       </span>
                       <Link href={`/ders/${l.id}#anlatim`} className="btn btn-ghost !min-h-10 !py-1 text-sm">Anlatım</Link>
-                      <button type="button" className="btn btn-primary !min-h-10 !py-1 text-sm" onClick={() => { startCompetition(l.id); router.push("/oyun"); }}>
-                        Oyunu başlat
-                      </button>
+                      {l.gameLessonId ? (
+                        <span className="text-sm text-ink-soft">Oyun: {LESSON_BY_ID.get(l.gameLessonId)?.title}</span>
+                      ) : (
+                        <button type="button" className="btn btn-primary !min-h-10 !py-1 text-sm" onClick={() => { startCompetition(l.id); router.push("/oyun"); }}>
+                          Oyunu başlat
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -239,7 +244,7 @@ function TeacherPanelInner() {
           <label className="flex flex-wrap items-center gap-3 text-lg">
             <span className="font-bold">Ders:</span>
             <select value={bankLesson} onChange={(e) => setBankLesson(e.target.value)} className="min-h-12 rounded-xl border-2 border-line px-3 text-lg">
-              {LESSON_ORDER.map((l) => (
+              {LESSON_ORDER.filter((l) => !l.gameLessonId).map((l) => (
                 <option key={l.id} value={l.id}>{l.title}</option>
               ))}
             </select>

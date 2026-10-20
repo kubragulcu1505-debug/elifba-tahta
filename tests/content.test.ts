@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { LESSONS, LESSON_BY_ID, UNITS } from "../src/content/lessons.ts";
-import { LESSON_QUESTION_IDS, QUESTION_BY_ID, questionsForLesson, LESSON_POOLS, PRACTICE_POOLS, AUDIO_CATALOG } from "../src/content/index.ts";
+import { LESSON_QUESTION_IDS, QUESTION_BY_ID, questionsForLesson, LESSON_POOLS, PRACTICE_POOLS, AUDIO_CATALOG, GAME_LESSONS, gameLessonOf } from "../src/content/index.ts";
 import { checkArabicChars, detectFeatures, canonical, skeleton } from "../src/content/arabic.ts";
 import { LETTERS, forms } from "../src/content/letters.ts";
 import { TANZIL_EXCERPT } from "../src/content/quran.ts";
@@ -34,8 +34,25 @@ test("bağlanmayan harflerin başta yazılışı tatvil almaz", () => {
   );
 });
 
-test("her dersin tam 30 benzersiz oyun sorusu var", () => {
-  for (const lesson of LESSONS) {
+test("harfler ünitesinde tek takım oyunu var ve 28 harfin hepsini içeriyor", () => {
+  const unit1 = LESSONS.filter((l) => l.unitId === "u1");
+  const games = new Set(unit1.map((l) => gameLessonOf(l.id)));
+  assert.deepEqual([...games], ["u1-l6"]);
+  for (const l of unit1) assert.equal(LESSON_QUESTION_IDS[l.id] !== undefined, l.id === "u1-l6", l.id);
+  const stimuli = new Set(questionsForLesson("u1-l6").map((q) => q.stimulus));
+  assert.equal(stimuli.size, 28);
+  assert.deepEqual([...stimuli].sort(), LETTERS.map((l) => l.display).sort());
+});
+
+test("kendi oyunu olmayan ders, var olan bir oyuna yönlendiriyor", () => {
+  for (const l of LESSONS.filter((x) => x.gameLessonId)) {
+    assert.ok(LESSON_QUESTION_IDS[l.gameLessonId!], `${l.id} → ${l.gameLessonId} oyunu yok`);
+    assert.equal(LESSON_BY_ID.get(l.gameLessonId!)!.gameLessonId, undefined, "yönlendirme zinciri olmamalı");
+  }
+});
+
+test("her oyunun tam 30 benzersiz sorusu var", () => {
+  for (const lesson of GAME_LESSONS) {
     const ids = LESSON_QUESTION_IDS[lesson.id];
     assert.ok(ids, `${lesson.id} için soru yok`);
     assert.equal(ids.length, 30, `${lesson.id}: ${ids.length} soru`);
@@ -102,9 +119,9 @@ test("henüz öğretilmemiş kural önceki derslerin sorularına girmiyor", () =
   assert.deepEqual(problems, []);
 });
 
-test("bir dersin 30 sorusu kendi içinde farklı; tekrar eden harf farklı şıklarla ve en fazla 5 kez sorulur", () => {
+test("bir oyunun 30 sorusu kendi içinde farklı; tekrar eden harf farklı şıklarla ve en fazla 5 kez sorulur", () => {
   // Öğretmen kararı: az harfli derslerde aynı harf birden fazla kez sorulabilir.
-  for (const lesson of LESSONS) {
+  for (const lesson of GAME_LESSONS) {
     const qs = questionsForLesson(lesson.id);
     const sigs = qs.map((q) => `${q.type}|${q.prompt}|${q.stimulus ?? ""}|${q.options.map((o) => o.label).sort().join("/")}`);
     const dup = sigs.filter((s, i) => sigs.indexOf(s) !== i);
@@ -119,7 +136,7 @@ test("bir dersin 30 sorusu kendi içinde farklı; tekrar eden harf farklı şık
 });
 
 test("sorular kendi dersinin kazanımına bağlı ve zorluk dengeli", () => {
-  for (const lesson of LESSONS) {
+  for (const lesson of GAME_LESSONS) {
     const qs = questionsForLesson(lesson.id);
     for (const q of qs) {
       const own = LESSON_BY_ID.get(q.lessonId)!;

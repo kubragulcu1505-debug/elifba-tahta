@@ -42,11 +42,11 @@ test("iki takım aynı 30 soru kümesini farklı sırada alıyor", () => {
 });
 
 test("aynı harf iki takımın sırasında da arka arkaya gelmiyor", () => {
-  const letters: QuestionLite[] = questionsForLesson("u1-l1").map((q) => ({
+  const letters: QuestionLite[] = questionsForLesson("u1-l6").map((q) => ({
     id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus,
   }));
   for (const seed of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
-    const s = createGame({ lessonId: "u1-l1", mode: "competition", seed, questions: letters });
+    const s = createGame({ lessonId: "u1-l6", mode: "competition", seed, questions: letters });
     for (const side of ["left", "right"] as Side[]) {
       const stim = s.teams[side].queue.map((x) => letters.find((q) => q.id === x.questionId)!.stimulus);
       for (let i = 1; i < stim.length; i++) assert.notEqual(stim[i], stim[i - 1], `${seed}/${side}: ${i}. sırada aynı harf`);
@@ -87,15 +87,15 @@ test("sırayla zorluk: her uyaranın bir kez geçtiği derste kolaydan zora bant
   }
 });
 
-test("önce bütün harfler birer kez karışık sorulur, sonra tekrar turu başlar", () => {
-  const letters: QuestionLite[] = questionsForLesson("u1-l1").map((q) => ({
+test("harfler oyununda önce 28 harfin hepsi birer kez karışık sorulur, sonra tekrar başlar", () => {
+  const letters: QuestionLite[] = questionsForLesson("u1-l6").map((q) => ({
     id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus,
   }));
   const distinct = new Set(letters.map((q) => q.stimulus)).size;
-  assert.equal(distinct, 7);
+  assert.equal(distinct, 28);
   const firstOrders = new Set<string>();
   for (const seed of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
-    const s = createGame({ lessonId: "u1-l1", mode: "competition", seed, questions: letters });
+    const s = createGame({ lessonId: "u1-l6", mode: "competition", seed, questions: letters });
     for (const side of ["left", "right"] as Side[]) {
       const stim = s.teams[side].queue.map((x) => letters.find((q) => q.id === x.questionId)!.stimulus!);
       assert.equal(new Set(stim.slice(0, distinct)).size, distinct, `${seed}/${side}: ilk ${distinct} soruda bütün harfler yok`);

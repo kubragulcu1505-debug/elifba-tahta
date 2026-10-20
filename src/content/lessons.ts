@@ -39,7 +39,7 @@ const letterChecklist = (letters: string) => [
 export const LESSONS: Lesson[] = [
   // ───────────── Ünite 1: Harfler ─────────────
   {
-    id: "u1-l1", unitId: "u1", order: 1, title: "Harfler 1: ا ب ت ث ج ح خ",
+    id: "u1-l1", unitId: "u1", order: 1, gameLessonId: "u1-l6", title: "Harfler 1: ا ب ت ث ج ح خ",
     goal: "İlk yedi harfi şekli ve adıyla tanır, noktalarına göre ayırır.",
     explanation: [
       "Arapça sağdan sola yazılır ve okunur. Elifbada 28 harf vardır.",
@@ -66,7 +66,7 @@ export const LESSONS: Lesson[] = [
     allowedFeatures: F1, sources: [{ id: "K1", locator: "s.6–7" }, { id: "K2", locator: "Harfler ve İsimleri" }],
   },
   {
-    id: "u1-l2", unitId: "u1", order: 2, title: "Harfler 2: د ذ ر ز س ش ص",
+    id: "u1-l2", unitId: "u1", order: 2, gameLessonId: "u1-l6", title: "Harfler 2: د ذ ر ز س ش ص",
     goal: "İkinci yedi harfi şekli ve adıyla tanır, önceki harflerden ayırır.",
     explanation: [
       "⟪د ذ⟫ ve ⟪ر ز⟫ çiftleri yalnızca bir noktayla ayrılır.",
@@ -93,7 +93,7 @@ export const LESSONS: Lesson[] = [
     allowedFeatures: F1, sources: [{ id: "K1", locator: "s.6–7" }, { id: "K2", locator: "Harfler ve İsimleri" }],
   },
   {
-    id: "u1-l3", unitId: "u1", order: 3, title: "Harfler 3: ض ط ظ ع غ ف ق",
+    id: "u1-l3", unitId: "u1", order: 3, gameLessonId: "u1-l6", title: "Harfler 3: ض ط ظ ع غ ف ق",
     goal: "Üçüncü yedi harfi tanır ve benzerlerinden ayırır.",
     explanation: [
       "⟪ض⟫ Sad harfinin üstüne bir nokta konmuş hâlidir.",
@@ -120,7 +120,7 @@ export const LESSONS: Lesson[] = [
     allowedFeatures: F1, sources: [{ id: "K1", locator: "s.6–7" }, { id: "K2", locator: "Harfler ve İsimleri" }],
   },
   {
-    id: "u1-l4", unitId: "u1", order: 4, title: "Harfler 4: ك ل م ن و هـ ى",
+    id: "u1-l4", unitId: "u1", order: 4, gameLessonId: "u1-l6", title: "Harfler 4: ك ل م ن و هـ ى",
     goal: "Son yedi harfi tanır; 28 harfin tamamını şekliyle bilir.",
     explanation: [
       "⟪ن⟫ (Nun) üstünde bir nokta olan çanak biçimli bir harftir; ⟪ب⟫ ailesine benzer.",
@@ -147,7 +147,7 @@ export const LESSONS: Lesson[] = [
     allowedFeatures: F1, sources: [{ id: "K1", locator: "s.6–7" }, { id: "K2", locator: "Harfler ve İsimleri" }],
   },
   {
-    id: "u1-l5", unitId: "u1", order: 5, title: "Benzer harfler",
+    id: "u1-l5", unitId: "u1", order: 5, gameLessonId: "u1-l6", title: "Benzer harfler",
     goal: "Şekli benzeyen harfleri nokta sayısına ve noktanın yerine bakarak ayırır.",
     explanation: [
       "Şekil olarak benzeyen harfler, nokta sayısına ve noktanın yerine dikkat edilince kolayca ayırt edilir.",
@@ -169,9 +169,13 @@ export const LESSONS: Lesson[] = [
     allowedFeatures: F1, sources: [{ id: "K2", locator: "Harfler > Pekiştirme" }],
   },
   {
-    id: "u1-l6", unitId: "u1", order: 6, title: "Harfler karma tekrar",
-    goal: "28 harfi karışık sırada tanır ve adlandırır.",
-    explanation: ["Bütün harfleri karışık sırayla tekrar ediyoruz. Harfin adını söylemeden önce noktalarına bakın."],
+    id: "u1-l6", unitId: "u1", order: 6, title: "Harfler oyunu: 28 harf",
+    goal: "28 harfi karışık sırada tanır ve adını söyler.",
+    explanation: [
+      "Harfler ünitesinin tek takım oyunu budur. Ekranda bir harf görünür; takım, şıklardan o harfin adını seçer.",
+      "Önce 28 harfin her biri birer kez, karışık sırayla sorulur. Harfler bitince kalan sorularda harfler tekrar edilir.",
+      "Harfin adını söylemeden önce noktalarına bakın.",
+    ],
     examples: [{ arabic: "ا ب ت ث ج ح خ د ذ ر ز س ش ص", note: "1–14" }, { arabic: "ض ط ظ ع غ ف ق ك ل م ن و هـ ى", note: "15–28" }],
     objectives: [
       { id: "u1-l6-o1", text: "Adı söylenen harfi 28 harf içinden bulur.", assessedBy: "game" },

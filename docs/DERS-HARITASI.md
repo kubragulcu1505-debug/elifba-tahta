@@ -6,12 +6,12 @@ Ana omurga Diyanet'in basılı Elifbâ kitabının (K1, 4. baskı 2025) konu sı
 
 | Ünite | Ders | Hedef | Oyun soru türleri | Zorluk (kolay/orta/zor) |
 |---|---|---|---|---|
-| 1. Harfler | Harfler 1: ا ب ت ث ج ح خ | İlk yedi harfi şekli ve adıyla tanır, noktalarına göre ayırır. | Harfin adını seç | 10/12/8 |
-| 1. Harfler | Harfler 2: د ذ ر ز س ش ص | İkinci yedi harfi şekli ve adıyla tanır, önceki harflerden ayırır. | Harfin adını seç | 10/13/7 |
-| 1. Harfler | Harfler 3: ض ط ظ ع غ ف ق | Üçüncü yedi harfi tanır ve benzerlerinden ayırır. | Harfin adını seç | 11/14/5 |
-| 1. Harfler | Harfler 4: ك ل م ن و هـ ى | Son yedi harfi tanır; 28 harfin tamamını şekliyle bilir. | Harfin adını seç | 20/8/2 |
-| 1. Harfler | Benzer harfler | Şekli benzeyen harfleri nokta sayısına ve noktanın yerine bakarak ayırır. | Harfin adını seç | 0/23/7 |
-| 1. Harfler | Harfler karma tekrar | 28 harfi karışık sırada tanır ve adlandırır. | Harfin adını seç | 11/12/7 |
+| 1. Harfler | Harfler 1: ا ب ت ث ج ح خ | İlk yedi harfi şekli ve adıyla tanır, noktalarına göre ayırır. | Kendi oyunu yok; ünitenin tek oyunu: “Harfler oyunu: 28 harf” | – |
+| 1. Harfler | Harfler 2: د ذ ر ز س ش ص | İkinci yedi harfi şekli ve adıyla tanır, önceki harflerden ayırır. | Kendi oyunu yok; ünitenin tek oyunu: “Harfler oyunu: 28 harf” | – |
+| 1. Harfler | Harfler 3: ض ط ظ ع غ ف ق | Üçüncü yedi harfi tanır ve benzerlerinden ayırır. | Kendi oyunu yok; ünitenin tek oyunu: “Harfler oyunu: 28 harf” | – |
+| 1. Harfler | Harfler 4: ك ل م ن و هـ ى | Son yedi harfi tanır; 28 harfin tamamını şekliyle bilir. | Kendi oyunu yok; ünitenin tek oyunu: “Harfler oyunu: 28 harf” | – |
+| 1. Harfler | Benzer harfler | Şekli benzeyen harfleri nokta sayısına ve noktanın yerine bakarak ayırır. | Kendi oyunu yok; ünitenin tek oyunu: “Harfler oyunu: 28 harf” | – |
+| 1. Harfler | Harfler oyunu: 28 harf | 28 harfi karışık sırada tanır ve adını söyler. | Harfin adını seç | 11/12/7 |
 | 2. Harflerin yazılışları | Başta yazılış | Harflerin kelime başındaki yazılışını tanır. | Yazılıştan harfi bul | 10/12/8 |
 | 2. Harflerin yazılışları | Ortada yazılış | Harflerin kelime ortasındaki yazılışını tanır. | Yazılıştan harfi bul | 10/12/8 |
 | 2. Harflerin yazılışları | Sonda yazılış | Harflerin kelime sonundaki yazılışını tanır. | Yazılıştan harfi bul | 10/12/8 |
@@ -126,9 +126,9 @@ Ana omurga Diyanet'in basılı Elifbâ kitabının (K1, 4. baskı 2025) konu sı
 
 **İzin verilen yazım özellikleri:** letters, tatweel
 
-#### Harfler karma tekrar (`u1-l6`)
+#### Harfler oyunu: 28 harf (`u1-l6`)
 
-**Hedef:** 28 harfi karışık sırada tanır ve adlandırır.
+**Hedef:** 28 harfi karışık sırada tanır ve adını söyler.
 
 **Kazanımlar:**
 - Adı söylenen harfi 28 harf içinden bulur. _(oyunla ölçülür)_

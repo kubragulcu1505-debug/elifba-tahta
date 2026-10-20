@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LESSON_BY_ID, UNIT_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
-import { PRACTICE_POOLS, questionsForLesson, AUDIO_CATALOG } from "@/content/index";
+import { PRACTICE_POOLS, questionsForLesson, gameLessonOf, AUDIO_CATALOG } from "@/content/index";
 import { usePersisted } from "@/lib/storage";
 import { startCompetition, startReview } from "@/lib/session";
 import { Ar, RichText } from "@/components/Arabic";
@@ -37,23 +37,27 @@ export function LessonView({ lessonId }: { lessonId: string }) {
   const idx = LESSON_ORDER.findIndex((l) => l.id === lessonId);
   const prev = LESSON_ORDER[idx - 1];
   const next = LESSON_ORDER[idx + 1];
-  const games = history.filter((h) => h.lessonId === lessonId);
+  // Harfler 1–5 gibi dersler kendi oyunu yerine ünitenin tek oyununu kullanır.
+  const gameId = gameLessonOf(lessonId);
+  const gameLesson = LESSON_BY_ID.get(gameId)!;
+  const redirected = gameId !== lessonId;
+  const games = history.filter((h) => h.lessonId === gameId);
   const last = games[0];
-  const qs = questionsForLesson(lessonId);
+  const qs = questionsForLesson(gameId);
   const review = { auto: qs.filter((q) => q.reviewStatus === "auto-validated").length, teacher: qs.filter((q) => q.reviewStatus === "needs-teacher-review").length, verified: qs.filter((q) => q.reviewStatus === "verified-source").length };
   // Alıştırma, oyundan farklı etkinlik türlerini kullanır (harfi bul, benzer harf, Arapça şıklar…).
   const extra = PRACTICE_POOLS[lessonId] ?? [];
   const practice = (extra.length >= 6 ? [...extra].sort((a, b) => a.type.localeCompare(b.type) || a.id.localeCompare(b.id)).filter((_, i, arr) => i % Math.max(1, Math.floor(arr.length / 6)) === 0) : qs).slice(0, 6);
   const audioItems = AUDIO_CATALOG.filter((a) => a.lessonId === lessonId);
-  const activeHere = active && active.state.lessonId === lessonId;
+  const activeHere = active && active.state.lessonId === gameId;
 
   const start = () => {
-    startCompetition(lessonId);
+    startCompetition(gameId);
     router.push("/oyun");
   };
   const startWrongReview = () => {
     if (!last) return;
-    startReview(lessonId, { left: last.teams.left.wrongQuestionIds, right: last.teams.right.wrongQuestionIds });
+    startReview(gameId, { left: last.teams.left.wrongQuestionIds, right: last.teams.right.wrongQuestionIds });
     router.push("/oyun");
   };
 
@@ -151,7 +155,13 @@ export function LessonView({ lessonId }: { lessonId: string }) {
           <PracticePanel questions={practice} />
         </Section>
 
-        <Section id="oyun" title="30 soruluk takım oyunu">
+        <Section id="oyun" title={redirected ? "Takım oyunu: " + gameLesson.title : "30 soruluk takım oyunu"}>
+          {redirected && (
+            <p className="mb-4 rounded-xl bg-left-soft p-3 text-lg">
+              Harfler ünitesinde tek bir takım oyunu vardır: <Link href={`/ders/${gameId}`} className="font-bold underline">{gameLesson.title}</Link>.
+              Bu oyunda 28 harfin hepsi sorulur. Aşağıdaki düğme o oyunu başlatır.
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-4 text-xl">
             <TeamBadge side="left" name={settings.teamNames.left} />
             <span className="text-ink-soft">ve</span>
@@ -167,7 +177,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             <li>Kazanan önce doğru sayısına, eşitlikte toplam süreye göre belirlenir.</li>
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
-            <TapButton className="big-btn btn-primary" onTap={start}>▶ Takım oyununu başlat</TapButton>
+            <TapButton className="big-btn btn-primary" onTap={start}>{redirected ? "▶ Harfler oyununu başlat (28 harf)" : "▶ Takım oyununu başlat"}</TapButton>
             {activeHere && (
               <Link href="/oyun" className="big-btn btn-ghost inline-flex items-center border-2 border-line">Yarıda kalan oyuna dön</Link>
             )}

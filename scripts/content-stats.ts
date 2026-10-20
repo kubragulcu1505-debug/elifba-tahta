@@ -1,6 +1,5 @@
-import { LESSONS } from "../src/content/lessons.ts";
-import { questionsForLesson, LESSON_POOLS } from "../src/content/index.ts";
-for (const l of LESSONS) {
+import { questionsForLesson, LESSON_POOLS, GAME_LESSONS } from "../src/content/index.ts";
+for (const l of GAME_LESSONS) {
   const qs = questionsForLesson(l.id);
   const d = [1, 2, 3].map((k) => qs.filter((q) => q.difficulty === k).length);
   const pool = LESSON_POOLS[l.id]?.length ?? "-";

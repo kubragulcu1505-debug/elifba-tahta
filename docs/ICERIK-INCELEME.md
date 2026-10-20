@@ -10,12 +10,7 @@ Durum anlamları:
 
 | Ders | Oyun sorusu | Otomatik denetlendi | İnceleme bekliyor | Havuzdaki toplam soru |
 |---|---|---|---|---|
-| Harfler 1: ا ب ت ث ج ح خ | 30 | 30 | 0 | 40 |
-| Harfler 2: د ذ ر ز س ش ص | 30 | 30 | 0 | 41 |
-| Harfler 3: ض ط ظ ع غ ف ق | 30 | 30 | 0 | 41 |
-| Harfler 4: ك ل م ن و هـ ى | 30 | 30 | 0 | 40 |
-| Benzer harfler | 30 | 30 | 0 | 42 |
-| Harfler karma tekrar | 30 | 30 | 0 | 56 |
+| Harfler oyunu: 28 harf | 30 | 30 | 0 | 56 |
 | Başta yazılış | 30 | 30 | 0 | 42 |
 | Ortada yazılış | 30 | 30 | 0 | 56 |
 | Sonda yazılış | 30 | 30 | 0 | 56 |
@@ -41,7 +36,7 @@ Durum anlamları:
 | Râ harfi | 30 | 0 | 30 | 30 |
 | Duruş (vakf) ve tenvinli geçiş | 30 | 0 | 30 | 42 |
 | Genel tekrar ve yüzüne okuma | 30 | 9 | 21 | (önceki derslerden seçilir) |
-| **Toplam (ders başına sayım; 12. ünite önceki soruları tekrar kullanır)** | 930 | 566 | 364 | |
+| **Toplam (oyun başına sayım; 12. ünite önceki soruları tekrar kullanır)** | 780 | 416 | 364 | |
 
 ## Bilinen içerik sınırları
 

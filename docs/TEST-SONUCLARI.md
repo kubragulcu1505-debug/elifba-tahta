@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 28/28 geçti |
+| Otomatik testler (`npm test`) | 30/30 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -41,6 +41,14 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 - Tarayıcıda “Harfler 1” oyunu açıldı. Bir tarafta ا için “Ha, Hı, Elif, Cim”, diğer tarafta ح için “Se, Ha, Be, Te” şıkları çıktı.
 
 Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe şıklar en uzun hâliyle (ör. “Be üstün, Elif ile uzatılır”) daha önce ölçülen heceleme şıklarıyla aynı boyut sınıfındadır, ama bu yeni metinlerle ayrıca ölçülmedi.
+
+## Harfler ünitesinde tek oyun (20 Ekim 2026)
+
+Öğretmen kararıyla harfler ünitesindeki altı oyun tek oyunda birleştirildi: “Harfler oyunu: 28 harf”.
+
+- Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
+- 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
+- Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
 
 ## Ekran yerleşimi ölçümleri
 

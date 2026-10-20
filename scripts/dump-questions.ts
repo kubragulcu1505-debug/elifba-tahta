@@ -4,6 +4,7 @@ const only = process.argv[2]?.split(",");
 const n = Number(process.argv[3] ?? 4);
 for (const l of LESSONS) {
   if (only && !only.includes(l.id)) continue;
+  if (l.gameLessonId) continue;
   console.log(`\n=== ${l.id} ${l.title}`);
   for (const q of questionsForLesson(l.id).slice(0, n)) {
     const c = q.options.find((o) => o.id === q.correctOptionId)!.label;
