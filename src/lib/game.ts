@@ -100,6 +100,38 @@ function bandOrder(qs: QuestionLite[], rand: () => number, banded: boolean): Que
 }
 
 /**
+ * Tur tabanlı sıra (öğretmen isteği): önce dersteki her harf/hece bir kez, karışık sırayla sorulur;
+ * hepsi bitince tekrar turu başlar. Bir harfin ilk sorusu en kolay olanıdır; zorluk turlar ilerledikçe artar.
+ * Tekrar olan derslerde tur içi sıra tamamen karışıktır (hep aynı harfle başlamasın diye).
+ * Tekrar olmayan derslerde tek tur vardır ve yarışmada kolaydan zora sıralanır.
+ * Tur geçişinde aynı uyaran arka arkaya gelmez.
+ */
+export function roundOrder(qs: QuestionLite[], rand: () => number, banded: boolean): QuestionLite[] {
+  const key = (q: QuestionLite) => q.stimulus ?? q.id;
+  const groups = new Map<string, QuestionLite[]>();
+  for (const q of shuffle(qs, rand)) {
+    if (!groups.has(key(q))) groups.set(key(q), []);
+    groups.get(key(q))!.push(q);
+  }
+  const lists = [...groups.values()].map((g) => [...g].sort((a, b) => a.difficulty - b.difficulty));
+  const hasRepeats = lists.some((g) => g.length > 1);
+  const out: QuestionLite[] = [];
+  for (let r = 0; ; r++) {
+    const round = lists.map((g) => g[r]).filter((q): q is QuestionLite => !!q);
+    if (round.length === 0) break;
+    const ordered = bandOrder(round, rand, banded && !hasRepeats);
+    const prev = out[out.length - 1];
+    if (prev && ordered.length > 1 && key(ordered[0]) === key(prev)) {
+      // Tur başındaki soru bir önceki turun sonuyla aynı harfse, onu turdaki başka bir soruyla değiştir.
+      const j = ordered.findIndex((q, i) => i > 0 && key(q) !== key(prev));
+      if (j > 0) [ordered[0], ordered[j]] = [ordered[j], ordered[0]];
+    }
+    out.push(...ordered);
+  }
+  return out;
+}
+
+/**
  * Aynı uyaranın (ör. aynı harf) arka arkaya gelmesini önler. Önce aynı zorluktaki,
  * sonra herhangi bir sonraki soruyla yer değiştirir. Mümkün değilse sıra olduğu gibi kalır.
  */
@@ -158,17 +190,18 @@ export function createGame(args: {
 }): GameState {
   const settings = { ...DEFAULT_SETTINGS, ...args.settings };
   const queues = {} as Record<Side, QueueItem[]>;
-  for (const side of SIDES) {
-    const rand = mulberry32(hashSeed(args.seed + ":" + side));
+  const build = (side: Side, salt: string): QueueItem[] => {
+    const rand = mulberry32(hashSeed(args.seed + ":" + side + salt));
     const list = args.perTeam?.[side] ?? args.questions;
-    queues[side] = spreadSameStimulus(bandOrder(list, rand, args.mode === "competition")).map((q) => ({
+    return roundOrder(list, rand, args.mode === "competition").map((q) => ({
       questionId: q.id,
       optionOrder: shuffle(q.optionIds, rand),
     }));
-  }
-  // İki takım aynı sırayı alırsa sağ tarafı bir adım döndür (en az iki soru varsa).
-  if (!args.perTeam && queues.left.length > 1 && sameOrder(queues.left, queues.right)) {
-    queues.right = [...queues.right.slice(1), queues.right[0]];
+  };
+  for (const side of SIDES) queues[side] = build(side, "");
+  // İki takım tesadüfen aynı sırayı alırsa sağ tarafı yeniden karıştır.
+  for (let k = 1; !args.perTeam && queues.left.length > 1 && sameOrder(queues.left, queues.right) && k <= 20; k++) {
+    queues.right = build("right", ":" + k);
   }
   const ids = args.questions.map((q) => q.id);
   return {

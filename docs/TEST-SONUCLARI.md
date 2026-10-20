@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 27/27 geçti |
+| Otomatik testler (`npm test`) | 28/28 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -37,6 +37,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 - Her oyun sorusunda Arapça uyaran var ve şıkların hepsi Türkçe: geçti.
 - Bir derste aynı harf aynı şık kümesiyle tekrar etmiyor, en fazla 5 kez soruluyor ve harfler arasındaki fark en fazla 1: geçti. İlk derste 7 harfin her biri 4 veya 5 kez soruluyor.
 - Aynı harf iki takımın sırasında arka arkaya gelmiyor (8 farklı karıştırmada): geçti.
+- Tur sırası: ilk 7 soru 7 harfin hepsini içeriyor; her 7'lik turda her harf tam bir kez geçiyor; ilk turun sırası karıştırmadan karıştırmaya değişiyor: geçti. 200 oyunda 2.–4. turların ilk harfi 7 harfe dengeli dağıldı (her harf 67–95 kez). Tarayıcıda yeni oyunda iki takımın ilk 7 sorusu 7 farklı harf olarak doğrulandı.
 - Tarayıcıda “Harfler 1” oyunu açıldı. Bir tarafta ا için “Ha, Hı, Elif, Cim”, diğer tarafta ح için “Se, Ha, Be, Te” şıkları çıktı.
 
 Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe şıklar en uzun hâliyle (ör. “Be üstün, Elif ile uzatılır”) daha önce ölçülen heceleme şıklarıyla aynı boyut sınıfındadır, ama bu yeni metinlerle ayrıca ölçülmedi.

@@ -76,12 +76,38 @@ test("soru kümesi bir kez oluşur; aynı tohum aynı oyunu verir (render'da yen
   assert.notDeepEqual(a.teams.left.queue, c.teams.left.queue);
 });
 
-test("sırayla zorluk: her takımda kolaydan zora bantlar", () => {
-  const s = newGame();
+test("sırayla zorluk: her uyaranın bir kez geçtiği derste kolaydan zora bantlar", () => {
+  const uniq: QuestionLite[] = questionsForLesson("u4-l1").map((q) => ({
+    id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus,
+  }));
+  const s = createGame({ lessonId: "u4-l1", mode: "competition", seed: "z", questions: uniq });
   for (const side of ["left", "right"] as Side[]) {
-    const d = s.teams[side].queue.map((x) => byId.get(x.questionId)!.difficulty);
+    const d = s.teams[side].queue.map((x) => uniq.find((q) => q.id === x.questionId)!.difficulty);
     assert.deepEqual(d, [...d].sort((a, b) => a - b));
   }
+});
+
+test("önce bütün harfler birer kez karışık sorulur, sonra tekrar turu başlar", () => {
+  const letters: QuestionLite[] = questionsForLesson("u1-l1").map((q) => ({
+    id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus,
+  }));
+  const distinct = new Set(letters.map((q) => q.stimulus)).size;
+  assert.equal(distinct, 7);
+  const firstOrders = new Set<string>();
+  for (const seed of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
+    const s = createGame({ lessonId: "u1-l1", mode: "competition", seed, questions: letters });
+    for (const side of ["left", "right"] as Side[]) {
+      const stim = s.teams[side].queue.map((x) => letters.find((q) => q.id === x.questionId)!.stimulus!);
+      assert.equal(new Set(stim.slice(0, distinct)).size, distinct, `${seed}/${side}: ilk ${distinct} soruda bütün harfler yok`);
+      for (let k = 1; k * distinct <= stim.length; k++) {
+        const counts = new Map<string, number>();
+        for (const x of stim.slice(0, k * distinct)) counts.set(x, (counts.get(x) ?? 0) + 1);
+        assert.ok([...counts.values()].every((c) => c === k), `${seed}/${side}: ${k}. tur dengesiz`);
+      }
+      firstOrders.add(stim.slice(0, distinct).join(""));
+    }
+  }
+  assert.ok(firstOrders.size > 4, "ilk turun sırası karışık olmalı");
 });
 
 test("bir taraftaki cevap diğer tarafı etkilemiyor", () => {
