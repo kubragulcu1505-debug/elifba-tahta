@@ -10,6 +10,7 @@ Akıllı tahtada iki takımın aynı anda oynadığı, çocuklara aşama aşama 
 - **Her ders** somut bir hedef, kısa anlatım, büyük gösterilebilen rehberli örnekler, puansız alıştırma, 30 soruluk takım oyunu, yanlışlara yönelik tekrar ve öğretmen değerlendirmesi içerir. Harfler ünitesinde tek takım oyunu vardır: “Harfler oyunu: 28 harf”. Bu oyunda önce 28 harfin hepsi birer kez sorulur; ünitenin diğer dersleri oyun için bu derse yönlendirir.
 - **Soru biçimi:** Oyunda ekranda Arapça harf, hece veya kelime görünür; şıklar Türkçedir. Örneğin ا gösterilir, şıklar “Elif, Cim, Ha, Dal” olur. Sıra tur turdur: önce dersteki bütün harfler birer kez karışık sorulur, harfler bitince tekrar turu başlar. Tekrarlarda şıklar farklıdır; bir harf en fazla 5 kez sorulur ve arka arkaya gelmez. Harfi bul, benzer harfi bul gibi diğer etkinlikler ders sayfasındaki puansız alıştırmadadır.
 - **Takım oyunu:** Ekran dikey çizgiyle ikiye ayrılır. Sol takım ve sağ takım aynı 30 soruyu kendi sıralarıyla, birbirinden bağımsız çözer. Öğrenciler sırayla tahtaya gelir. Hesap gerekmez.
+- **Halat çekme:** İkinci oyun türü. Üstte halat çekme animasyonu vardır; ekran yine iki takıma bölünür. Doğru cevap veren takım halatı bir adım kendi tarafına çeker. Sorular sınırsızdır ve kendiliğinden geçer; önce dersin bütün harfleri/heceleri karışık gelir, bitince yeniden karışır. Yanlış cevapta o takım 5 saniye bekler ve doğru cevap gösterilir. Bayrağı kendi çizgisine ilk çeken takım kazanır (varsayılan 7 çekiş, öğretmen panelinden değişir). Her derste oynanabilir: ders sayfasından, ana sayfadan ya da öğretmen panelinden başlatılır. Harfler 1–5 derslerinde yalnızca o dersin harfleri sorulur.
 - **Puanlama:** Doğru 10, yanlış 0. Her soruda ilk dokunuş geçerlidir. Yanlıştan sonra doğru cevap ve kısa açıklama gösterilir. Kazanan önce doğru sayısına, eşitlikte toplam süreye göre belirlenir. Duraklama, yükleme ve geri bildirim süreleri sayılmaz.
 - **Öğretmen paneli:** Ders seçme, takım adları, başarı eşiği (varsayılan %80, ürün ayarı), sonuçlar ve yanlış yapılan kazanımlar, yanlışlarla tekrar, soru bankasını doğru cevaplarıyla inceleme, ses kayıtları, öğrenci değerlendirmesi ve “Kur'an okumaya hazır” onayı, JSON dışa aktarma ve sıfırlama.
 - **Ses:** Uygulama hiçbir ses dosyasıyla gelmez ve tarayıcının yapay sesini kullanmaz. Öğretmen kendi kaydını yükleyip dinleyerek onaylayabilir. Onaylı kayıtlar yalnızca ders sayfasındaki “Dinle ve seç” alıştırmasında, tek ses kanalıyla çalar.
@@ -45,7 +46,7 @@ npm start
 npm test
 ```
 
-30 test: içerik doğrulama (oyunda Arapça uyaran ve Türkçe şıklar, harflerin dengeli tekrarı dahil) (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
+38 test: içerik doğrulama (oyunda Arapça uyaran ve Türkçe şıklar, harflerin dengeli tekrarı dahil) (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
 
 Diğer denetimler:
 
@@ -73,6 +74,7 @@ Vercel adımları: [docs/YAYINLAMA.md](docs/YAYINLAMA.md).
 |---|---|
 | `src/content/` | Öğretim içeriği (arayüzden bağımsız): harfler, kelimeler, dersler, soru üreticileri, Tanzil alıntısı |
 | `src/lib/game.ts` | İki takımlı oyun durum makinesi (saf fonksiyonlar, test edilir) |
+| `src/lib/tug.ts` | Halat çekme oyunu durum makinesi (sınırsız soru, 5 sn bekleme, kazanma) |
 | `src/lib/storage.ts` | localStorage kalıcı depo (ayarlar, sonuçlar, değerlendirmeler, aktif oyun) |
 | `src/lib/audioStore.ts` | Öğretmen ses kayıtları (IndexedDB) ve tek ses kanalı |
 | `src/components/` | Arayüz: oyun ekranı, ders sayfası, öğretmen paneli, cihaz testi |

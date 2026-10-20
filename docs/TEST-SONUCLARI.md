@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 30/30 geçti |
+| Otomatik testler (`npm test`) | 38/38 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,24 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Halat çekme oyunu (20 Ekim 2026)
+
+Otomatik testler (8 test, `tests/tug.test.ts`):
+
+- Her ders için havuz var; bütün sorularda Arapça uyaran ve Türkçe şıklar var; öğretilmemiş kural yok. Harfler 1. derste yalnızca o dersin 7 harfi soruluyor: geçti.
+- Doğru cevap halatı o takıma bir adım çekiyor, yanlış cevap çekmiyor: geçti.
+- Yanlışta 5 saniye bekleniyor; bu sürede dokunuşlar yok sayılıyor; 5 saniyeden önce geçilmiyor: geçti.
+- İki takım bağımsız ve aynı anda cevap verebiliyor: geçti.
+- Sınırsız soru: 300 soru boyunca deste en az 6 kez yenilendi, aynı harf arka arkaya gelmedi, ilk sorularda bütün harfler geldi: geçti.
+- Bayrağı kendi çizgisine ilk çeken kazanıyor, sonra cevap kabul edilmiyor; duraklatma bekleme süresini uzatıyor; kaydet/yükle kalan beklemeyi koruyor: geçti.
+
+Tarayıcıda (Harfler 1 dersi):
+
+- Halat sahnesi, takım figürleri, kazanma çizgileri ve bayrak çizildi.
+- Doğru cevaplarla halat -1, -3 ve sonunda -7 oldu; bayrak sol çizgiye ulaştı ve “Yıldız Takımı halatı kendi tarafına çekti!” ekranı açıldı.
+- Yanlış cevapta doğru şık ve açıklama gösterildi; geri sayım 5'ten 1'e indi, soru kendiliğinden geçti; bu sırada diğer takım oynamaya devam etti.
+- Yerleşim: 1366×768'de en alttaki öğe 757. pikselde (yanlış cevap açıklaması açıkken de), 1920×1080'de 1080 piksel içinde; kaydırma yok, figürler ekranda.
 
 ## Ekran yerleşimi ölçümleri
 

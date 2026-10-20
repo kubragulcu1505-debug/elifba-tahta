@@ -2,7 +2,8 @@
 // Oyun oturumu yardımcıları: başlatma, tekrar, sonuç kaydı.
 import { createGame, computeResult, objectiveStats, type GameMode, type GameState, type QuestionLite, type Side } from "./game";
 import { newSeed } from "./rng";
-import { questionsForLesson, getQuestion } from "@/content/index";
+import { questionsForLesson, getQuestion, TUG_POOLS, getAnyQuestion } from "@/content/index";
+import { createTug, type TugState } from "./tug";
 import type { Question } from "@/content/types";
 import { read, update, write, type GameRecord } from "./storage";
 
@@ -25,6 +26,20 @@ export function startCompetition(lessonId: string): GameState {
 }
 
 /** Puansız tekrar: her takım kendi yanlış sorularını çözer. */
+/** Halat çekme oyununu başlatır (dersin soru havuzu, sınırsız). */
+export function startTug(lessonId: string): TugState {
+  const pool = (TUG_POOLS[lessonId] ?? []).map(toLite);
+  const state = createTug({ lessonId, seed: newSeed(), pool, settings: { target: read("settings").tugTarget } });
+  write("activeTug", { state, savedAtEpoch: Date.now(), fresh: true });
+  return state;
+}
+
+/** Halat çekme sorularını da kapsayan arama. */
+export function lookupAnyLite(id: string): QuestionLite | undefined {
+  const q = getAnyQuestion(id);
+  return q ? toLite(q) : undefined;
+}
+
 export function startReview(lessonId: string, wrong: Record<Side, string[]>): GameState {
   const toList = (ids: string[]) => [...new Set(ids)].map((id) => getQuestion(id)).filter((q): q is Question => !!q).map(toLite);
   const all = toList([...wrong.left, ...wrong.right]);

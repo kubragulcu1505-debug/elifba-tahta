@@ -269,3 +269,132 @@ html[data-motion="reduce"] *::after {
   transition-duration: 0.001ms !important;
   scroll-behavior: auto !important;
 }
+
+/* ── Halat çekme ── */
+.tug-root {
+  grid-template-rows: auto auto 1fr;
+}
+.tug-stage {
+  position: relative;
+  height: clamp(118px, 18vh, 210px);
+  overflow: hidden;
+  background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 62%, #bbf7d0 62%, #86efac 100%);
+  border-bottom: 3px solid var(--line);
+}
+.tug-line {
+  position: absolute;
+  left: 50%;
+  top: 16%;
+  bottom: 4%;
+  border-left: 4px dashed rgba(31, 36, 48, 0.45);
+}
+.tug-goal {
+  position: absolute;
+  top: 12%;
+  bottom: 4%;
+  width: 8px;
+  margin-left: -4px;
+  border-radius: 4px;
+  opacity: 0.85;
+}
+.tug-goal.left {
+  left: calc(50% - 12vw);
+  background: var(--left);
+}
+.tug-goal.right {
+  left: calc(50% + 12vw);
+  background: var(--right);
+}
+.tug-group {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  transform: translateX(calc(var(--pos) * 12vw));
+  transition: transform 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tug-rope {
+  position: absolute;
+  left: -33vw;
+  width: 66vw;
+  top: calc(63% - 6px);
+  height: 12px;
+  border-radius: 6px;
+  background: repeating-linear-gradient(60deg, #92400e 0 9px, #d97706 9px 18px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.tug-flag {
+  position: absolute;
+  left: -13px;
+  top: calc(63% - 2px);
+  width: 26px;
+  height: 42px;
+  background: #dc2626;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.tug-fig {
+  position: absolute;
+  bottom: 8%;
+  height: 62%;
+  aspect-ratio: 60 / 90;
+}
+.tug-fig svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transform-origin: 50% 95%;
+}
+.tug-pull .tug-fig svg {
+  animation: tug-lean 460ms ease-out;
+}
+@keyframes tug-lean {
+  0% { transform: rotate(0deg); }
+  40% { transform: rotate(-13deg) translateX(-6%); }
+  100% { transform: rotate(0deg); }
+}
+.tug-label {
+  position: absolute;
+  top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  font-weight: 800;
+  font-size: clamp(14px, 2.2vh, 24px);
+}
+.tug-title {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(14px, 2.3vh, 26px);
+  letter-spacing: 0.06em;
+  color: #7c2d12;
+  white-space: nowrap;
+}
+
+/* Halat çekmede soru alanı biraz daha sıkı */
+.team-panel.compact {
+  padding-top: clamp(6px, 1vh, 14px);
+  gap: clamp(4px, 0.8vh, 12px);
+}
+.team-panel.compact .prompt-text {
+  font-size: clamp(16px, 2.8vh, 32px);
+}
+.team-panel.compact .stimulus {
+  font-size: clamp(52px, 9vh, 120px);
+}
+.team-panel.compact .stimulus.long {
+  font-size: clamp(38px, 6.5vh, 90px);
+}
+.team-panel.compact .option-btn {
+  min-height: clamp(64px, 11vh, 150px);
+}
+.team-panel.compact .option-btn .opt-ar {
+  font-size: clamp(34px, 6vh, 80px);
+}

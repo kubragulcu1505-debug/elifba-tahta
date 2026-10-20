@@ -133,6 +133,34 @@ export function getQuestion(id: string): Question | undefined {
 export const ALL_GAME_QUESTIONS: Question[] = [...QUESTION_BY_ID.values()];
 
 /**
+ * Halat çekme oyunu soru havuzları (ders başına, sınırsız tekrar için).
+ * Kendi oyunu olan derslerde oyun havuzunun tamamı kullanılır; Harfler 1–5'te yalnızca o dersin harfleri;
+ * genel tekrar dersinde kendi 30 sorusu. Hepsi "Arapça göster, Türkçe seç" biçimindedir.
+ */
+const TUG_EXTRA: Record<string, (id: string) => Question[]> = {
+  "u1-l1": (id) => GG.gameLetterGroup(id, 1),
+  "u1-l2": (id) => GG.gameLetterGroup(id, 2),
+  "u1-l3": (id) => GG.gameLetterGroup(id, 3),
+  "u1-l4": (id) => GG.gameLetterGroup(id, 4),
+  "u1-l5": GG.gameSimilar,
+};
+export const TUG_POOLS: Record<string, Question[]> = {};
+for (const lesson of LESSONS) {
+  const extra = TUG_EXTRA[lesson.id];
+  if (extra) TUG_POOLS[lesson.id] = extra(lesson.id);
+  else if (LESSON_POOLS[lesson.id]) TUG_POOLS[lesson.id] = LESSON_POOLS[lesson.id];
+  else if (LESSON_QUESTION_IDS[lesson.id]) TUG_POOLS[lesson.id] = questionsForLesson(lesson.id);
+}
+const ANY_QUESTION = new Map<string, Question>();
+for (const q of Object.values(TUG_POOLS).flat()) ANY_QUESTION.set(q.id, q);
+for (const q of QUESTION_BY_ID.values()) ANY_QUESTION.set(q.id, q);
+
+/** Oyun ya da halat çekme sorusunu kimliğinden bulur. */
+export function getAnyQuestion(id: string): Question | undefined {
+  return ANY_QUESTION.get(id);
+}
+
+/**
  * Ses kaydı kataloğu. Uygulamada hiçbir ses dosyası yoktur; öğretmen kaydı yükleyip onaylayana kadar
  * bu sesler "Ses kaydı gerekli" durumundadır ve hiçbir yerde çalınmaz.
  */

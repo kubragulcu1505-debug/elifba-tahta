@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { questionsForLesson, GAME_LESSONS } from "@/content/index";
 import { usePersisted, update, write, exportAll, resetAll, downloadJson, storageAvailable, useHydrated, DEFAULT_SETTINGS, type Settings } from "@/lib/storage";
-import { startCompetition, startReview } from "@/lib/session";
+import { startCompetition, startReview, startTug } from "@/lib/session";
 import { formatMs } from "@/lib/game";
 import { Ar, RichText } from "@/components/Arabic";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -94,6 +94,9 @@ function TeacherPanelInner() {
                         <RichText text={l.title.replace(/([؀-ۿ][؀-ۿ\s]*[؀-ۿ])/g, "⟪$1⟫")} />
                       </span>
                       <Link href={`/ders/${l.id}#anlatim`} className="btn btn-ghost !min-h-10 !py-1 text-sm">Anlatım</Link>
+                      <button type="button" className="btn btn-ghost !min-h-10 !py-1 text-sm" onClick={() => { startTug(l.id); router.push("/halat"); }}>
+                        Halat çekme
+                      </button>
                       {l.gameLessonId ? (
                         <span className="text-sm text-ink-soft">Oyun: {LESSON_BY_ID.get(l.gameLessonId)?.title}</span>
                       ) : (
@@ -137,6 +140,19 @@ function TeacherPanelInner() {
               <span className="text-base text-ink-soft">
                 Varsayılan %80. Bu pedagojik bir ürün ayarıdır; resmî bir zorunluluk değildir. Sonuç ekranında ve ders haritasında kullanılır.
               </span>
+            </label>
+            <label className="flex flex-col gap-2 text-lg">
+              <span className="font-bold">Halat çekme: kazanmak için gereken çekiş</span>
+              <input
+                type="number"
+                min={3}
+                max={20}
+                step={1}
+                value={settings.tugTarget}
+                onChange={(e) => setSettings({ tugTarget: Math.min(20, Math.max(3, Number(e.target.value) || 7)) })}
+                className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
+              />
+              <span className="text-base text-ink-soft">Varsayılan 7. Bayrak, bir takım bu kadar çekiş öne geçince o takımın çizgisine ulaşır. Yeni başlatılan oyunlarda geçerlidir.</span>
             </label>
             <label className="flex flex-col gap-2 text-lg">
               <span className="font-bold">Hareket ve animasyon</span>

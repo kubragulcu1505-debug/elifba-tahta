@@ -3,6 +3,7 @@
 // Tüm okuma/yazmalar try/catch içindedir; depolama kapalıysa uygulama varsayılanlarla çalışır.
 import { useSyncExternalStore } from "react";
 import type { GameState, Side, TeamResult, GameResult } from "./game";
+import type { TugState } from "./tug";
 
 export const STORAGE_VERSION = 1;
 const PREFIX = "elifba-tahta.v1.";
@@ -13,12 +14,15 @@ export interface Settings {
   threshold: number;
   /** Hareket azaltma: sistem tercihine uy / her zaman azalt / animasyonlar açık */
   motion: "system" | "reduce" | "full";
+  /** Halat çekmede kazanmak için gereken net çekiş sayısı. */
+  tugTarget: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   teamNames: { left: "Yıldız Takımı", right: "Hilal Takımı" },
   threshold: 80,
   motion: "system",
+  tugTarget: 7,
 };
 
 export interface GameRecord {
@@ -55,6 +59,7 @@ export interface Schema {
   evaluations: Evaluations;
   approvals: QuestionApprovals;
   activeGame: ActiveGame | null;
+  activeTug: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Ders sayfasında açık bırakılan sekme vb. küçük kolaylıklar */
   ui: { lastLessonId?: string };
 }
@@ -65,6 +70,7 @@ const DEFAULTS: Schema = {
   evaluations: EMPTY_EVALUATIONS,
   approvals: {},
   activeGame: null,
+  activeTug: null,
   ui: {},
 };
 

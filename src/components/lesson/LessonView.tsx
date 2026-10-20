@@ -5,7 +5,7 @@ import { useState } from "react";
 import { LESSON_BY_ID, UNIT_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { PRACTICE_POOLS, questionsForLesson, gameLessonOf, AUDIO_CATALOG } from "@/content/index";
 import { usePersisted } from "@/lib/storage";
-import { startCompetition, startReview } from "@/lib/session";
+import { startCompetition, startReview, startTug } from "@/lib/session";
 import { Ar, RichText } from "@/components/Arabic";
 import { TapButton } from "@/components/TapButton";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -67,6 +67,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
     ["ornekler", "Örnekler"],
     ["alistirma", "Alıştırma"],
     ["oyun", "Takım oyunu"],
+    ["halat", "Halat çekme"],
     ["tekrar", "Tekrar"],
     ...(audioItems.length ? [["ses", "Dinle ve seç"]] : []),
     ...(lessonId === "u12-l1" ? [["okuma", "Yüzüne okuma"]] : []),
@@ -182,6 +183,24 @@ export function LessonView({ lessonId }: { lessonId: string }) {
               <Link href="/oyun" className="big-btn btn-ghost inline-flex items-center border-2 border-line">Yarıda kalan oyuna dön</Link>
             )}
           </div>
+        </Section>
+
+        <Section id="halat" title="Halat çekme oyunu">
+          <ul className="list-disc pl-6 text-lg">
+            <li>Üstte halat çekme animasyonu vardır. Doğru cevap veren takım halatı bir adım kendi tarafına çeker.</li>
+            <li>Sorular sınırsızdır ve kendiliğinden geçer. Önce bu dersin bütün harfleri/heceleri karışık gelir, bitince yeniden karışır.</li>
+            <li>Yanlış cevapta o takım 5 saniye bekler; doğru cevap ekranda gösterilir.</li>
+            <li>Bayrağı {settings.tugTarget} çekiş farkla kendi çizgisine ilk çeken takım kazanır.</li>
+          </ul>
+          <TapButton
+            className="big-btn btn-primary mt-5"
+            onTap={() => {
+              startTug(lessonId);
+              router.push("/halat");
+            }}
+          >
+            🪢 Halat çekmeyi başlat
+          </TapButton>
         </Section>
 
         <Section id="tekrar" title="Yanlışlara yönelik tekrar">
