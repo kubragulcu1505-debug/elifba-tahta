@@ -34,6 +34,14 @@ export function startTug(lessonId: string): TugState {
   return state;
 }
 
+/** Kale yıkma oyununu başlatır (halat çekmeyle aynı soru havuzu, sınırsız). */
+export function startSiege(lessonId: string): TugState {
+  const pool = (TUG_POOLS[lessonId] ?? []).map(toLite);
+  const state = createTug({ lessonId, seed: newSeed(), pool, kind: "siege", settings: { target: read("settings").siegeTarget } });
+  write("activeSiege", { state, savedAtEpoch: Date.now(), fresh: true });
+  return state;
+}
+
 /** Halat çekme sorularını da kapsayan arama. */
 export function lookupAnyLite(id: string): QuestionLite | undefined {
   const q = getAnyQuestion(id);

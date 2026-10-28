@@ -1,7 +1,7 @@
 // Halat çekme oyunu testleri. Çalıştırma: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createTug, reduceTug, currentTugItem, snapshotTug, restoreTug, TUG_DEFAULTS, type TugState } from "../src/lib/tug.ts";
+import { createTug, reduceTug, currentTugItem, snapshotTug, restoreTug, TUG_DEFAULTS, SIEGE_TARGET, type TugState } from "../src/lib/tug.ts";
 import type { QuestionLite, Side } from "../src/lib/game.ts";
 import { TUG_POOLS, getAnyQuestion } from "../src/content/index.ts";
 import { LESSONS, LESSON_BY_ID } from "../src/content/lessons.ts";
@@ -145,4 +145,40 @@ test("kaydet/yükle: kalan bekleme korunur, oyun duraklatılmış döner", () =>
   assert.equal(r.teams.left.continueAt, 50 + 3000);
   const resumed = reduceTug(r, { type: "RESUME", now: 1050 }, ctx);
   assert.equal(resumed.teams.left.continueAt, 50 + 3000 + 1000);
+});
+
+test("kale yıkma: her doğru cevap rakip kaleye bir taş; 15 taşta rakip kale yıkılır, yanlış cevap taş atmaz", () => {
+  const pool = lite("u1-l6");
+  const byId = new Map(pool.map((q) => [q.id, q]));
+  const ctx = { pool, lookup: (id: string) => byId.get(id) };
+  let s = createTug({ lessonId: "u1-l6", seed: "kale", pool, kind: "siege" });
+  assert.equal(s.kind, "siege");
+  assert.equal(s.settings.target, SIEGE_TARGET);
+  assert.equal(SIEGE_TARGET, 15);
+  let now = 0;
+  // Sol takım 14 taş atar, sağ takım 14 taş atar: kimse kazanmaz (halattaki gibi birbirini götürmez).
+  for (let i = 0; i < 14; i++) {
+    ({ s, now } = step(s, "left", true, now, ctx));
+    ({ s, now } = step(s, "right", true, now, ctx));
+  }
+  ({ s, now } = step(s, "right", false, now, ctx));
+  assert.equal(s.winner, null);
+  assert.equal(s.rope, 0, "kale oyununda halat kullanılmaz");
+  assert.equal(s.teams.right.correct, 14);
+  ({ s, now } = step(s, "left", true, now, ctx));
+  assert.equal(s.winner, "left");
+  assert.equal(s.teams.left.correct, 15);
+  assert.equal(s.teams.right.phase, "finished");
+});
+
+test("kale yıkma hedefi öğretmen ayarından gelir; eski kayıtlar halat çekme sayılır", () => {
+  const pool = lite("u1-l1");
+  const s = createTug({ lessonId: "u1-l1", seed: "k", pool, kind: "siege", settings: { target: 5 } });
+  assert.equal(s.settings.target, 5);
+  assert.ok(s.id.startsWith("siege-"));
+  const old = { ...createTug({ lessonId: "u1-l1", seed: "k", pool }), kind: undefined };
+  assert.ok(createTug({ lessonId: "u1-l1", seed: "k", pool }).id.startsWith("tug-"));
+  const byId = new Map(pool.map((q) => [q.id, q]));
+  const { s: after } = step(old, "left", true, 0, { pool, lookup: (id: string) => byId.get(id) });
+  assert.equal(after.rope, -1);
 });

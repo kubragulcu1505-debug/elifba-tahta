@@ -3,11 +3,15 @@
 // - Sorular sınırsızdır: dersin soru havuzu bitince yeniden karıştırılır (önce her harf bir kez).
 // - Yanlış cevapta takım 5 saniye bekler; sonra soru kendiliğinden geçer. Doğruda da kendiliğinden geçer.
 // - Halatın ortasındaki bayrağı kendi çizgisine ilk çeken takım kazanır.
+// Kale yıkma oyunu da aynı makineyi kullanır (kind: "siege"): her doğru cevap rakip kaleye
+// mancınıkla bir taş atar; rakip kaleye `target` taş ilk isabet ettiren takım kazanır.
 import { roundOrder, SIDES, type QueueItem, type QuestionLite, type Side } from "./game.ts";
 import { hashSeed, mulberry32, shuffle } from "./rng.ts";
 
+export type TugKind = "tug" | "siege";
+
 export interface TugSettings {
-  /** Kazanmak için gereken net çekiş sayısı (bayrağın çizgiye uzaklığı). */
+  /** Kazanmak için gereken net çekiş sayısı (halat) ya da rakip kaleye isabet eden taş sayısı (kale). */
   target: number;
   /** Yanlış cevaptan sonra bekleme (ms). */
   wrongLockMs: number;
@@ -18,6 +22,7 @@ export interface TugSettings {
 }
 
 export const TUG_DEFAULTS: TugSettings = { target: 7, wrongLockMs: 5000, correctFeedbackMs: 900, inputGuardMs: 400 };
+export const SIEGE_TARGET = 15;
 
 export type TugPhase = "loading" | "question" | "feedback" | "finished";
 
@@ -37,6 +42,8 @@ export interface TugTeam {
 
 export interface TugState {
   id: string;
+  /** Oyun türü; eski kayıtlarda yoktur ve halat çekme sayılır. */
+  kind?: TugKind;
   lessonId: string;
   seed: string;
   /** Halatın konumu: eksi = sol takıma doğru, artı = sağ takıma doğru. */
@@ -73,8 +80,9 @@ export function makeDeck(pool: QuestionLite[], seed: string, side: Side, cycle: 
   return order.map((q) => ({ questionId: q.id, optionOrder: shuffle(q.optionIds, rand) }));
 }
 
-export function createTug(args: { lessonId: string; seed: string; pool: QuestionLite[]; settings?: Partial<TugSettings> }): TugState {
-  if (args.pool.length === 0) throw new Error("Halat çekme için soru havuzu boş");
+export function createTug(args: { lessonId: string; seed: string; pool: QuestionLite[]; settings?: Partial<TugSettings>; kind?: TugKind }): TugState {
+  if (args.pool.length === 0) throw new Error("Oyun için soru havuzu boş");
+  const kind = args.kind ?? "tug";
   const team = (side: Side): TugTeam => ({
     side,
     deck: makeDeck(args.pool, args.seed, side, 0),
@@ -88,11 +96,12 @@ export function createTug(args: { lessonId: string; seed: string; pool: Question
     wrong: 0,
   });
   return {
-    id: `tug-${args.lessonId}-${args.seed}`,
+    id: `${kind}-${args.lessonId}-${args.seed}`,
+    kind,
     lessonId: args.lessonId,
     seed: args.seed,
     rope: 0,
-    settings: { ...TUG_DEFAULTS, ...args.settings },
+    settings: { ...TUG_DEFAULTS, ...(kind === "siege" ? { target: SIEGE_TARGET } : {}), ...args.settings },
     paused: false,
     pausedAt: null,
     winner: null,
@@ -121,14 +130,22 @@ export function reduceTug(s: TugState, a: TugAction, ctx: TugContext): TugState 
       const q = ctx.lookup(a.questionId);
       if (!q) return s;
       const correct = a.optionId === q.correctOptionId;
-      const rope = correct ? s.rope + (a.side === "left" ? -1 : 1) : s.rope;
-      const winner: Side | null = rope <= -s.settings.target ? "left" : rope >= s.settings.target ? "right" : null;
+      const hits = t.correct + (correct ? 1 : 0);
+      let rope = s.rope;
+      let winner: Side | null = null;
+      if (s.kind === "siege") {
+        // Kale: halat yok; takımın isabet sayısı hedefe ulaşınca rakip kale yıkılır.
+        if (hits >= s.settings.target) winner = a.side;
+      } else {
+        rope = correct ? s.rope + (a.side === "left" ? -1 : 1) : s.rope;
+        winner = rope <= -s.settings.target ? "left" : rope >= s.settings.target ? "right" : null;
+      }
       const updated: TugTeam = {
         ...t,
         phase: winner ? "finished" : "feedback",
         lastAnswer: { questionId: q.id, optionId: a.optionId, correct },
         continueAt: a.now + (correct ? s.settings.correctFeedbackMs : s.settings.wrongLockMs),
-        correct: t.correct + (correct ? 1 : 0),
+        correct: hits,
         wrong: t.wrong + (correct ? 0 : 1),
       };
       let next = withTeam({ ...s, rope, winner }, a.side, updated);

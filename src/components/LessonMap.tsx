@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { startTug } from "@/lib/session";
+import { startSiege, startTug } from "@/lib/session";
 import { LESSON_ORDER } from "@/content/lessons";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID } from "@/content/lessons";
 import { usePersisted } from "@/lib/storage";
@@ -31,8 +31,8 @@ export function LessonMap() {
         </div>
       )}
       <section className="card flex flex-wrap items-center gap-4 border-warn p-5" aria-labelledby="halat-h">
-        <h2 id="halat-h" className="text-2xl font-extrabold">🪢 Halat çekme</h2>
-        <p className="min-w-60 flex-1 text-ink-soft">Sınırsız sorulu iki takımlı oyun. Doğru cevap halatı çeker. Her derste oynanabilir.</p>
+        <h2 id="halat-h" className="text-2xl font-extrabold">🪢 Halat çekme · 🏰 Kale yıkma</h2>
+        <p className="min-w-60 flex-1 text-ink-soft">Sınırsız sorulu iki takımlı oyunlar. Doğru cevap halatı çeker ya da rakip kaleye mancınıkla taş atar. Her derste oynanabilir.</p>
         <label className="flex items-center gap-2 text-lg">
           <span className="font-bold">Ders:</span>
           <select value={tugLesson} onChange={(e) => setTugLesson(e.target.value)} className="min-h-12 max-w-[60vw] rounded-xl border-2 border-line px-3 text-lg">
@@ -49,7 +49,17 @@ export function LessonMap() {
             router.push("/halat");
           }}
         >
-          Başlat
+          🪢 Halat çekme
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            startSiege(tugLesson);
+            router.push("/kale");
+          }}
+        >
+          🏰 Kale yıkma
         </button>
       </section>
       {UNITS.map((u) => (

@@ -16,6 +16,8 @@ export interface Settings {
   motion: "system" | "reduce" | "full";
   /** Halat çekmede kazanmak için gereken net çekiş sayısı. */
   tugTarget: number;
+  /** Kale yıkmada rakip kaleyi yıkmak için gereken isabet (doğru cevap) sayısı. */
+  siegeTarget: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -23,6 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   threshold: 80,
   motion: "system",
   tugTarget: 7,
+  siegeTarget: 15,
 };
 
 export interface GameRecord {
@@ -60,6 +63,8 @@ export interface Schema {
   approvals: QuestionApprovals;
   activeGame: ActiveGame | null;
   activeTug: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
+  /** Kale yıkma oyunu (halat çekmeyle aynı durum makinesi, ayrı kayıt). */
+  activeSiege: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Ders sayfasında açık bırakılan sekme vb. küçük kolaylıklar */
   ui: { lastLessonId?: string };
 }
@@ -71,6 +76,7 @@ const DEFAULTS: Schema = {
   approvals: {},
   activeGame: null,
   activeTug: null,
+  activeSiege: null,
   ui: {},
 };
 

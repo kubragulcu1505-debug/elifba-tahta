@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 40/40 geçti |
+| Otomatik testler (`npm test`) | 42/42 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,15 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Kale yıkma oyunu (28 Ekim 2026)
+
+- Her doğru cevap rakip kaleye bir taş sayılıyor; iki takım 14'er taş atınca kimse kazanmıyor, sol takımın 15. taşında sol takım kazanıyor ve diğer takımın soruları kapanıyor; yanlış cevap taş atmıyor: geçti.
+- Hedef öğretmen ayarından geliyor; eski halat çekme kayıtları halat çekme olarak çalışmaya devam ediyor: geçti.
+- Tarayıcıda (1366×768): ana sayfadaki “Kale yıkma” düğmesi /kale oyununu açtı; sahne ve soru alanı kaydırmasız sığdı (en alt düğme 704 px).
+- Taşın yolu animasyonlar durdurularak ölçüldü: mancınıktan çıkıp sahnenin üst kısmına yükseliyor, sonra rakip kaleye iniyor.
+- Hedef geçici olarak 5 yapılarak öğretmen panelinden başlatıldı: sol kale her isabette parçalandı, dayanıklılık çubuğu azaldı; 5. taşta kale yıkılıp moloz yığınına döndü ve kupa, konfetili “Hilal Takımı kazandı! Rakip takımın kalesi yıkıldı!” ekranı açıldı. Yanlış cevapta 5 saniye bekleme gösterildi.
+- Not: Tarayıcı paneli arka plandayken sayfa kare çizmediği için ders sayfası “Ders yükleniyor…” aşamasında kaldı; bu yüzden ders sayfasındaki “Kale yıkmayı başlat” düğmesine tarayıcıda tıklanamadı (bölüm metni doğrulandı).
 
 ## Türkçe okunuş şıkları, kutlama ve çukur (20 Ekim 2026)
 

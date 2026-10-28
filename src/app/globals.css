@@ -454,3 +454,157 @@ html[data-motion="reduce"] *::after {
 html[data-motion="reduce"] .confetti {
   display: none;
 }
+
+/* ── Kale yıkma ── */
+.siege-side {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+/* Sağ takımın kalesi ve mancınığı aynalanır; taş da sola uçar. */
+.siege-right {
+  transform: scaleX(-1);
+}
+.siege-castle {
+  position: absolute;
+  left: 2%;
+  bottom: 5%;
+  height: 62%;
+  aspect-ratio: 120 / 100;
+  transform-origin: 50% 100%;
+}
+.siege-castle svg,
+.siege-catapult svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.siege-catapult {
+  position: absolute;
+  left: 15%;
+  bottom: 4%;
+  height: 42%;
+  aspect-ratio: 80 / 60;
+}
+.siege-arm {
+  transform-box: view-box;
+  transform-origin: 40px 20px;
+}
+.siege-fire .siege-arm {
+  animation: siege-arm 900ms ease-out;
+}
+@keyframes siege-arm {
+  0% { transform: rotate(0deg); }
+  22% { transform: rotate(118deg); }
+  60% { transform: rotate(118deg); }
+  100% { transform: rotate(0deg); }
+}
+.siege-stone {
+  position: absolute;
+  left: 20%;
+  top: 45%;
+  height: 11%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #9ca3af, #4b5563 70%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  animation:
+    siege-stone-x 780ms linear 180ms both,
+    siege-stone-y 780ms 180ms both,
+    siege-stone-show 780ms 180ms both;
+}
+@keyframes siege-stone-x {
+  from { left: 20%; }
+  to { left: 93%; }
+}
+@keyframes siege-stone-y {
+  0% { top: 45%; animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1); }
+  50% { top: -2%; animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  100% { top: 52%; }
+}
+@keyframes siege-stone-show {
+  0%, 96% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.siege-hit {
+  animation: siege-shake 420ms ease-out 900ms;
+}
+@keyframes siege-shake {
+  0%, 100% { transform: none; }
+  20% { transform: translateX(-4%) rotate(-2deg); }
+  45% { transform: translateX(3%) rotate(1.5deg); }
+  70% { transform: translateX(-2%) rotate(-1deg); }
+}
+.siege-puff {
+  position: absolute;
+  left: 3%;
+  top: 30%;
+  height: 40%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120, 113, 108, 0.85) 0%, rgba(168, 162, 158, 0.5) 45%, transparent 70%);
+  opacity: 0;
+  animation: siege-puff 700ms ease-out 900ms both;
+}
+@keyframes siege-puff {
+  0% { transform: scale(0.3); opacity: 0; }
+  30% { opacity: 0.95; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+.siege-collapse {
+  animation: siege-collapse 1300ms ease-in 900ms forwards;
+}
+@keyframes siege-collapse {
+  0% { transform: none; opacity: 1; }
+  15% { transform: translateX(-3%) rotate(-3deg); opacity: 1; }
+  30% { transform: translateX(3%) rotate(3deg); opacity: 1; }
+  100% { transform: translateY(45%) scaleY(0.3) rotate(5deg); opacity: 0; }
+}
+.siege-rubble {
+  position: absolute;
+  left: 0.5%;
+  bottom: 4%;
+  height: 26%;
+  aspect-ratio: 3.6;
+  border-radius: 50% 50% 10% 10% / 80% 80% 10% 10%;
+  background:
+    radial-gradient(circle at 18% 70%, #94a3b8 0 12%, transparent 13%),
+    radial-gradient(circle at 40% 45%, #cbd5e1 0 14%, transparent 15%),
+    radial-gradient(circle at 62% 65%, #64748b 0 13%, transparent 14%),
+    radial-gradient(circle at 82% 55%, #94a3b8 0 11%, transparent 12%),
+    linear-gradient(#a8a29e, #78716c);
+  opacity: 0;
+  animation: siege-rubble 700ms ease-out 1700ms forwards;
+}
+@keyframes siege-rubble {
+  from { opacity: 0; transform: translateY(20%); }
+  to { opacity: 1; transform: none; }
+}
+.siege-flag {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+.siege-win .siege-flag {
+  animation: siege-flag 600ms ease-in-out 1100ms 5;
+}
+@keyframes siege-flag {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.6, 1.3); }
+}
+.siege-hp {
+  display: inline-block;
+  width: clamp(50px, 7vw, 110px);
+  height: 14px;
+  border-radius: 7px;
+  background: #fecaca;
+  border: 2px solid #7f1d1d;
+  overflow: hidden;
+}
+.siege-hp > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(#4ade80, #16a34a);
+  transition: width 400ms ease-out 900ms;
+}

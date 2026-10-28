@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { questionsForLesson, GAME_LESSONS } from "@/content/index";
 import { usePersisted, update, write, exportAll, resetAll, downloadJson, storageAvailable, useHydrated, DEFAULT_SETTINGS, type Settings } from "@/lib/storage";
-import { startCompetition, startReview, startTug } from "@/lib/session";
+import { startCompetition, startReview, startSiege, startTug } from "@/lib/session";
 import { formatMs } from "@/lib/game";
 import { Ar, RichText } from "@/components/Arabic";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -97,6 +97,9 @@ function TeacherPanelInner() {
                       <button type="button" className="btn btn-ghost !min-h-10 !py-1 text-sm" onClick={() => { startTug(l.id); router.push("/halat"); }}>
                         Halat çekme
                       </button>
+                      <button type="button" className="btn btn-ghost !min-h-10 !py-1 text-sm" onClick={() => { startSiege(l.id); router.push("/kale"); }}>
+                        Kale yıkma
+                      </button>
                       {l.gameLessonId ? (
                         <span className="text-sm text-ink-soft">Oyun: {LESSON_BY_ID.get(l.gameLessonId)?.title}</span>
                       ) : (
@@ -153,6 +156,20 @@ function TeacherPanelInner() {
                 className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
               />
               <span className="text-base text-ink-soft">Varsayılan 7. Bir takım bu kadar çekiş öne geçince rakip takım ortadaki çukura düşer. Yeni başlatılan oyunlarda geçerlidir.</span>
+            </label>
+            <label className="flex flex-col gap-2 text-lg">
+              <span className="font-bold">Kale yıkma: kaleyi yıkmak için gereken taş</span>
+              <input
+                type="number"
+                min={5}
+                max={30}
+                step={1}
+                value={settings.siegeTarget}
+                onChange={(e) => setSettings({ siegeTarget: Math.min(30, Math.max(5, Number(e.target.value) || 15)) })}
+                className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
+                data-testid="siege-target"
+              />
+              <span className="text-base text-ink-soft">Varsayılan 15. Her doğru cevap rakip kaleye bir taş atar; bu kadar taş isabet eden kale yıkılır. Yeni başlatılan oyunlarda geçerlidir.</span>
             </label>
             <label className="flex flex-col gap-2 text-lg">
               <span className="font-bold">Hareket ve animasyon</span>

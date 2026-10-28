@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SIDES, type Side } from "@/lib/game";
-import { reduceTug, snapshotTug, restoreTug, currentTugItem, type TugAction, type TugState } from "@/lib/tug";
-import { lookupAnyLite, startTug, toLite } from "@/lib/session";
+import { reduceTug, snapshotTug, restoreTug, currentTugItem, type TugAction, type TugKind, type TugState } from "@/lib/tug";
+import { lookupAnyLite, startSiege, startTug, toLite } from "@/lib/session";
 import { read, write, usePersisted, useHydrated } from "@/lib/storage";
 import { LESSON_BY_ID } from "@/content/lessons";
 import { TUG_POOLS, getAnyQuestion } from "@/content/index";
@@ -12,13 +12,46 @@ import { TapButton } from "@/components/TapButton";
 import { TeamIcon } from "@/components/TeamBadge";
 import { Ar, RichText } from "@/components/Arabic";
 import { RopeStage } from "./RopeStage";
+import { SiegeStage } from "./SiegeStage";
 import { Confetti, Trophy } from "@/components/Celebration";
 
 const isLongArabic = (s: string) => [...s].filter((c) => c !== " ").length > 7 || s.includes(" ");
 const isLongText = (s: string) => s.length > 22;
 
-function loadInitial(): TugState | null {
-  const at = read("activeTug");
+/** Halat çekme ve kale yıkma aynı ekranı kullanır; değişen yazılar ve sahne buradadır. */
+const KINDS = {
+  tug: {
+    key: "activeTug",
+    start: startTug,
+    chip: "Halat çekme · sınırsız soru",
+    none: "Aktif halat çekme oyunu yok",
+    noneHint: "Bir ders sayfasından “Halat çekme” oyununu başlatın.",
+    winLine: "Rakip takım ortadaki çukura düştü.",
+    praise: "İki takım da çok güzel çekti. Tebrikler!",
+    rule: (t: number) => `Kazanmak için rakibi ${t} çekiş farkla ortadaki çukura çekmek gerekir.`,
+    restartQ: "Halat çekme yeniden başlasın mı?",
+    restartHint: "Halat ortaya döner, sorular yeniden karışır.",
+    correctMsg: "Doğru! Halatı çektiniz",
+    winDelayMs: 1600,
+  },
+  siege: {
+    key: "activeSiege",
+    start: startSiege,
+    chip: "Kale yıkma · sınırsız soru",
+    none: "Aktif kale yıkma oyunu yok",
+    noneHint: "Bir ders sayfasından “Kale yıkma” oyununu başlatın.",
+    winLine: "Rakip takımın kalesi yıkıldı!",
+    praise: "İki takım da çok güzel nişan aldı. Tebrikler!",
+    rule: (t: number) => `Doğru cevap veren takımın mancınığı rakip kaleye taş atar. Rakip kaleye ${t} taş ilk isabet ettiren takım kazanır.`,
+    restartQ: "Kale yıkma yeniden başlasın mı?",
+    restartHint: "Kaleler onarılır, sorular yeniden karışır.",
+    correctMsg: "Doğru! Mancınık taşı fırlattı",
+    winDelayMs: 2600,
+  },
+} as const;
+
+function loadInitial(kind: TugKind): TugState | null {
+  const at = read(KINDS[kind].key);
   if (!at) return null;
   return at.fresh ? at.state : restoreTug(at.state, performance.now());
 }
@@ -39,28 +72,29 @@ function useNow(active: boolean): number {
   return now;
 }
 
-export function TugScreen() {
+export function TugScreen({ kind = "tug" }: { kind?: TugKind }) {
   const hydrated = useHydrated();
-  const active = usePersisted("activeTug");
+  const active = usePersisted(KINDS[kind].key);
   if (!hydrated) return <div className="p-10 text-2xl">Hazırlanıyor…</div>;
   // Yeni oyun başlatılınca bileşen sıfırdan kurulsun (Next.js sayfa durumunu saklar).
-  return <TugInner key={active?.state.id ?? "none"} />;
+  return <TugInner key={active?.state.id ?? "none"} kind={kind} />;
 }
 
-function TugInner() {
+function TugInner({ kind }: { kind: TugKind }) {
   const router = useRouter();
+  const cfg = KINDS[kind];
   const settings = usePersisted("settings");
-  const [state, setState] = useState<TugState | null>(loadInitial);
+  const [state, setState] = useState<TugState | null>(() => loadInitial(kind));
   const [isFs, setIsFs] = useState(false);
   const [confirmRestart, setConfirmRestart] = useState(false);
-  // Kazanma kartı, kaybedenlerin çukura düşme animasyonundan sonra açılır.
+  // Kazanma kartı, kaybedenlerin çukura düşmesinden / kalenin yıkılmasından sonra açılır.
   const [showWin, setShowWin] = useState(false);
   const winner = state?.winner ?? null;
   useEffect(() => {
     if (!winner) return;
-    const t = setTimeout(() => setShowWin(true), 1600);
+    const t = setTimeout(() => setShowWin(true), cfg.winDelayMs);
     return () => clearTimeout(t);
-  }, [winner]);
+  }, [winner, cfg.winDelayMs]);
 
   const lessonId = state?.lessonId;
   const pool = useMemo(() => (lessonId ? (TUG_POOLS[lessonId] ?? []).map(toLite) : []), [lessonId]);
@@ -70,10 +104,10 @@ function TugInner() {
   // Kaydet (başka bir oyun başlatıldıysa üzerine yazma).
   useEffect(() => {
     if (!state) return;
-    const cur = read("activeTug");
+    const cur = read(cfg.key);
     if (!cur || cur.state.id !== state.id) return;
-    write("activeTug", { state: snapshotTug(state, performance.now()), savedAtEpoch: Date.now(), fresh: false });
-  }, [state]);
+    write(cfg.key, { state: snapshotTug(state, performance.now()), savedAtEpoch: Date.now(), fresh: false });
+  }, [state, cfg.key]);
 
   // Bekleme süresi dolunca soru kendiliğinden geçer (doğruda kısa, yanlışta 5 saniye).
   useEffect(() => {
@@ -112,8 +146,8 @@ function TugInner() {
   if (!state) {
     return (
       <main className="mx-auto max-w-3xl p-10 text-center">
-        <h1 className="text-3xl font-extrabold">Aktif halat çekme oyunu yok</h1>
-        <p className="mt-4 text-xl text-ink-soft">Bir ders sayfasından “Halat çekme” oyununu başlatın.</p>
+        <h1 className="text-3xl font-extrabold">{cfg.none}</h1>
+        <p className="mt-4 text-xl text-ink-soft">{cfg.noneHint}</p>
         <Link href="/" className="btn btn-primary mt-8 inline-flex items-center">Ders haritasına git</Link>
       </main>
     );
@@ -123,7 +157,7 @@ function TugInner() {
   const names = settings.teamNames;
   const restart = () => {
     setConfirmRestart(false);
-    startTug(state.lessonId);
+    cfg.start(state.lessonId);
   };
   const toggleFs = async () => {
     try {
@@ -139,7 +173,7 @@ function TugInner() {
       <header className="flex items-center gap-3 border-b-2 border-line bg-surface px-4 py-2">
         <div className="min-w-0 flex-1 truncate text-lg font-extrabold">
           {lesson?.title}
-          <span className="ml-3 chip bg-warn-soft text-warn">Halat çekme · sınırsız soru</span>
+          <span className="ml-3 chip bg-warn-soft text-warn">{cfg.chip}</span>
         </div>
         <TapButton className="btn btn-primary" onTap={(now) => dispatch(state.paused ? { type: "RESUME", now } : { type: "PAUSE", now })}>
           {state.paused ? "▶ Devam" : "⏸ Duraklat"}
@@ -157,13 +191,17 @@ function TugInner() {
         </TapButton>
       </header>
 
-      <RopeStage rope={state.rope} target={state.settings.target} names={names} winner={state.winner} pulls={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
+      {kind === "siege" ? (
+        <SiegeStage target={state.settings.target} names={names} winner={state.winner} shots={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
+      ) : (
+        <RopeStage rope={state.rope} target={state.settings.target} names={names} winner={state.winner} pulls={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
+      )}
 
       <div className="relative min-h-0">
         <div className="halves h-full">
-          <TugPanel side="left" state={state} name={names.left} dispatch={dispatch} />
+          <TugPanel side="left" state={state} name={names.left} dispatch={dispatch} correctMsg={cfg.correctMsg} />
           <div className="divider" aria-hidden="true" />
-          <TugPanel side="right" state={state} name={names.right} dispatch={dispatch} />
+          <TugPanel side="right" state={state} name={names.right} dispatch={dispatch} correctMsg={cfg.correctMsg} />
         </div>
 
         {state.paused && !state.winner && (
@@ -183,8 +221,8 @@ function TugInner() {
               <div className={`text-[clamp(28px,5vh,56px)] font-extrabold ${state.winner === "left" ? "text-left" : "text-right"}`}>
                 <TeamIcon side={state.winner} size={48} /> <span className="text-ink">{names[state.winner]} kazandı!</span>
               </div>
-              <p className="text-[clamp(16px,2.6vh,28px)]">Rakip takım ortadaki çukura düştü.</p>
-              <p className="text-[clamp(16px,2.6vh,28px)] font-semibold">İki takım da çok güzel çekti. Tebrikler!</p>
+              <p className="text-[clamp(16px,2.6vh,28px)]">{cfg.winLine}</p>
+              <p className="text-[clamp(16px,2.6vh,28px)] font-semibold">{cfg.praise}</p>
               <div className="grid w-full grid-cols-2 gap-4 text-[clamp(16px,2.4vh,26px)]">
                 {(["left", "right"] as Side[]).map((side) => (
                   <div key={side} className={`rounded-2xl border-4 p-3 ${side === "left" ? "border-left bg-left-soft" : "border-right bg-right-soft"}`}>
@@ -194,7 +232,7 @@ function TugInner() {
                 ))}
               </div>
               <p className="text-base text-ink-soft">
-                Kazanmak için rakibi {state.settings.target} çekiş farkla ortadaki çukura çekmek gerekir. Takım sonucu tek tek öğrencilerin düzeyini göstermez.
+                {cfg.rule(state.settings.target)} Takım sonucu tek tek öğrencilerin düzeyini göstermez.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <TapButton className="big-btn btn-primary" onTap={restart}>↻ Yeniden oyna</TapButton>
@@ -207,8 +245,8 @@ function TugInner() {
         {confirmRestart && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-ink/40">
             <div className="card flex flex-col items-center gap-6 p-10 text-center">
-              <div className="text-3xl font-extrabold">Halat çekme yeniden başlasın mı?</div>
-              <p className="text-xl text-ink-soft">Halat ortaya döner, sorular yeniden karışır.</p>
+              <div className="text-3xl font-extrabold">{cfg.restartQ}</div>
+              <p className="text-xl text-ink-soft">{cfg.restartHint}</p>
               <div className="flex gap-4">
                 <TapButton className="big-btn btn-primary" onTap={restart}>Evet, yeniden başlat</TapButton>
                 <TapButton className="big-btn btn-ghost" onTap={() => setConfirmRestart(false)}>Vazgeç</TapButton>
@@ -221,7 +259,7 @@ function TugInner() {
   );
 }
 
-function TugPanel({ side, state, name, dispatch }: { side: Side; state: TugState; name: string; dispatch: (a: TugAction) => void }) {
+function TugPanel({ side, state, name, dispatch, correctMsg }: { side: Side; state: TugState; name: string; dispatch: (a: TugAction) => void; correctMsg: string }) {
   const team = state.teams[side];
   const item = currentTugItem(team);
   const q = item ? getAnyQuestion(item.questionId) : undefined;
@@ -307,7 +345,7 @@ function TugPanel({ side, state, name, dispatch }: { side: Side; state: TugState
         <footer className="flex min-h-[clamp(40px,6vh,70px)] items-center justify-center">
           {fb?.correct && (
             <div className="anim-pop rounded-full bg-ok px-8 py-1 text-[clamp(18px,3vh,36px)] font-extrabold text-white" role="status">
-              Doğru! Halatı çektiniz
+              {correctMsg}
             </div>
           )}
           {!fb && <span className="text-[clamp(13px,2vh,22px)] font-semibold text-ink-soft">Cevabını seç.</span>}

@@ -11,7 +11,8 @@ Akıllı tahtada iki takımın aynı anda oynadığı, çocuklara aşama aşama 
 - **Soru biçimi:** Oyunda ekranda Arapça harf, hece veya kelime görünür; şıklar Türkçedir. Hareke, cezm ve şedde ünitelerinde şıklar Türkçe okunuştur (ör. فَتَحَ → “feteha”); okunuş geleneksel elifba hecelemesine göre yaklaşık yazılır. Örneğin ا gösterilir, şıklar “Elif, Cim, Ha, Dal” olur. Sıra tur turdur: önce dersteki bütün harfler birer kez karışık sorulur, harfler bitince tekrar turu başlar. Tekrarlarda şıklar farklıdır; bir harf en fazla 5 kez sorulur ve arka arkaya gelmez. Harfi bul, benzer harfi bul gibi diğer etkinlikler ders sayfasındaki puansız alıştırmadadır.
 - **Takım oyunu:** Ekran dikey çizgiyle ikiye ayrılır. Sol takım ve sağ takım aynı 30 soruyu kendi sıralarıyla, birbirinden bağımsız çözer. Öğrenciler sırayla tahtaya gelir. Hesap gerekmez.
 - **Halat çekme:** İkinci oyun türü. Üstte halat çekme animasyonu vardır; ekran yine iki takıma bölünür. Doğru cevap veren takım halatı bir adım kendi tarafına çeker. Sorular sınırsızdır ve kendiliğinden geçer; önce dersin bütün harfleri/heceleri karışık gelir, bitince yeniden karışır. Yanlış cevapta o takım 5 saniye bekler ve doğru cevap gösterilir. Ortada bir çukur vardır; rakibini çukura ilk düşüren takım kazanır (varsayılan 7 çekiş, öğretmen panelinden değişir). Kaybeden takımın çocukları çukura düşer, kazananlar zıplar. Her derste oynanabilir: ders sayfasından, ana sayfadan ya da öğretmen panelinden başlatılır. Harfler 1–5 derslerinde yalnızca o dersin harfleri sorulur.
-- **Kutlama:** Yarışma ve halat çekme sonunda konfeti ve kupa animasyonu gösterilir (hareket azaltma tercihinde konfeti gösterilmez).
+- **Kale yıkma:** Üçüncü oyun türü. Üstte iki takımın kalesi ve mancınığı vardır. Doğru cevap veren takımın mancınığı rakip kaleye bir taş atar; kale her taşta biraz daha parçalanır (mazgallar düşer, duvarda delikler ve çatlaklar açılır) ve takım etiketindeki dayanıklılık çubuğu azalır. Rakip kaleye 15 taş ilk isabet ettiren takım kazanır, rakip kale yıkılıp moloz yığınına döner (sayı öğretmen panelinden 5–30 arasında değişir). Sorular, 5 saniyelik yanlış cevap beklemesi ve başlatma yerleri halat çekmeyle aynıdır.
+- **Kutlama:** Yarışma, halat çekme ve kale yıkma sonunda konfeti ve kupa animasyonu gösterilir (hareket azaltma tercihinde konfeti gösterilmez).
 - **Puanlama:** Doğru 10, yanlış 0. Her soruda ilk dokunuş geçerlidir. Yanlıştan sonra doğru cevap ve kısa açıklama gösterilir. Kazanan önce doğru sayısına, eşitlikte toplam süreye göre belirlenir. Duraklama, yükleme ve geri bildirim süreleri sayılmaz.
 - **Öğretmen paneli:** Ders seçme, takım adları, başarı eşiği (varsayılan %80, ürün ayarı), sonuçlar ve yanlış yapılan kazanımlar, yanlışlarla tekrar, soru bankasını doğru cevaplarıyla inceleme, ses kayıtları, öğrenci değerlendirmesi ve “Kur'an okumaya hazır” onayı, JSON dışa aktarma ve sıfırlama.
 - **Ses:** Uygulama hiçbir ses dosyasıyla gelmez ve tarayıcının yapay sesini kullanmaz. Öğretmen kendi kaydını yükleyip dinleyerek onaylayabilir. Onaylı kayıtlar yalnızca ders sayfasındaki “Dinle ve seç” alıştırmasında, tek ses kanalıyla çalar.
@@ -47,7 +48,7 @@ npm start
 npm test
 ```
 
-40 test: içerik doğrulama (oyunda Arapça uyaran ve Türkçe şıklar, harflerin dengeli tekrarı dahil) (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
+42 test: içerik doğrulama (oyunda Arapça uyaran ve Türkçe şıklar, harflerin dengeli tekrarı dahil) (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
 
 Diğer denetimler:
 
@@ -75,7 +76,8 @@ Vercel adımları: [docs/YAYINLAMA.md](docs/YAYINLAMA.md).
 |---|---|
 | `src/content/` | Öğretim içeriği (arayüzden bağımsız): harfler, kelimeler, dersler, soru üreticileri, Tanzil alıntısı |
 | `src/lib/game.ts` | İki takımlı oyun durum makinesi (saf fonksiyonlar, test edilir) |
-| `src/lib/tug.ts` | Halat çekme oyunu durum makinesi (sınırsız soru, 5 sn bekleme, kazanma) |
+| `src/lib/tug.ts` | Halat çekme ve kale yıkma oyunlarının ortak durum makinesi (sınırsız soru, 5 sn bekleme, kazanma) |
+| `src/components/tug/SiegeStage.tsx` | Kale yıkma sahnesi: kaleler, mancınıklar, taş atışı, hasar ve yıkılma |
 | `src/lib/storage.ts` | localStorage kalıcı depo (ayarlar, sonuçlar, değerlendirmeler, aktif oyun) |
 | `src/lib/audioStore.ts` | Öğretmen ses kayıtları (IndexedDB) ve tek ses kanalı |
 | `src/components/` | Arayüz: oyun ekranı, ders sayfası, öğretmen paneli, cihaz testi |

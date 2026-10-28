@@ -5,7 +5,7 @@ import { useState } from "react";
 import { LESSON_BY_ID, UNIT_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { PRACTICE_POOLS, questionsForLesson, gameLessonOf, AUDIO_CATALOG } from "@/content/index";
 import { usePersisted } from "@/lib/storage";
-import { startCompetition, startReview, startTug } from "@/lib/session";
+import { startCompetition, startReview, startSiege, startTug } from "@/lib/session";
 import { Ar, RichText } from "@/components/Arabic";
 import { TapButton } from "@/components/TapButton";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -68,6 +68,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
     ["alistirma", "Alıştırma"],
     ["oyun", "Takım oyunu"],
     ["halat", "Halat çekme"],
+    ["kale", "Kale yıkma"],
     ["tekrar", "Tekrar"],
     ...(audioItems.length ? [["ses", "Dinle ve seç"]] : []),
     ...(lessonId === "u12-l1" ? [["okuma", "Yüzüne okuma"]] : []),
@@ -200,6 +201,23 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             }}
           >
             🪢 Halat çekmeyi başlat
+          </TapButton>
+        </Section>
+
+        <Section id="kale" title="Kale yıkma oyunu">
+          <ul className="list-disc pl-6 text-lg">
+            <li>Üstte iki takımın kalesi ve mancınığı vardır. Doğru cevap veren takımın mancınığı rakip kaleye bir taş atar.</li>
+            <li>Kale her taşta biraz daha parçalanır. Rakip kaleye {settings.siegeTarget} taş ilk isabet ettiren takım kazanır ve rakip kale yıkılır.</li>
+            <li>Sorular sınırsızdır ve kendiliğinden geçer. Yanlış cevapta o takım 5 saniye bekler; doğru cevap ekranda gösterilir.</li>
+          </ul>
+          <TapButton
+            className="big-btn btn-primary mt-5"
+            onTap={() => {
+              startSiege(lessonId);
+              router.push("/kale");
+            }}
+          >
+            🏰 Kale yıkmayı başlat
           </TapButton>
         </Section>
 
