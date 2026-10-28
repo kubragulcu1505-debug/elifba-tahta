@@ -1,6 +1,6 @@
 "use client";
-import type { Side } from "@/lib/game";
-import { TeamIcon } from "@/components/TeamBadge";
+import type { DuelPlayer, Side } from "@/lib/game";
+import { SideIcon } from "@/components/PlayerAvatar";
 
 // Kalenin kırılabilen parçaları, düşme sırasıyla: önce mazgallar (m…), arada duvarda delikler (h…).
 const DAMAGE_ORDER = ["m1", "h1", "m6", "m9", "h2", "m3", "m11", "m7", "h3", "m4", "m2", "m10", "h4", "m5", "m8"];
@@ -77,9 +77,11 @@ export function SiegeStage({
   names,
   shots,
   winner,
+  players,
 }: {
   target: number;
   names: Record<Side, string>;
+  players?: Record<Side, DuelPlayer>;
   /** Takımın attığı (isabet eden) taş sayısı = doğru cevap sayısı. */
   shots: Record<Side, number>;
   winner: Side | null;
@@ -101,7 +103,7 @@ export function SiegeStage({
       {(["left", "right"] as Side[]).map((side) => (
         <div key={side} className="tug-label" style={side === "left" ? { left: 8 } : { right: 8, flexDirection: "row-reverse" }}>
           <span className={side === "left" ? "text-left" : "text-right"}>
-            <TeamIcon side={side} size={24} />
+            <SideIcon side={side} size={24} player={players?.[side]} />
           </span>
           <span>{names[side]}</span>
           <span className="siege-hp" title="Kale dayanıklılığı" data-testid={`siege-hp-${side}`}>

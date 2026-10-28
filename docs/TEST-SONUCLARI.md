@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 42/42 geçti |
+| Otomatik testler (`npm test`) | 46/46 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,20 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Bireysel düello ve genel tablo (28 Ekim 2026)
+
+- Maç kaydı: her doğru 10 puan; kazanan, kaybeden ve beraberlik doğru işaretleniyor: geçti.
+- Genel tablo: puanlar toplanıyor, Harfler oyunu ve Kale yıkma puanları ayrılıyor, sıralama puan sonra galibiyet; puanı ve galibiyeti eşit olanlar aynı sırayı paylaşıyor; silinen öğrenci tabloda görünmüyor: geçti.
+- Öğrenciler Türkçe alfabeye göre (Can, Çağla, Zeynep) sıralanıyor: geçti.
+- Oyun durumları düellodaki iki öğrenciyi taşıyor, takım oyununda taşımıyor: geçti.
+- Tarayıcıda (1366×768): öğretmen panelinden 6-A sınıfı ve toplu listeyle 8 öğrenci eklendi; 6 öğrenciye dosya seçme yoluyla deneme resmi (tarayıcıda çizilmiş renkli yüz, gerçek kişi değil) yüklendi. Resimler 320×320 JPEG'e küçültüldü (5–6 KB), fotoğrafsız öğrencilerde baş harfler göründü.
+- Seçim ekranı: kartlar ve fotoğraflar göründü; 1. ve 2. oyuncu seçilince büyük portrelere geçti, seçili karta yeniden dokununca seçim kalktı; “BAŞLA” ile VS ekranı açıldı ve ardından oyun başladı.
+- Harfler düellosu 30 soru sonuna kadar oynatıldı: panellerde öğrenci adları ve fotoğrafları, başlıkta “Bireysel düello · 30 soru” göründü; sonuç ekranında kazanan, konfeti ve “+300 / +280 puan genel tabloya eklendi” göründü; kayıt bir kez yazıldı.
+- Kale yıkma düellosu (hedef geçici olarak 5): kazanan ekranı ve “+50 / +30 puan” göründü, kayıt yazıldı.
+- Genel tablo iki maçı doğru topladı (300, 280, 50, 30; 0 puanlılar aynı sırada).
+- Denemeden sonra tarayıcıdaki deneme verileri (öğrenciler, puanlar, resimler) silindi.
+- Denenmedi: “Sınıf yedeğini indir” ve “Yedekten yükle” tarayıcıda çalıştırılmadı (dosya indirme/yükleme); gerçek fotoğrafla ve gerçek akıllı tahtada dokunmatik deneme yapılmadı.
 
 ## Kale yıkma oyunu (28 Ekim 2026)
 

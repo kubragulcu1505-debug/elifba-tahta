@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { currentItem, liveTotalMs, formatMs, type GameAction, type GameState, type Side } from "@/lib/game";
 import { getQuestion } from "@/content/index";
 import { TapButton } from "@/components/TapButton";
-import { TeamIcon } from "@/components/TeamBadge";
+import { SideIcon } from "@/components/PlayerAvatar";
 import { Ar, RichText } from "@/components/Arabic";
 
 /** Etkinken ~200 ms'de bir güncellenen monoton saat (render sırasında performance.now çağrılmaz). */
@@ -68,7 +68,7 @@ export function TeamPanel({
     <section className="team-panel" data-side={side} aria-label={`${name} alanı`} data-testid={`team-${side}`}>
       <header className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <span className={`inline-flex items-center gap-2 text-[clamp(18px,3vh,34px)] font-extrabold ${sideColor}`}>
-          <TeamIcon side={side} size={34} />
+          <SideIcon side={side} size={34} player={game.players?.[side]} />
           <span className="text-ink">{name}</span>
         </span>
         <span className="ml-auto flex flex-wrap items-center gap-2 text-[clamp(14px,2.2vh,24px)] font-bold">

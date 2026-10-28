@@ -12,6 +12,9 @@ Akıllı tahtada iki takımın aynı anda oynadığı, çocuklara aşama aşama 
 - **Takım oyunu:** Ekran dikey çizgiyle ikiye ayrılır. Sol takım ve sağ takım aynı 30 soruyu kendi sıralarıyla, birbirinden bağımsız çözer. Öğrenciler sırayla tahtaya gelir. Hesap gerekmez.
 - **Halat çekme:** İkinci oyun türü. Üstte halat çekme animasyonu vardır; ekran yine iki takıma bölünür. Doğru cevap veren takım halatı bir adım kendi tarafına çeker. Sorular sınırsızdır ve kendiliğinden geçer; önce dersin bütün harfleri/heceleri karışık gelir, bitince yeniden karışır. Yanlış cevapta o takım 5 saniye bekler ve doğru cevap gösterilir. Ortada bir çukur vardır; rakibini çukura ilk düşüren takım kazanır (varsayılan 7 çekiş, öğretmen panelinden değişir). Kaybeden takımın çocukları çukura düşer, kazananlar zıplar. Her derste oynanabilir: ders sayfasından, ana sayfadan ya da öğretmen panelinden başlatılır. Harfler 1–5 derslerinde yalnızca o dersin harfleri sorulur.
 - **Kale yıkma:** Üçüncü oyun türü. Üstte iki takımın kalesi ve mancınığı vardır. Doğru cevap veren takımın mancınığı rakip kaleye bir taş atar; kale her taşta biraz daha parçalanır (mazgallar düşer, duvarda delikler ve çatlaklar açılır) ve takım etiketindeki dayanıklılık çubuğu azalır. Rakip kaleye 15 taş ilk isabet ettiren takım kazanır, rakip kale yıkılıp moloz yığınına döner (sayı öğretmen panelinden 5–30 arasında değişir). Sorular, 5 saniyelik yanlış cevap beklemesi ve başlatma yerleri halat çekmeyle aynıdır.
+- **Bireysel düello:** Takım yerine iki öğrenci bire bir yarışır. Öğretmen panelindeki “Sınıflar ve öğrenciler” bölümünden sınıf (ör. 6-A) ve öğrenciler eklenir; her öğrenciye isteğe bağlı fotoğraf yüklenir (kare kırpılıp 320×320 boyutuna küçültülür). `/duello` sayfası dövüş oyunu tarzı bir seçim ekranıdır: 1. oyuncu, sonra 2. oyuncu kendi fotoğrafına dokunur, “VS” ekranından sonra oyun başlar. İki oyun düello olarak oynanır: **Harfler oyunu** (28 harf, 30 soru) ve **Kale yıkma** (ders seçilir). Oyun ekranında takım adlarının yerine öğrencilerin adı ve fotoğrafı görünür.
+- **Genel tablo:** `/tablo` sayfası herkese açık sıralamadır. Düelloda her doğru cevap 10 puandır; kazanan da kaybeden de doğruları kadar puan alır. Sıralama toplam puana, eşitlikte galibiyet sayısına göredir; Harfler oyunu ve Kale yıkma puanları ayrıca gösterilir.
+- **Öğrenci verisi ve gizlilik:** Sınıf listesi ve puanlar localStorage'da, fotoğraflar IndexedDB'de, yalnızca o cihazın tarayıcısında tutulur; hiçbir sunucuya gönderilmez. Öğrenci fotoğrafı kişisel veridir; kullanmadan önce veli izni ve okul idaresinin onayı alınması önerilir. “Bütün verileri sıfırla” sınıf listesini silmez; sınıf, öğrenci ve puanlar kendi bölümünden yönetilir. “Sınıf yedeğini indir” fotoğraflar dahil bir JSON yedeği verir; yedek başka bir tahtaya yüklenebilir.
 - **Kutlama:** Yarışma, halat çekme ve kale yıkma sonunda konfeti ve kupa animasyonu gösterilir (hareket azaltma tercihinde konfeti gösterilmez).
 - **Puanlama:** Doğru 10, yanlış 0. Her soruda ilk dokunuş geçerlidir. Yanlıştan sonra doğru cevap ve kısa açıklama gösterilir. Kazanan önce doğru sayısına, eşitlikte toplam süreye göre belirlenir. Duraklama, yükleme ve geri bildirim süreleri sayılmaz.
 - **Öğretmen paneli:** Ders seçme, takım adları, başarı eşiği (varsayılan %80, ürün ayarı), sonuçlar ve yanlış yapılan kazanımlar, yanlışlarla tekrar, soru bankasını doğru cevaplarıyla inceleme, ses kayıtları, öğrenci değerlendirmesi ve “Kur'an okumaya hazır” onayı, JSON dışa aktarma ve sıfırlama.
@@ -48,7 +51,7 @@ npm start
 npm test
 ```
 
-42 test: içerik doğrulama (oyunda Arapça uyaran ve Türkçe şıklar, harflerin dengeli tekrarı dahil) (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
+46 test: içerik doğrulama (oyunda Arapça uyaran ve Türkçe şıklar, harflerin dengeli tekrarı dahil) (her dersin 30 geçerli sorusu, tek doğru cevap, aynı görünen şık olmaması, yasak karakter, öğretilmemiş kural denetimi, ders içi tekrar, Tanzil metni bütünlüğü) ve oyun motoru (aynı küme farklı sıra, bağımsız ilerleme, eşzamanlı cevap, çift dokunma, duraklatma ve süre, sonuç kuralı, puansız tekrar, kaydet/yükle). Sonuçlar: [docs/TEST-SONUCLARI.md](docs/TEST-SONUCLARI.md).
 
 Diğer denetimler:
 
@@ -78,6 +81,11 @@ Vercel adımları: [docs/YAYINLAMA.md](docs/YAYINLAMA.md).
 | `src/lib/game.ts` | İki takımlı oyun durum makinesi (saf fonksiyonlar, test edilir) |
 | `src/lib/tug.ts` | Halat çekme ve kale yıkma oyunlarının ortak durum makinesi (sınırsız soru, 5 sn bekleme, kazanma) |
 | `src/components/tug/SiegeStage.tsx` | Kale yıkma sahnesi: kaleler, mancınıklar, taş atışı, hasar ve yıkılma |
+| `src/lib/roster.ts` | Bireysel düello: sınıf listesi, maç kaydı ve genel puan tablosu (saf fonksiyonlar) |
+| `src/lib/photoStore.ts` | Öğrenci fotoğrafları (IndexedDB), kırpma ve küçültme |
+| `src/components/duel/DuelSelect.tsx` | Dövüş oyunu tarzı oyuncu seçim ekranı ve VS animasyonu |
+| `src/components/duel/Leaderboard.tsx` | Genel puan tablosu |
+| `src/components/teacher/RosterManager.tsx` | Öğretmen panelinde sınıf ve öğrenci yönetimi, yedek |
 | `src/lib/storage.ts` | localStorage kalıcı depo (ayarlar, sonuçlar, değerlendirmeler, aktif oyun) |
 | `src/lib/audioStore.ts` | Öğretmen ses kayıtları (IndexedDB) ve tek ses kanalı |
 | `src/components/` | Arayüz: oyun ekranı, ders sayfası, öğretmen paneli, cihaz testi |

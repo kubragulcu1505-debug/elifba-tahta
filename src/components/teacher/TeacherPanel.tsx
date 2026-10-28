@@ -11,10 +11,12 @@ import { Ar, RichText } from "@/components/Arabic";
 import { TeamBadge } from "@/components/TeamBadge";
 import { AudioManager } from "./AudioManager";
 import { Readiness } from "./Readiness";
+import { RosterManager } from "./RosterManager";
 
 const NAV: [string, string][] = [
   ["dersler", "Ders seçimi"],
   ["ayarlar", "Takımlar ve ayarlar"],
+  ["siniflar", "Sınıflar ve öğrenciler"],
   ["sonuclar", "Sonuçlar"],
   ["sorular", "Soru bankası"],
   ["ses", "Ses kayıtları"],
@@ -204,6 +206,10 @@ function TeacherPanelInner() {
           </div>
         </Block>
 
+        <Block id="siniflar" title="Sınıflar ve öğrenciler (bireysel düello)">
+          <RosterManager />
+        </Block>
+
         <Block id="sonuclar" title="Sonuçlar ve yanlış yapılan kazanımlar">
           {history.length === 0 ? (
             <p className="text-lg text-ink-soft">Henüz tamamlanmış oyun yok.</p>
@@ -361,7 +367,7 @@ function TeacherPanelInner() {
               </span>
             )}
           </div>
-          <p className="mt-3 text-base text-ink-soft">Ses kayıtları ayrı tutulur ve “Ses kayıtları” bölümünden silinir.</p>
+          <p className="mt-3 text-base text-ink-soft">Ses kayıtları ayrı tutulur ve “Ses kayıtları” bölümünden silinir. Sınıf listesi, öğrenci fotoğrafları ve genel tablo da ayrı tutulur ve “Sınıflar ve öğrenciler” bölümünden yönetilir.</p>
           <h3 className="mt-6 text-xl font-bold">Kaynaklar</h3>
           <ul className="list-disc pl-6">
             {Object.entries(SOURCE_TITLES).map(([k, v]) => (

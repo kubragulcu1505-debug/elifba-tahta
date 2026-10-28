@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function SiteHeader({ current }: { current?: "home" | "teacher" | "check" }) {
+export function SiteHeader({ current }: { current?: "home" | "teacher" | "check" | "duel" | "board" }) {
   const item = (href: string, label: string, key: string) => (
     <Link
       href={href}
@@ -20,6 +20,8 @@ export function SiteHeader({ current }: { current?: "home" | "teacher" | "check"
           <span className="text-2xl font-extrabold">Elifba Tahtası</span>
         </Link>
         {item("/", "Ders haritası", "home")}
+        {item("/duello", "⚔ Düello", "duel")}
+        {item("/tablo", "🏆 Genel tablo", "board")}
         {item("/ogretmen", "Öğretmen paneli", "teacher")}
         {item("/kontrol", "Cihaz ve görüntü testi", "check")}
       </div>

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { computeResult, formatMs, type GameState, type Side } from "@/lib/game";
 import { TapButton } from "@/components/TapButton";
-import { TeamIcon } from "@/components/TeamBadge";
+import { SideIcon } from "@/components/PlayerAvatar";
 import { Confetti, Trophy } from "@/components/Celebration";
 
 export function ResultOverlay({
@@ -22,6 +22,7 @@ export function ResultOverlay({
 }) {
   const r = computeResult(game);
   const competition = game.mode === "competition";
+  const duel = !!game.players;
 
   let headline = "Tekrar tamamlandı!";
   if (competition) {
@@ -49,12 +50,12 @@ export function ResultOverlay({
         <div className="text-[clamp(28px,5vh,56px)] font-extrabold" data-testid="winner-line">
           {competition && r.winner && r.winner !== "tie" && (
             <span className={`mr-3 inline-block align-middle ${r.winner === "left" ? "text-left" : "text-right"}`}>
-              <TeamIcon side={r.winner} size={48} />
+              <SideIcon side={r.winner} size={48} player={game.players?.[r.winner]} />
             </span>
           )}
           {headline}
         </div>
-        {competition && <p className="text-[clamp(16px,2.6vh,28px)] font-semibold">İki takım da çok güzel çalıştı. Tebrikler!</p>}
+        {competition && <p className="text-[clamp(16px,2.6vh,28px)] font-semibold">{duel ? "İki oyuncu da çok güzel yarıştı. Tebrikler!" : "İki takım da çok güzel çalıştı. Tebrikler!"}</p>}
 
         {competition && (
           <div className="grid grid-cols-2 gap-4">
@@ -68,7 +69,7 @@ export function ResultOverlay({
                   data-testid={`result-${side}`}
                 >
                   <div className={`flex items-center justify-center gap-2 text-[clamp(20px,3.2vh,36px)] font-extrabold ${side === "left" ? "text-left" : "text-right"}`}>
-                    <TeamIcon side={side} size={36} />
+                    <SideIcon side={side} size={36} player={game.players?.[side]} />
                     <span className="text-ink">{names[side]}</span>
                   </div>
                   <dl className="mt-3 grid grid-cols-2 gap-2 text-[clamp(16px,2.5vh,28px)]">
@@ -84,6 +85,11 @@ export function ResultOverlay({
                   <p className="mt-2 text-[clamp(14px,2vh,22px)]">
                     {pct >= threshold ? "Önerilen eşiğe ulaştınız." : "Yanlışları tekrar etmek faydalı olur."}
                   </p>
+                  {duel && (
+                    <p className="mt-1 text-[clamp(16px,2.4vh,26px)] font-extrabold text-ok" data-testid={`duel-points-${side}`}>
+                      +{t.score} puan genel tabloya eklendi
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -93,10 +99,10 @@ export function ResultOverlay({
         {competition && (
           <div className="rounded-2xl bg-surface-2 p-4 text-left text-[clamp(14px,2.1vh,22px)]" data-testid="win-rule">
             <strong>Kazanma kuralı:</strong> Kazanan önce <strong>doğru cevap sayısına</strong> göre belirlenir. Doğru sayısı eşitse{" "}
-            <strong>toplam tamamlama süresi kısa olan</strong> takım kazanır. Duraklama, soru yüklenmesi ve geri bildirim ekranları süreye
+            <strong>toplam tamamlama süresi kısa olan</strong> {duel ? "oyuncu" : "takım"} kazanır. Duraklama, soru yüklenmesi ve geri bildirim ekranları süreye
             eklenmez. {reason}
             <br />
-            Önerilen başarı eşiği %{threshold} bir ürün ayarıdır; resmî bir ölçüt değildir. Takım puanı tek tek öğrencilerin düzeyini göstermez.
+            Önerilen başarı eşiği %{threshold} bir ürün ayarıdır; resmî bir ölçüt değildir. {duel ? "Bireysel düelloda her doğru cevap 10 puandır; iki oyuncunun puanı da genel tabloya eklenir." : "Takım puanı tek tek öğrencilerin düzeyini göstermez."}
           </div>
         )}
 
@@ -114,9 +120,16 @@ export function ResultOverlay({
           <Link href={`/ders/${game.lessonId}`} className="big-btn btn-ghost inline-flex items-center border-2 border-line">
             Ders sayfası
           </Link>
-          <Link href="/ogretmen" className="big-btn btn-ghost inline-flex items-center border-2 border-line">
-            Öğretmen paneli
-          </Link>
+          {duel ? (
+            <>
+              <Link href="/tablo" className="big-btn btn-ghost inline-flex items-center border-2 border-line">🏆 Genel tablo</Link>
+              <Link href="/duello" className="big-btn btn-ghost inline-flex items-center border-2 border-line">⚔ Yeni düello</Link>
+            </>
+          ) : (
+            <Link href="/ogretmen" className="big-btn btn-ghost inline-flex items-center border-2 border-line">
+              Öğretmen paneli
+            </Link>
+          )}
         </div>
       </div>
     </div>

@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SIDES, type Side } from "@/lib/game";
 import { reduceTug, snapshotTug, restoreTug, currentTugItem, type TugAction, type TugKind, type TugState } from "@/lib/tug";
-import { lookupAnyLite, startSiege, startTug, toLite } from "@/lib/session";
+import { lookupAnyLite, recordFinishedSiege, sideNames, startSiege, startTug, toLite } from "@/lib/session";
 import { read, write, usePersisted, useHydrated } from "@/lib/storage";
 import { LESSON_BY_ID } from "@/content/lessons";
 import { TUG_POOLS, getAnyQuestion } from "@/content/index";
 import { TapButton } from "@/components/TapButton";
-import { TeamIcon } from "@/components/TeamBadge";
+import { SideIcon } from "@/components/PlayerAvatar";
 import { Ar, RichText } from "@/components/Arabic";
 import { RopeStage } from "./RopeStage";
 import { SiegeStage } from "./SiegeStage";
@@ -22,7 +22,6 @@ const isLongText = (s: string) => s.length > 22;
 const KINDS = {
   tug: {
     key: "activeTug",
-    start: startTug,
     chip: "Halat çekme · sınırsız soru",
     none: "Aktif halat çekme oyunu yok",
     noneHint: "Bir ders sayfasından “Halat çekme” oyununu başlatın.",
@@ -36,13 +35,12 @@ const KINDS = {
   },
   siege: {
     key: "activeSiege",
-    start: startSiege,
     chip: "Kale yıkma · sınırsız soru",
     none: "Aktif kale yıkma oyunu yok",
     noneHint: "Bir ders sayfasından “Kale yıkma” oyununu başlatın.",
-    winLine: "Rakip takımın kalesi yıkıldı!",
+    winLine: "Rakip kale yıkıldı!",
     praise: "İki takım da çok güzel nişan aldı. Tebrikler!",
-    rule: (t: number) => `Doğru cevap veren takımın mancınığı rakip kaleye taş atar. Rakip kaleye ${t} taş ilk isabet ettiren takım kazanır.`,
+    rule: (t: number) => `Doğru cevap verenin mancınığı rakip kaleye taş atar. Rakip kaleye ${t} taş ilk isabet ettiren kazanır.`,
     restartQ: "Kale yıkma yeniden başlasın mı?",
     restartHint: "Kaleler onarılır, sorular yeniden karışır.",
     correctMsg: "Doğru! Mancınık taşı fırlattı",
@@ -101,6 +99,11 @@ function TugInner({ kind }: { kind: TugKind }) {
   const ctx = useMemo(() => ({ pool, lookup: lookupAnyLite }), [pool]);
   const dispatch = useCallback((a: TugAction) => setState((prev) => (prev ? reduceTug(prev, a, ctx) : prev)), [ctx]);
 
+  // Bireysel kale yıkma bitince öğrencilerin puanları genel tabloya işlenir (aynı oyun bir kez).
+  useEffect(() => {
+    if (state?.winner && state.players) recordFinishedSiege(state);
+  }, [state]);
+
   // Kaydet (başka bir oyun başlatıldıysa üzerine yazma).
   useEffect(() => {
     if (!state) return;
@@ -154,10 +157,12 @@ function TugInner({ kind }: { kind: TugKind }) {
   }
 
   const lesson = LESSON_BY_ID.get(state.lessonId);
-  const names = settings.teamNames;
+  const duel = !!state.players;
+  const names = duel ? sideNames(state.players) : settings.teamNames;
   const restart = () => {
     setConfirmRestart(false);
-    cfg.start(state.lessonId);
+    if (kind === "siege") startSiege(state.lessonId, state.players);
+    else startTug(state.lessonId);
   };
   const toggleFs = async () => {
     try {
@@ -173,7 +178,7 @@ function TugInner({ kind }: { kind: TugKind }) {
       <header className="flex items-center gap-3 border-b-2 border-line bg-surface px-4 py-2">
         <div className="min-w-0 flex-1 truncate text-lg font-extrabold">
           {lesson?.title}
-          <span className="ml-3 chip bg-warn-soft text-warn">{cfg.chip}</span>
+          <span className="ml-3 chip bg-warn-soft text-warn">{duel ? `Bireysel düello · ${cfg.chip}` : cfg.chip}</span>
         </div>
         <TapButton className="btn btn-primary" onTap={(now) => dispatch(state.paused ? { type: "RESUME", now } : { type: "PAUSE", now })}>
           {state.paused ? "▶ Devam" : "⏸ Duraklat"}
@@ -192,7 +197,7 @@ function TugInner({ kind }: { kind: TugKind }) {
       </header>
 
       {kind === "siege" ? (
-        <SiegeStage target={state.settings.target} names={names} winner={state.winner} shots={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
+        <SiegeStage target={state.settings.target} names={names} players={state.players} winner={state.winner} shots={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
       ) : (
         <RopeStage rope={state.rope} target={state.settings.target} names={names} winner={state.winner} pulls={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
       )}
@@ -219,24 +224,34 @@ function TugInner({ kind }: { kind: TugKind }) {
             <div className="card anim-pop flex w-full max-w-3xl flex-col items-center gap-4 p-8 text-center">
               <Trophy />
               <div className={`text-[clamp(28px,5vh,56px)] font-extrabold ${state.winner === "left" ? "text-left" : "text-right"}`}>
-                <TeamIcon side={state.winner} size={48} /> <span className="text-ink">{names[state.winner]} kazandı!</span>
+                <SideIcon side={state.winner} size={48} player={state.players?.[state.winner]} /> <span className="text-ink">{names[state.winner]} kazandı!</span>
               </div>
               <p className="text-[clamp(16px,2.6vh,28px)]">{cfg.winLine}</p>
-              <p className="text-[clamp(16px,2.6vh,28px)] font-semibold">{cfg.praise}</p>
+              <p className="text-[clamp(16px,2.6vh,28px)] font-semibold">{duel ? "İki oyuncu da çok güzel nişan aldı. Tebrikler!" : cfg.praise}</p>
               <div className="grid w-full grid-cols-2 gap-4 text-[clamp(16px,2.4vh,26px)]">
                 {(["left", "right"] as Side[]).map((side) => (
                   <div key={side} className={`rounded-2xl border-4 p-3 ${side === "left" ? "border-left bg-left-soft" : "border-right bg-right-soft"}`}>
                     <div className="font-extrabold">{names[side]}</div>
                     <div>{state.teams[side].correct} doğru · {state.teams[side].wrong} yanlış</div>
+                    {duel && (
+                      <div className="font-extrabold text-ok" data-testid={`duel-points-${side}`}>+{state.teams[side].correct * 10} puan genel tabloya eklendi</div>
+                    )}
                   </div>
                 ))}
               </div>
               <p className="text-base text-ink-soft">
-                {cfg.rule(state.settings.target)} Takım sonucu tek tek öğrencilerin düzeyini göstermez.
+                {cfg.rule(state.settings.target)} {duel ? "Bireysel düelloda her doğru cevap 10 puandır; iki oyuncunun puanı da genel tabloya eklenir." : "Takım sonucu tek tek öğrencilerin düzeyini göstermez."}
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <TapButton className="big-btn btn-primary" onTap={restart}>↻ Yeniden oyna</TapButton>
-                <Link href={`/ders/${state.lessonId}`} className="big-btn btn-ghost inline-flex items-center border-2 border-line">Ders sayfası</Link>
+                {duel ? (
+                  <>
+                    <Link href="/tablo" className="big-btn btn-ghost inline-flex items-center border-2 border-line">🏆 Genel tablo</Link>
+                    <Link href="/duello" className="big-btn btn-ghost inline-flex items-center border-2 border-line">⚔ Yeni düello</Link>
+                  </>
+                ) : (
+                  <Link href={`/ders/${state.lessonId}`} className="big-btn btn-ghost inline-flex items-center border-2 border-line">Ders sayfası</Link>
+                )}
               </div>
             </div>
           </div>
@@ -288,7 +303,7 @@ function TugPanel({ side, state, name, dispatch, correctMsg }: { side: Side; sta
     <section className="team-panel compact" data-side={side} aria-label={`${name} alanı`} data-testid={`team-${side}`}>
       <header className="flex items-center gap-3">
         <span className={`inline-flex items-center gap-2 text-[clamp(16px,2.6vh,30px)] font-extrabold ${side === "left" ? "text-left" : "text-right"}`}>
-          <TeamIcon side={side} size={28} />
+          <SideIcon side={side} size={28} player={state.players?.[side]} />
           <span className="text-ink">{name}</span>
         </span>
         <span className="ml-auto flex gap-2 text-[clamp(13px,2vh,22px)] font-bold">

@@ -5,7 +5,7 @@
 // - Halatın ortasındaki bayrağı kendi çizgisine ilk çeken takım kazanır.
 // Kale yıkma oyunu da aynı makineyi kullanır (kind: "siege"): her doğru cevap rakip kaleye
 // mancınıkla bir taş atar; rakip kaleye `target` taş ilk isabet ettiren takım kazanır.
-import { roundOrder, SIDES, type QueueItem, type QuestionLite, type Side } from "./game.ts";
+import { roundOrder, SIDES, type DuelPlayer, type QueueItem, type QuestionLite, type Side } from "./game.ts";
 import { hashSeed, mulberry32, shuffle } from "./rng.ts";
 
 export type TugKind = "tug" | "siege";
@@ -44,6 +44,8 @@ export interface TugState {
   id: string;
   /** Oyun türü; eski kayıtlarda yoktur ve halat çekme sayılır. */
   kind?: TugKind;
+  /** Bireysel düelloda iki öğrenci; takım oyununda yoktur. */
+  players?: Record<Side, DuelPlayer>;
   lessonId: string;
   seed: string;
   /** Halatın konumu: eksi = sol takıma doğru, artı = sağ takıma doğru. */
@@ -80,7 +82,7 @@ export function makeDeck(pool: QuestionLite[], seed: string, side: Side, cycle: 
   return order.map((q) => ({ questionId: q.id, optionOrder: shuffle(q.optionIds, rand) }));
 }
 
-export function createTug(args: { lessonId: string; seed: string; pool: QuestionLite[]; settings?: Partial<TugSettings>; kind?: TugKind }): TugState {
+export function createTug(args: { lessonId: string; seed: string; pool: QuestionLite[]; settings?: Partial<TugSettings>; kind?: TugKind; players?: Record<Side, DuelPlayer> }): TugState {
   if (args.pool.length === 0) throw new Error("Oyun için soru havuzu boş");
   const kind = args.kind ?? "tug";
   const team = (side: Side): TugTeam => ({
@@ -98,6 +100,7 @@ export function createTug(args: { lessonId: string; seed: string; pool: Question
   return {
     id: `${kind}-${args.lessonId}-${args.seed}`,
     kind,
+    ...(args.players ? { players: args.players } : {}),
     lessonId: args.lessonId,
     seed: args.seed,
     rope: 0,

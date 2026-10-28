@@ -4,6 +4,7 @@
 import { useSyncExternalStore } from "react";
 import type { GameState, Side, TeamResult, GameResult } from "./game";
 import type { TugState } from "./tug";
+import { EMPTY_ROSTER, type DuelGame, type DuelRecord, type Roster } from "./roster";
 
 export const STORAGE_VERSION = 1;
 const PREFIX = "elifba-tahta.v1.";
@@ -65,8 +66,12 @@ export interface Schema {
   activeTug: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Kale yıkma oyunu (halat çekmeyle aynı durum makinesi, ayrı kayıt). */
   activeSiege: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
+  /** Sınıflar ve öğrenciler (fotoğraflar ayrıca IndexedDB'de). */
+  roster: Roster;
+  /** Bireysel düello maçları; genel puan tablosu bunlardan hesaplanır. */
+  duels: DuelRecord[];
   /** Ders sayfasında açık bırakılan sekme vb. küçük kolaylıklar */
-  ui: { lastLessonId?: string };
+  ui: { lastLessonId?: string; duel?: { game: DuelGame; lessonId: string; classId?: string } };
 }
 
 const DEFAULTS: Schema = {
@@ -77,6 +82,8 @@ const DEFAULTS: Schema = {
   activeGame: null,
   activeTug: null,
   activeSiege: null,
+  roster: EMPTY_ROSTER,
+  duels: [],
   ui: {},
 };
 
@@ -183,12 +190,17 @@ export function exportAll(): Record<string, unknown> {
     history: read("history"),
     evaluations: read("evaluations"),
     approvals: read("approvals"),
+    roster: read("roster"),
+    duels: read("duels"),
     note: "Ses kayıtları bu dosyaya dahil değildir (tarayıcının IndexedDB deposunda tutulur).",
   };
 }
 
+/** Sınıf listesi ve genel tablo "Bütün verileri sıfırla" ile silinmez; kendi bölümünden yönetilir. */
+const KEEP_ON_RESET = new Set<Key>(["roster", "duels"]);
+
 export function resetAll(): void {
-  for (const key of Object.keys(DEFAULTS) as Key[]) {
+  for (const key of (Object.keys(DEFAULTS) as Key[]).filter((k) => !KEEP_ON_RESET.has(k))) {
     try {
       storage()?.removeItem(PREFIX + key);
     } catch {

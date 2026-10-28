@@ -3,7 +3,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { reduce, restoreFromSave, snapshotForSave, computeResult, SIDES, type GameAction, type GameState, type Side } from "@/lib/game";
-import { lookupLite, recordFinishedGame, startCompetition, startReview } from "@/lib/session";
+import { lookupLite, recordFinishedGame, sideNames, startCompetition, startReview } from "@/lib/session";
 import { read, write, usePersisted, useHydrated } from "@/lib/storage";
 import { LESSON_BY_ID } from "@/content/lessons";
 import { TapButton } from "@/components/TapButton";
@@ -151,6 +151,7 @@ function GameInner() {
   }
 
   const lesson = LESSON_BY_ID.get(state.lessonId);
+  const names = state.players ? sideNames(state.players) : settings.teamNames;
   const result = computeResult(state);
   const bothFinished = SIDES.every((s) => state.teams[s].phase === "finished");
   const wrongBySide: Record<Side, string[]> = {
@@ -160,12 +161,12 @@ function GameInner() {
 
   const restart = () => {
     setConfirmRestart(false);
-    const s = startCompetition(state.lessonId);
+    const s = startCompetition(state.lessonId, state.players);
     recorded.current = null;
     setState(s);
   };
   const review = () => {
-    const s = startReview(state.lessonId, wrongBySide);
+    const s = startReview(state.lessonId, wrongBySide, state.players);
     setState(s);
   };
 
@@ -174,7 +175,7 @@ function GameInner() {
       <header className="flex items-center gap-3 border-b-2 border-line bg-surface px-4 py-2">
         <div className="min-w-0 flex-1 truncate text-lg font-extrabold">
           {lesson?.title}
-          <span className="ml-3 chip bg-surface-2 text-ink-soft">{state.mode === "competition" ? "Yarışma · 30 soru" : "Tekrar · puansız"}</span>
+          <span className="ml-3 chip bg-surface-2 text-ink-soft">{state.mode === "competition" ? (state.players ? "Bireysel düello · 30 soru" : "Yarışma · 30 soru") : "Tekrar · puansız"}</span>
         </div>
         <TapButton
           className="btn btn-primary"
@@ -202,9 +203,9 @@ function GameInner() {
 
       <div className="relative min-h-0">
         <div className="halves h-full">
-          <TeamPanel side="left" game={state} name={settings.teamNames.left} dispatch={dispatch} fontsReady={fontsReady} threshold={settings.threshold} />
+          <TeamPanel side="left" game={state} name={names.left} dispatch={dispatch} fontsReady={fontsReady} threshold={settings.threshold} />
           <div className="divider" aria-hidden="true" />
-          <TeamPanel side="right" game={state} name={settings.teamNames.right} dispatch={dispatch} fontsReady={fontsReady} threshold={settings.threshold} />
+          <TeamPanel side="right" game={state} name={names.right} dispatch={dispatch} fontsReady={fontsReady} threshold={settings.threshold} />
         </div>
 
         {state.paused && !bothFinished && (
@@ -222,7 +223,7 @@ function GameInner() {
         {bothFinished && (
           <ResultOverlay
             game={state}
-            names={settings.teamNames}
+            names={names}
             threshold={settings.threshold}
             onReview={review}
             onRestart={restart}

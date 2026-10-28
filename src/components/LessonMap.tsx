@@ -30,6 +30,14 @@ export function LessonMap() {
           <Link href="/oyun" className="btn btn-primary inline-flex items-center">Oyuna dön</Link>
         </div>
       )}
+      <section className="card flex flex-wrap items-center gap-4 border-left p-5" aria-labelledby="duello-h">
+        <h2 id="duello-h" className="text-2xl font-extrabold">⚔ Bireysel düello</h2>
+        <p className="min-w-60 flex-1 text-ink-soft">
+          İki öğrenci fotoğrafından kendini seçer ve bire bir yarışır: Harfler oyunu ya da Kale yıkma. Her doğru cevap 10 puan; bütün puanlar genel tabloya işlenir.
+        </p>
+        <Link href="/duello" className="btn btn-primary inline-flex items-center">⚔ Oyuncu seç</Link>
+        <Link href="/tablo" className="btn btn-ghost inline-flex items-center">🏆 Genel tablo</Link>
+      </section>
       <section className="card flex flex-wrap items-center gap-4 border-warn p-5" aria-labelledby="halat-h">
         <h2 id="halat-h" className="text-2xl font-extrabold">🪢 Halat çekme · 🏰 Kale yıkma</h2>
         <p className="min-w-60 flex-1 text-ink-soft">Sınırsız sorulu iki takımlı oyunlar. Doğru cevap halatı çeker ya da rakip kaleye mancınıkla taş atar. Her derste oynanabilir.</p>

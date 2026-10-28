@@ -72,10 +72,18 @@ export const DEFAULT_SETTINGS: GameSettings = {
   wrongFeedbackMs: 2500,
 };
 
+/** Bireysel düelloda bir tarafı oynayan öğrenci. */
+export interface DuelPlayer {
+  id: string;
+  name: string;
+}
+
 export interface GameState {
   id: string;
   lessonId: string;
   mode: GameMode;
+  /** Bireysel düelloda iki öğrenci; takım oyununda yoktur. */
+  players?: Record<Side, DuelPlayer>;
   seed: string;
   questionIds: string[];
   createdAtEpoch: number;
@@ -187,6 +195,7 @@ export function createGame(args: {
   perTeam?: Partial<Record<Side, QuestionLite[]>>;
   settings?: Partial<GameSettings>;
   nowEpoch?: number;
+  players?: Record<Side, DuelPlayer>;
 }): GameState {
   const settings = { ...DEFAULT_SETTINGS, ...args.settings };
   const queues = {} as Record<Side, QueueItem[]>;
@@ -208,6 +217,7 @@ export function createGame(args: {
     id: `${args.lessonId}-${args.seed}`,
     lessonId: args.lessonId,
     mode: args.mode,
+    ...(args.players ? { players: args.players } : {}),
     seed: args.seed,
     questionIds: ids,
     createdAtEpoch: args.nowEpoch ?? 0,
