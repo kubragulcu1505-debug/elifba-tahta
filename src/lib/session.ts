@@ -39,7 +39,7 @@ export function startTug(lessonId: string): TugState {
 /** Kale yıkma oyununu başlatır (halat çekmeyle aynı soru havuzu, sınırsız). Düelloda iki öğrenci verilir. */
 export function startSiege(lessonId: string, players?: Players): TugState {
   const pool = (TUG_POOLS[lessonId] ?? []).map(toLite);
-  const state = createTug({ lessonId, seed: newSeed(), pool, kind: "siege", players, settings: { target: read("settings").siegeTarget } });
+  const state = createTug({ lessonId, seed: newSeed(), pool, kind: "siege", players, settings: { target: read("settings").siegeTarget, easyAim: read("settings").easyAim } });
   write("activeSiege", { state, savedAtEpoch: Date.now(), fresh: true });
   return state;
 }

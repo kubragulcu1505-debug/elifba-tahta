@@ -17,8 +17,10 @@ export interface Settings {
   motion: "system" | "reduce" | "full";
   /** Halat çekmede kazanmak için gereken net çekiş sayısı. */
   tugTarget: number;
-  /** Kale yıkmada rakip kaleyi yıkmak için gereken isabet (doğru cevap) sayısı. */
+  /** Kale yıkmada rakip kaleyi yıkmak için gereken isabet sayısı. */
   siegeTarget: number;
+  /** Kale yıkmada kolay nişan: taşın gideceği yolun tamamı gösterilir. */
+  easyAim: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -27,6 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   motion: "system",
   tugTarget: 7,
   siegeTarget: 15,
+  easyAim: false,
 };
 
 export interface GameRecord {

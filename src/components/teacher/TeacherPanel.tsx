@@ -171,7 +171,22 @@ function TeacherPanelInner() {
                 className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
                 data-testid="siege-target"
               />
-              <span className="text-base text-ink-soft">Varsayılan 15. Her doğru cevap rakip kaleye bir taş atar; bu kadar taş isabet eden kale yıkılır. Yeni başlatılan oyunlarda geçerlidir.</span>
+              <span className="text-base text-ink-soft">Varsayılan 15. Doğru cevap veren mancınığı çekip bırakarak taş atar; ıskalanan taş sayılmaz. Bu kadar taş isabet eden kale yıkılır. Yeni başlatılan oyunlarda geçerlidir.</span>
+            </label>
+            <label className="flex items-start gap-3 text-lg">
+              <input
+                type="checkbox"
+                checked={settings.easyAim}
+                onChange={(e) => setSettings({ easyAim: e.target.checked })}
+                className="mt-1 h-6 w-6"
+                data-testid="easy-aim"
+              />
+              <span>
+                <span className="font-bold">Kale yıkma: kolay nişan</span>
+                <span className="block text-base text-ink-soft">
+                  Açıkken nişan alırken taşın gideceği yolun tamamı görünür; küçük öğrenciler için isabet kolaylaşır. Kapalıyken yalnızca yolun başı görünür.
+                </span>
+              </span>
             </label>
             <label className="flex flex-col gap-2 text-lg">
               <span className="font-bold">Hareket ve animasyon</span>

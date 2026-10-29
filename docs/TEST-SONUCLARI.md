@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 46/46 geçti |
+| Otomatik testler (`npm test`) | 48/48 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,15 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Kale yıkmada çek-bırak nişan (29 Ekim 2026)
+
+- Durum makinesi: doğru cevaptan sonra nişan aşaması geliyor; yalnızca isabet eden taş sayılıyor; iki taraf 14'er isabetteyken kimse kazanmıyor, 15. isabette kazanılıyor; ıskalanan atışın doğru cevabı puan için sayılıyor: geçti.
+- Nişan süresi duraklatmada uzuyor; duraklatılmışken atış yapılmıyor, havadaki taş yine iniyor; kaydet/yüklede havadaki taş kaydedilmiyor, öğrenci yeniden nişan alıyor: geçti.
+- Fizik: sola-aşağı çekiş sağa-yukarı atıyor, sağ taraf aynalanıyor; ileri çekiş geri atmıyor; %80 güç 45° isabet ediyor, süre dolunca yapılan zayıf atış kısa düşüyor, tam güç 45° kalenin üstünden aşıyor; kısa nişan çizgisi yalnızca uçuşun başını, kolay nişan tamamını gösteriyor: geçti.
+- Kalibrasyon (tipik ekran): 45°'de %73–90, 30°'de %75–100 güç isabet ediyor; uçuş 0,8–2 saniye.
+- Tarayıcıda (1366×768): doğru cevaptan sonra nişan alanı ve 8 saniyelik sayaç açıldı; çekerken mancınığın kolu gerildi, güç çubuğu %82 gösterdi ve sahnede 14 noktalı nişan çizgisi çizildi. Bırakınca taş yay çizerek uçtu, rakip kaleye isabet etti (“🎯 İsabet! Kale sarsıldı”, 1/15, dayanıklılık %93). Sağ taraftan atışta nişan çizgisi sola uzandı ve sol kaleye isabet etti. Zayıf çekişte taş kısa düştü, toz kalktı (“Iska!”), isabet sayısı değişmedi. Süre dolunca zayıf atış kendiliğinden yapıldı. Ekran kaydırmasız sığdı (en alt 757 px). Öğretmen panelindeki “kolay nişan” ayarı kaydedildi.
+- Denenmedi: gerçek akıllı tahtada parmakla, iki öğrencinin aynı anda nişan alması (sentetik dokunma olaylarıyla denendi).
 
 ## Bireysel düello ve genel tablo (28 Ekim 2026)
 

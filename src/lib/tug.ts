@@ -3,8 +3,9 @@
 // - Sorular sınırsızdır: dersin soru havuzu bitince yeniden karıştırılır (önce her harf bir kez).
 // - Yanlış cevapta takım 5 saniye bekler; sonra soru kendiliğinden geçer. Doğruda da kendiliğinden geçer.
 // - Halatın ortasındaki bayrağı kendi çizgisine ilk çeken takım kazanır.
-// Kale yıkma oyunu da aynı makineyi kullanır (kind: "siege"): her doğru cevap rakip kaleye
-// mancınıkla bir taş atar; rakip kaleye `target` taş ilk isabet ettiren takım kazanır.
+// Kale yıkma oyunu da aynı makineyi kullanır (kind: "siege"): doğru cevaptan sonra öğrenci mancınığı
+// kendisi çekip bırakarak nişan alır (aim → flying). Taş kaleye değerse isabet sayılır; rakip kaleye
+// `target` taş ilk isabet ettiren kazanır. Iskalanan atış da sorunun geçmesini sağlar.
 import { roundOrder, SIDES, type DuelPlayer, type QueueItem, type QuestionLite, type Side } from "./game.ts";
 import { hashSeed, mulberry32, shuffle } from "./rng.ts";
 
@@ -19,12 +20,27 @@ export interface TugSettings {
   correctFeedbackMs: number;
   /** Soru göründükten sonra dokunuşların yok sayıldığı süre (ms). */
   inputGuardMs: number;
+  /** Kale: nişan almak için süre (ms); dolunca zayıf bir atış kendiliğinden yapılır. */
+  aimMs: number;
+  /** Kale: taş yere/kaleye değdikten sonra sıradaki soruya geçiş (ms). */
+  landFeedbackMs: number;
+  /** Kale: kolay nişan (taşın yolunun tamamı gösterilir). */
+  easyAim: boolean;
 }
 
-export const TUG_DEFAULTS: TugSettings = { target: 7, wrongLockMs: 5000, correctFeedbackMs: 900, inputGuardMs: 400 };
+export const TUG_DEFAULTS: TugSettings = {
+  target: 7,
+  wrongLockMs: 5000,
+  correctFeedbackMs: 900,
+  inputGuardMs: 400,
+  aimMs: 8000,
+  landFeedbackMs: 700,
+  easyAim: false,
+};
 export const SIEGE_TARGET = 15;
 
-export type TugPhase = "loading" | "question" | "feedback" | "finished";
+/** aim: kale oyununda nişan alınıyor; flying: taş havada. */
+export type TugPhase = "loading" | "question" | "feedback" | "aim" | "flying" | "finished";
 
 export interface TugTeam {
   side: Side;
@@ -38,6 +54,12 @@ export interface TugTeam {
   inputOpensAt: number;
   correct: number;
   wrong: number;
+  /** Kale: rakip kaleye isabet eden taş sayısı (eski kayıtlarda yoktur). */
+  hits?: number;
+  /** Kale: nişan süresinin bittiği an. */
+  aimDeadline?: number;
+  /** Kale: son atışın sonucu (geri bildirim için). */
+  lastShot?: { hit: boolean } | null;
 }
 
 export interface TugState {
@@ -61,6 +83,8 @@ export type TugAction =
   | { type: "QUESTION_VISIBLE"; side: Side; now: number }
   | { type: "ANSWER"; side: Side; questionId: string; optionId: string; now: number }
   | { type: "NEXT"; side: Side; now: number }
+  | { type: "FIRE"; side: Side; now: number }
+  | { type: "LAND"; side: Side; hit: boolean; now: number }
   | { type: "PAUSE"; now: number }
   | { type: "RESUME"; now: number };
 
@@ -133,25 +157,55 @@ export function reduceTug(s: TugState, a: TugAction, ctx: TugContext): TugState 
       const q = ctx.lookup(a.questionId);
       if (!q) return s;
       const correct = a.optionId === q.correctOptionId;
-      const hits = t.correct + (correct ? 1 : 0);
-      let rope = s.rope;
-      let winner: Side | null = null;
+      const lastAnswer = { questionId: q.id, optionId: a.optionId, correct };
       if (s.kind === "siege") {
-        // Kale: halat yok; takımın isabet sayısı hedefe ulaşınca rakip kale yıkılır.
-        if (hits >= s.settings.target) winner = a.side;
-      } else {
-        rope = correct ? s.rope + (a.side === "left" ? -1 : 1) : s.rope;
-        winner = rope <= -s.settings.target ? "left" : rope >= s.settings.target ? "right" : null;
+        // Kale: doğru cevapta nişan sırası gelir; yanlışta 5 saniye beklenir. Kazananı isabetler belirler (LAND).
+        return withTeam(s, a.side, {
+          ...t,
+          phase: correct ? "aim" : "feedback",
+          lastAnswer,
+          lastShot: null,
+          aimDeadline: correct ? a.now + s.settings.aimMs : undefined,
+          continueAt: correct ? 0 : a.now + s.settings.wrongLockMs,
+          correct: t.correct + (correct ? 1 : 0),
+          wrong: t.wrong + (correct ? 0 : 1),
+        });
       }
+      const rope = correct ? s.rope + (a.side === "left" ? -1 : 1) : s.rope;
+      const winner: Side | null = rope <= -s.settings.target ? "left" : rope >= s.settings.target ? "right" : null;
       const updated: TugTeam = {
         ...t,
         phase: winner ? "finished" : "feedback",
-        lastAnswer: { questionId: q.id, optionId: a.optionId, correct },
+        lastAnswer,
         continueAt: a.now + (correct ? s.settings.correctFeedbackMs : s.settings.wrongLockMs),
-        correct: hits,
+        correct: t.correct + (correct ? 1 : 0),
         wrong: t.wrong + (correct ? 0 : 1),
       };
       let next = withTeam({ ...s, rope, winner }, a.side, updated);
+      if (winner) {
+        const other: Side = a.side === "left" ? "right" : "left";
+        next = withTeam(next, other, { ...next.teams[other], phase: "finished" });
+      }
+      return next;
+    }
+    case "FIRE": {
+      const t = s.teams[a.side];
+      if (s.paused || s.winner || t.phase !== "aim") return s;
+      return withTeam(s, a.side, { ...t, phase: "flying" });
+    }
+    case "LAND": {
+      // Taş havadayken oyun duraklatılsa bile uçuş tamamlanır ve sonucu işlenir.
+      const t = s.teams[a.side];
+      if (s.winner || t.phase !== "flying") return s;
+      const hits = (t.hits ?? 0) + (a.hit ? 1 : 0);
+      const winner: Side | null = hits >= s.settings.target ? a.side : null;
+      let next = withTeam({ ...s, winner }, a.side, {
+        ...t,
+        hits,
+        phase: winner ? "finished" : "feedback",
+        lastShot: { hit: a.hit },
+        continueAt: a.now + s.settings.landFeedbackMs,
+      });
       if (winner) {
         const other: Side = a.side === "left" ? "right" : "left";
         next = withTeam(next, other, { ...next.teams[other], phase: "finished" });
@@ -184,6 +238,7 @@ export function reduceTug(s: TugState, a: TugAction, ctx: TugContext): TugState 
         const t = teams[side];
         if (t.phase === "question") teams[side] = { ...t, inputOpensAt: a.now + s.settings.inputGuardMs };
         else if (t.phase === "feedback") teams[side] = { ...t, continueAt: t.continueAt + pausedFor };
+        else if (t.phase === "aim") teams[side] = { ...t, aimDeadline: (t.aimDeadline ?? a.now) + pausedFor };
       }
       return { ...s, paused: false, pausedAt: null, teams };
     }
@@ -195,8 +250,17 @@ export function snapshotTug(s: TugState, now: number): TugState {
   const teams = { ...s.teams };
   for (const side of SIDES) {
     const t = teams[side];
-    // continueAt, "şimdiden kalan süre" olarak saklanır; yüklemede yeni saat tabanına eklenir.
-    teams[side] = { ...t, continueAt: t.phase === "feedback" ? Math.max(0, t.continueAt - (s.paused && s.pausedAt !== null ? s.pausedAt : now)) : 0, inputOpensAt: 0 };
+    // continueAt ve aimDeadline, "şimdiden kalan süre" olarak saklanır; yüklemede yeni saat tabanına eklenir.
+    const base = s.paused && s.pausedAt !== null ? s.pausedAt : now;
+    // Havadaki taş kaydedilmez: yüklenince öğrenci yeniden nişan alır.
+    const aiming = t.phase === "aim" || t.phase === "flying";
+    teams[side] = {
+      ...t,
+      phase: t.phase === "flying" ? "aim" : t.phase,
+      continueAt: t.phase === "feedback" ? Math.max(0, t.continueAt - base) : 0,
+      aimDeadline: aiming ? (t.phase === "aim" ? Math.max(0, (t.aimDeadline ?? base) - base) : s.settings.aimMs) : undefined,
+      inputOpensAt: 0,
+    };
   }
   return { ...s, paused: !s.winner, pausedAt: 0, teams };
 }
@@ -207,8 +271,9 @@ export function restoreTug(s: TugState, now: number): TugState {
     const t = teams[side];
     teams[side] = {
       ...t,
-      phase: t.phase === "question" ? "loading" : t.phase,
+      phase: t.phase === "question" ? "loading" : t.phase === "flying" ? "aim" : t.phase,
       continueAt: t.phase === "feedback" ? now + t.continueAt : 0,
+      aimDeadline: t.phase === "aim" || t.phase === "flying" ? now + (t.aimDeadline ?? s.settings.aimMs) : undefined,
       inputOpensAt: now,
     };
   }

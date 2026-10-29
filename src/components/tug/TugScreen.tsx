@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SIDES, type Side } from "@/lib/game";
@@ -12,7 +12,9 @@ import { TapButton } from "@/components/TapButton";
 import { SideIcon } from "@/components/PlayerAvatar";
 import { Ar, RichText } from "@/components/Arabic";
 import { RopeStage } from "./RopeStage";
-import { SiegeStage } from "./SiegeStage";
+import { SiegeStage, type Flight, type Impact, type SiegeGeometry } from "./SiegeStage";
+import { AimPad } from "./AimPad";
+import { AUTO_POWER, launchFromAngle, launchFromPull, previewPath, simulateShot, type Launch, type Pt } from "@/lib/ballistics";
 import { Confetti, Trophy } from "@/components/Celebration";
 
 const isLongArabic = (s: string) => [...s].filter((c) => c !== " ").length > 7 || s.includes(" ");
@@ -40,11 +42,11 @@ const KINDS = {
     noneHint: "Bir ders sayfasından “Kale yıkma” oyununu başlatın.",
     winLine: "Rakip kale yıkıldı!",
     praise: "İki takım da çok güzel nişan aldı. Tebrikler!",
-    rule: (t: number) => `Doğru cevap verenin mancınığı rakip kaleye taş atar. Rakip kaleye ${t} taş ilk isabet ettiren kazanır.`,
+    rule: (t: number) => `Doğru cevap veren, mancınığı kendisi çekip bırakarak rakip kaleye taş atar. Rakip kaleye ${t} taş ilk isabet ettiren kazanır.`,
     restartQ: "Kale yıkma yeniden başlasın mı?",
     restartHint: "Kaleler onarılır, sorular yeniden karışır.",
-    correctMsg: "Doğru! Mancınık taşı fırlattı",
-    winDelayMs: 2600,
+    correctMsg: "Doğru! Şimdi nişan al",
+    winDelayMs: 2000,
   },
 } as const;
 
@@ -98,6 +100,78 @@ function TugInner({ kind }: { kind: TugKind }) {
   const pool = useMemo(() => (lessonId ? (TUG_POOLS[lessonId] ?? []).map(toLite) : []), [lessonId]);
   const ctx = useMemo(() => ({ pool, lookup: lookupAnyLite }), [pool]);
   const dispatch = useCallback((a: TugAction) => setState((prev) => (prev ? reduceTug(prev, a, ctx) : prev)), [ctx]);
+
+  // ── Kale yıkma: çek-bırak nişanı ve uçan taşlar ──
+  const stateRef = useRef(state);
+  const geometry = useRef<SiegeGeometry | null>(null);
+  const flightSeq = useRef(0);
+  const [aims, setAims] = useState<Record<Side, { power: number; path: Pt[] } | null>>({ left: null, right: null });
+  const [flights, setFlights] = useState<Record<Side, Flight | null>>({ left: null, right: null });
+  const [impacts, setImpacts] = useState<Record<Side, Impact | null>>({ left: null, right: null });
+  const flightsRef = useRef(flights);
+  useEffect(() => {
+    stateRef.current = state;
+    flightsRef.current = flights;
+  }, [state, flights]);
+  const easyAim = state?.settings.easyAim ?? false;
+
+  const plan = useCallback((side: Side, launch: Launch) => {
+    const g = geometry.current?.(side);
+    return g ? simulateShot(g.start, launch, g.target) : null;
+  }, []);
+  const onPull = useCallback(
+    (side: Side, pull: Pt | null, maxPull: number) => {
+      if (!pull) {
+        setAims((a) => ({ ...a, [side]: null }));
+        return;
+      }
+      const launch = launchFromPull(pull, maxPull, side);
+      const shot = plan(side, launch);
+      setAims((a) => ({ ...a, [side]: { power: launch.power, path: shot ? previewPath(shot, easyAim) : [] } }));
+    },
+    [plan, easyAim],
+  );
+  const fire = useCallback(
+    (side: Side, launch: Launch) => {
+      setAims((a) => ({ ...a, [side]: null }));
+      const s = stateRef.current;
+      if (!s || s.paused || s.winner || s.teams[side].phase !== "aim") return;
+      const now = performance.now();
+      const shot = plan(side, launch);
+      dispatch({ type: "FIRE", side, now });
+      if (!shot) {
+        dispatch({ type: "LAND", side, hit: false, now });
+        return;
+      }
+      flightSeq.current += 1;
+      const id = flightSeq.current;
+      setFlights((f) => ({ ...f, [side]: { id, shot, startedAt: now } }));
+    },
+    [plan, dispatch],
+  );
+  const landed = useCallback(
+    (side: Side) => {
+      const fl = flightsRef.current[side];
+      if (!fl) return;
+      dispatch({ type: "LAND", side, hit: fl.shot.hit, now: performance.now() });
+      setImpacts((i) => ({ ...i, [side]: { id: fl.id, at: fl.shot.end, hit: fl.shot.hit } }));
+      setFlights((f) => ({ ...f, [side]: null }));
+    },
+    [dispatch],
+  );
+
+  // Nişan süresi dolunca zayıf bir atış kendiliğinden yapılır (oyun akışı durmasın).
+  useEffect(() => {
+    if (!state || kind !== "siege" || state.paused || state.winner) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (const side of SIDES) {
+      const t = state.teams[side];
+      if (t.phase !== "aim") continue;
+      const wait = Math.max(0, (t.aimDeadline ?? 0) - performance.now()) + 20;
+      timers.push(setTimeout(() => fire(side, launchFromAngle(AUTO_POWER, 45, side)), wait));
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [state, kind, fire]);
 
   // Bireysel kale yıkma bitince öğrencilerin puanları genel tabloya işlenir (aynı oyun bir kez).
   useEffect(() => {
@@ -197,16 +271,38 @@ function TugInner({ kind }: { kind: TugKind }) {
       </header>
 
       {kind === "siege" ? (
-        <SiegeStage target={state.settings.target} names={names} players={state.players} winner={state.winner} shots={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
+        <SiegeStage
+          target={state.settings.target}
+          names={names}
+          players={state.players}
+          winner={state.winner}
+          hits={{ left: state.teams.left.hits ?? 0, right: state.teams.right.hits ?? 0 }}
+          cock={{ left: aims.left?.power ?? 0, right: aims.right?.power ?? 0 }}
+          preview={{ left: aims.left?.path ?? [], right: aims.right?.path ?? [] }}
+          flights={flights}
+          impacts={impacts}
+          onLanded={landed}
+          geometryRef={geometry}
+        />
       ) : (
         <RopeStage rope={state.rope} target={state.settings.target} names={names} winner={state.winner} pulls={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
       )}
 
       <div className="relative min-h-0">
         <div className="halves h-full">
-          <TugPanel side="left" state={state} name={names.left} dispatch={dispatch} correctMsg={cfg.correctMsg} />
-          <div className="divider" aria-hidden="true" />
-          <TugPanel side="right" state={state} name={names.right} dispatch={dispatch} correctMsg={cfg.correctMsg} />
+          {SIDES.map((side, i) => (
+            <TugSlot key={side} divider={i === 1}>
+              <TugPanel
+                side={side}
+                state={state}
+                name={names[side]}
+                dispatch={dispatch}
+                correctMsg={cfg.correctMsg}
+                onPull={(pull, max) => onPull(side, pull, max)}
+                onRelease={(pull, max) => fire(side, launchFromPull(pull, max, side))}
+              />
+            </TugSlot>
+          ))}
         </div>
 
         {state.paused && !state.winner && (
@@ -232,7 +328,10 @@ function TugInner({ kind }: { kind: TugKind }) {
                 {(["left", "right"] as Side[]).map((side) => (
                   <div key={side} className={`rounded-2xl border-4 p-3 ${side === "left" ? "border-left bg-left-soft" : "border-right bg-right-soft"}`}>
                     <div className="font-extrabold">{names[side]}</div>
-                    <div>{state.teams[side].correct} doğru · {state.teams[side].wrong} yanlış</div>
+                    <div>
+                      {state.teams[side].correct} doğru · {state.teams[side].wrong} yanlış
+                      {kind === "siege" && ` · 🎯 ${state.teams[side].hits ?? 0} isabet`}
+                    </div>
                     {duel && (
                       <div className="font-extrabold text-ok" data-testid={`duel-points-${side}`}>+{state.teams[side].correct * 10} puan genel tabloya eklendi</div>
                     )}
@@ -274,12 +373,40 @@ function TugInner({ kind }: { kind: TugKind }) {
   );
 }
 
-function TugPanel({ side, state, name, dispatch, correctMsg }: { side: Side; state: TugState; name: string; dispatch: (a: TugAction) => void; correctMsg: string }) {
+/** İki panelin arasına çizgi koyar (panel sırası korunur). */
+function TugSlot({ divider, children }: { divider: boolean; children: React.ReactNode }) {
+  return (
+    <>
+      {divider && <div className="divider" aria-hidden="true" />}
+      {children}
+    </>
+  );
+}
+
+function TugPanel({
+  side,
+  state,
+  name,
+  dispatch,
+  correctMsg,
+  onPull,
+  onRelease,
+}: {
+  side: Side;
+  state: TugState;
+  name: string;
+  dispatch: (a: TugAction) => void;
+  correctMsg: string;
+  onPull: (pull: Pt | null, maxPull: number) => void;
+  onRelease: (pull: Pt, maxPull: number) => void;
+}) {
   const team = state.teams[side];
   const item = currentTugItem(team);
   const q = item ? getAnyQuestion(item.questionId) : undefined;
-  const now = useNow(team.phase === "feedback" && !state.paused);
+  const now = useNow((team.phase === "feedback" || team.phase === "aim") && !state.paused);
   const fb = team.phase === "feedback" ? team.lastAnswer : null;
+  const aiming = team.phase === "aim" || team.phase === "flying";
+  const shotResult = team.phase === "feedback" && team.lastShot ? team.lastShot : null;
 
   // Soru ekrana çizilince dokunuşları aç.
   useEffect(() => {
@@ -298,19 +425,49 @@ function TugPanel({ side, state, name, dispatch, correctMsg }: { side: Side; sta
   const options = item.optionOrder.map((id) => q.options.find((o) => o.id === id)!);
   const correctOpt = q.options.find((o) => o.id === q.correctOptionId)!;
   const secondsLeft = fb && !fb.correct ? Math.max(1, Math.ceil((team.continueAt - (now || team.continueAt - state.settings.wrongLockMs)) / 1000)) : 0;
+  const aimLeft = Math.max(0, Math.ceil(((team.aimDeadline ?? 0) - (now || (team.aimDeadline ?? 0) - state.settings.aimMs)) / 1000));
+  const header = (
+    <header className="flex items-center gap-3">
+      <span className={`inline-flex items-center gap-2 text-[clamp(16px,2.6vh,30px)] font-extrabold ${side === "left" ? "text-left" : "text-right"}`}>
+        <SideIcon side={side} size={28} player={state.players?.[side]} />
+        <span className="text-ink">{name}</span>
+      </span>
+      <span className="ml-auto flex gap-2 text-[clamp(13px,2vh,22px)] font-bold">
+        <span className="chip bg-ok-soft text-ok" data-testid={`correct-${side}`}>✓ {team.correct}</span>
+        <span className="chip bg-bad-soft text-bad">✗ {team.wrong}</span>
+        {state.kind === "siege" && <span className="chip bg-warn-soft text-warn" data-testid={`hits-${side}`}>🎯 {team.hits ?? 0}</span>}
+      </span>
+    </header>
+  );
+
+  // Kale: doğru cevaptan sonra soru alanı nişan alanına döner; atıştan sonra kısa bir sonuç gösterilir.
+  if (aiming || shotResult) {
+    return (
+      <section className="team-panel compact" data-side={side} aria-label={`${name} alanı`} data-testid={`team-${side}`}>
+        {header}
+        <div className="flex min-h-0 flex-1 flex-col" data-qid={q.id} data-phase={team.phase}>
+          {aiming ? (
+            <AimPad
+              side={side}
+              secondsLeft={aimLeft}
+              disabled={state.paused || !!state.winner || team.phase !== "aim"}
+              flying={team.phase === "flying"}
+              onPull={onPull}
+              onRelease={onRelease}
+            />
+          ) : (
+            <div className={`shot-result anim-pop ${shotResult!.hit ? "hit" : "miss"}`} role="status" data-testid={`shot-${side}`}>
+              {shotResult!.hit ? "🎯 İsabet! Kale sarsıldı" : "Iska! Bir dahaki sefere"}
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="team-panel compact" data-side={side} aria-label={`${name} alanı`} data-testid={`team-${side}`}>
-      <header className="flex items-center gap-3">
-        <span className={`inline-flex items-center gap-2 text-[clamp(16px,2.6vh,30px)] font-extrabold ${side === "left" ? "text-left" : "text-right"}`}>
-          <SideIcon side={side} size={28} player={state.players?.[side]} />
-          <span className="text-ink">{name}</span>
-        </span>
-        <span className="ml-auto flex gap-2 text-[clamp(13px,2vh,22px)] font-bold">
-          <span className="chip bg-ok-soft text-ok" data-testid={`correct-${side}`}>✓ {team.correct}</span>
-          <span className="chip bg-bad-soft text-bad">✗ {team.wrong}</span>
-        </span>
-      </header>
+      {header}
       <div className="flex min-h-0 flex-1 flex-col gap-[clamp(4px,1vh,14px)]" data-qid={q.id} data-phase={team.phase}>
         <div className="flex min-h-[clamp(96px,18vh,250px)] flex-col items-center justify-center">
           {fb && !fb.correct ? (

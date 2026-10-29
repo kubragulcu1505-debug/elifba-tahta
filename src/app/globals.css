@@ -490,46 +490,29 @@ html[data-motion="reduce"] .confetti {
 .siege-arm {
   transform-box: view-box;
   transform-origin: 40px 20px;
+  transition: transform 80ms linear;
 }
 .siege-fire .siege-arm {
   animation: siege-arm 900ms ease-out;
 }
 @keyframes siege-arm {
   0% { transform: rotate(0deg); }
-  22% { transform: rotate(118deg); }
+  18% { transform: rotate(118deg); }
   60% { transform: rotate(118deg); }
   100% { transform: rotate(0deg); }
 }
 .siege-stone {
   position: absolute;
-  left: 20%;
-  top: 45%;
-  height: 11%;
+  width: clamp(12px, 1.3vw, 24px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #9ca3af, #4b5563 70%);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 35%, #d1d5db, #4b5563 70%);
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
-  opacity: 0;
-  animation:
-    siege-stone-x 780ms linear 180ms both,
-    siege-stone-y 780ms 180ms both,
-    siege-stone-show 780ms 180ms both;
-}
-@keyframes siege-stone-x {
-  from { left: 20%; }
-  to { left: 93%; }
-}
-@keyframes siege-stone-y {
-  0% { top: 45%; animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1); }
-  50% { top: -2%; animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
-  100% { top: 52%; }
-}
-@keyframes siege-stone-show {
-  0%, 96% { opacity: 1; }
-  100% { opacity: 0; }
+  z-index: 3;
 }
 .siege-hit {
-  animation: siege-shake 420ms ease-out 900ms;
+  animation: siege-shake 420ms ease-out;
 }
 @keyframes siege-shake {
   0%, 100% { transform: none; }
@@ -546,7 +529,7 @@ html[data-motion="reduce"] .confetti {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(120, 113, 108, 0.85) 0%, rgba(168, 162, 158, 0.5) 45%, transparent 70%);
   opacity: 0;
-  animation: siege-puff 700ms ease-out 900ms both;
+  animation: siege-puff 700ms ease-out both;
 }
 @keyframes siege-puff {
   0% { transform: scale(0.3); opacity: 0; }
@@ -554,7 +537,7 @@ html[data-motion="reduce"] .confetti {
   100% { transform: scale(1.7); opacity: 0; }
 }
 .siege-collapse {
-  animation: siege-collapse 1300ms ease-in 900ms forwards;
+  animation: siege-collapse 1300ms ease-in 250ms forwards;
 }
 @keyframes siege-collapse {
   0% { transform: none; opacity: 1; }
@@ -576,7 +559,7 @@ html[data-motion="reduce"] .confetti {
     radial-gradient(circle at 82% 55%, #94a3b8 0 11%, transparent 12%),
     linear-gradient(#a8a29e, #78716c);
   opacity: 0;
-  animation: siege-rubble 700ms ease-out 1700ms forwards;
+  animation: siege-rubble 700ms ease-out 1100ms forwards;
 }
 @keyframes siege-rubble {
   from { opacity: 0; transform: translateY(20%); }
@@ -587,7 +570,7 @@ html[data-motion="reduce"] .confetti {
   transform-origin: 0% 50%;
 }
 .siege-win .siege-flag {
-  animation: siege-flag 600ms ease-in-out 1100ms 5;
+  animation: siege-flag 600ms ease-in-out 400ms 5;
 }
 @keyframes siege-flag {
   0%, 100% { transform: scale(1); }
@@ -606,7 +589,7 @@ html[data-motion="reduce"] .confetti {
   display: block;
   height: 100%;
   background: linear-gradient(#4ade80, #16a34a);
-  transition: width 400ms ease-out 900ms;
+  transition: width 400ms ease-out;
 }
 
 /* ── Bireysel düello: oyuncu seçim ekranı ── */
@@ -933,3 +916,107 @@ html[data-motion="reduce"] .confetti {
 .duel-vs .duel-portrait-name {
   font-size: clamp(24px, 4.4vh, 52px);
 }
+
+/* ── Kale yıkma: çek-bırak nişanı ── */
+.siege-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.siege-dot {
+  position: absolute;
+  width: clamp(6px, 0.55vw, 11px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 2px solid #1f2937;
+}
+.siege-dot.left { border-color: var(--left); }
+.siege-dot.right { border-color: var(--right); }
+.siege-dust {
+  position: absolute;
+  width: clamp(30px, 3.5vw, 70px);
+  aspect-ratio: 2;
+  transform: translate(-50%, -70%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(120, 113, 108, 0.85), rgba(168, 162, 158, 0.4) 50%, transparent 72%);
+  opacity: 0;
+  animation: siege-dust 800ms ease-out both;
+}
+@keyframes siege-dust {
+  0% { opacity: 0; transform: translate(-50%, -70%) scale(0.3); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(1.6); }
+}
+.aim-pad {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: clamp(6px, 1vh, 14px);
+  border-radius: 22px;
+  border: 4px dashed var(--warn);
+  background: radial-gradient(ellipse at 50% 60%, #fff7d6, #fde68a 85%);
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.aim-pad[data-side="left"] { border-color: var(--left); }
+.aim-pad[data-side="right"] { border-color: var(--right); }
+.aim-pad.off { opacity: 0.6; cursor: default; }
+.aim-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+.aim-title {
+  font-weight: 900;
+  font-size: clamp(16px, 2.8vh, 32px);
+  text-align: center;
+}
+.aim-timer {
+  min-width: 1.8em;
+  padding: 0 0.4em;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 900;
+  font-size: clamp(18px, 3vh, 34px);
+  text-align: center;
+}
+.aim-sling {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.aim-power {
+  width: min(70%, 420px);
+  height: 16px;
+  border-radius: 8px;
+  background: rgba(31, 36, 48, 0.15);
+  overflow: hidden;
+}
+.aim-power > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #facc15 60%, #ef4444);
+}
+.shot-result {
+  margin: auto;
+  padding: clamp(14px, 3vh, 36px) clamp(20px, 3vw, 48px);
+  border-radius: 24px;
+  font-weight: 900;
+  font-size: clamp(24px, 5vh, 56px);
+  text-align: center;
+}
+.shot-result.hit { background: var(--ok-soft); color: var(--ok); border: 4px solid var(--ok); }
+.shot-result.miss { background: var(--surface-2); color: var(--ink-soft); border: 4px solid var(--line); }
