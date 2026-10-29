@@ -130,9 +130,9 @@ function DuelSelectInner() {
         )}
         {roster.classes.length === 1 && <span className="duel-chip">{roster.classes[0].name}</span>}
         <div className="duel-games" role="group" aria-label="Oyun">
-          {(["letters", "siege", "penalty"] as DuelGame[]).map((g) => (
+          {(["letters", "siege", "penalty", "dart"] as DuelGame[]).map((g) => (
             <TapButton key={g} className={`duel-game ${game === g ? "on" : ""}`} onTap={() => setDuel({ game: g })}>
-              {g === "letters" ? "🔤 " : g === "siege" ? "🏰 " : "⚽ "}
+              {g === "letters" ? "🔤 " : g === "siege" ? "🏰 " : g === "penalty" ? "⚽ " : "🎯 "}
               {DUEL_GAME_LABEL[g]}
             </TapButton>
           ))}

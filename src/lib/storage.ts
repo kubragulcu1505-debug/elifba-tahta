@@ -24,6 +24,8 @@ export interface Settings {
   easyAim: boolean;
   /** Penaltıda kazanmak için gereken gol. */
   penaltyTarget: number;
+  /** Dartta kazanmak için gereken puan. */
+  dartTarget: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -34,6 +36,7 @@ export const DEFAULT_SETTINGS: Settings = {
   siegeTarget: 15,
   easyAim: false,
   penaltyTarget: 5,
+  dartTarget: 50,
 };
 
 export interface GameRecord {
@@ -75,6 +78,8 @@ export interface Schema {
   activeSiege: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Penaltı oyunu. */
   activePenalty: { state: PenaltyState; savedAtEpoch: number; fresh?: boolean } | null;
+  /** Dart oyunu (penaltıyla aynı durum makinesi, ayrı kayıt). */
+  activeDart: { state: PenaltyState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Sınıflar ve öğrenciler (fotoğraflar ayrıca IndexedDB'de). */
   roster: Roster;
   /** Bireysel düello maçları; genel puan tablosu bunlardan hesaplanır. */
@@ -92,6 +97,7 @@ const DEFAULTS: Schema = {
   activeTug: null,
   activeSiege: null,
   activePenalty: null,
+  activeDart: null,
   roster: EMPTY_ROSTER,
   duels: [],
   ui: {},

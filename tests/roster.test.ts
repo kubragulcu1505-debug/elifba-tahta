@@ -31,7 +31,7 @@ test("genel tablo: puanlar toplanır, oyun türüne göre ayrılır, sıralama p
   const rows = leaderboard(students, recs);
   const by = Object.fromEntries(rows.map((r) => [r.student.id, r]));
   assert.equal(by.a.points, 350);
-  assert.deepEqual(by.a.byGame, { letters: 200, siege: 150, penalty: 0 });
+  assert.deepEqual(by.a.byGame, { letters: 200, siege: 150, penalty: 0, dart: 0 });
   assert.equal(by.a.matches, 2);
   assert.equal(by.a.wins, 1);
   assert.equal(by.b.points, 250);

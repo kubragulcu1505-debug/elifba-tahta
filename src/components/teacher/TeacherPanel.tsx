@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { questionsForLesson, GAME_LESSONS } from "@/content/index";
 import { usePersisted, update, write, exportAll, resetAll, downloadJson, storageAvailable, useHydrated, DEFAULT_SETTINGS, type Settings } from "@/lib/storage";
-import { startCompetition, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
+import { startCompetition, startDart, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
 import { formatMs } from "@/lib/game";
 import { Ar, RichText } from "@/components/Arabic";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -105,6 +105,9 @@ function TeacherPanelInner() {
                       <button type="button" className="btn btn-ghost !min-h-10 !py-1 text-sm" onClick={() => { startPenalty(l.id); router.push("/penalti"); }}>
                         Penaltı
                       </button>
+                      <button type="button" className="btn btn-ghost !min-h-10 !py-1 text-sm" onClick={() => { startDart(l.id); router.push("/dart"); }}>
+                        Dart
+                      </button>
                       {l.gameLessonId ? (
                         <span className="text-sm text-ink-soft">Oyun: {LESSON_BY_ID.get(l.gameLessonId)?.title}</span>
                       ) : (
@@ -189,6 +192,20 @@ function TeacherPanelInner() {
                 data-testid="penalty-target"
               />
               <span className="text-base text-ink-soft">Varsayılan 5. İlk doğru cevap veren penaltıyı kullanır; kaleci otomatik atlar. Bu kadar gol atan kazanır. Yeni başlatılan oyunlarda geçerlidir.</span>
+            </label>
+            <label className="flex flex-col gap-2 text-lg">
+              <span className="font-bold">Dart: kazanmak için gereken puan</span>
+              <input
+                type="number"
+                min={10}
+                max={200}
+                step={5}
+                value={settings.dartTarget}
+                onChange={(e) => setSettings({ dartTarget: Math.min(200, Math.max(10, Number(e.target.value) || 50)) })}
+                className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
+                data-testid="dart-target"
+              />
+              <span className="text-base text-ink-soft">Varsayılan 50. Kırmızı merkez 10, dışa doğru 7, 5, 3, 1 puan. Bu kadar puana ulaşan kazanır. Yeni başlatılan oyunlarda geçerlidir.</span>
             </label>
             <label className="flex items-start gap-3 text-lg">
               <input

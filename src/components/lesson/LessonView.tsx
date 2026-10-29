@@ -5,7 +5,7 @@ import { useState } from "react";
 import { LESSON_BY_ID, UNIT_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { PRACTICE_POOLS, questionsForLesson, gameLessonOf, AUDIO_CATALOG } from "@/content/index";
 import { usePersisted } from "@/lib/storage";
-import { startCompetition, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
+import { startCompetition, startDart, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
 import { Ar, RichText } from "@/components/Arabic";
 import { TapButton } from "@/components/TapButton";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -70,6 +70,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
     ["halat", "Halat çekme"],
     ["kale", "Kale yıkma"],
     ["penalti", "Penaltı"],
+    ["dart", "Dart"],
     ["tekrar", "Tekrar"],
     ...(audioItems.length ? [["ses", "Dinle ve seç"]] : []),
     ...(lessonId === "u12-l1" ? [["okuma", "Yüzüne okuma"]] : []),
@@ -238,6 +239,24 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             }}
           >
             ⚽ Penaltıyı başlat
+          </TapButton>
+        </Section>
+
+        <Section id="dart" title="Dart oyunu">
+          <ul className="list-disc pl-6 text-lg">
+            <li>Kurallar penaltıdaki gibidir: iki takıma aynı soru gelir; ilk cevap doğruysa atışı o yapar, yanlışsa atış rakibe geçer.</li>
+            <li>Atış sırası gelenin tahtasında bir çizgi gidip gelir. Öğrenci “DUR!” düğmesine basınca ok çizginin olduğu yere saplanır.</li>
+            <li>Kırmızı merkez 10 puandır; merkezden uzaklaştıkça 7, 5, 3, 1; tahtanın dışı 0. Atış için 5 saniye vardır.</li>
+            <li>Önce {settings.dartTarget} puana ulaşan takım kazanır.</li>
+          </ul>
+          <TapButton
+            className="big-btn btn-primary mt-5"
+            onTap={() => {
+              startDart(lessonId);
+              router.push("/dart");
+            }}
+          >
+            🎯 Dartı başlat
           </TapButton>
         </Section>
 

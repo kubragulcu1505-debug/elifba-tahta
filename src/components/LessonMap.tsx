@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { startPenalty, startSiege, startTug } from "@/lib/session";
+import { startDart, startPenalty, startSiege, startTug } from "@/lib/session";
 import { LESSON_ORDER } from "@/content/lessons";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID } from "@/content/lessons";
 import { usePersisted } from "@/lib/storage";
@@ -33,14 +33,14 @@ export function LessonMap() {
       <section className="card flex flex-wrap items-center gap-4 border-left p-5" aria-labelledby="duello-h">
         <h2 id="duello-h" className="text-2xl font-extrabold">⚔ Bireysel düello</h2>
         <p className="min-w-60 flex-1 text-ink-soft">
-          İki öğrenci fotoğrafından kendini seçer ve bire bir yarışır: Harfler oyunu, Kale yıkma ya da Penaltı. Her doğru cevap 10 puan; bütün puanlar genel tabloya işlenir.
+          İki öğrenci fotoğrafından kendini seçer ve bire bir yarışır: Harfler oyunu, Kale yıkma, Penaltı ya da Dart. Her doğru cevap 10 puan; bütün puanlar genel tabloya işlenir.
         </p>
         <Link href="/duello" className="btn btn-primary inline-flex items-center">⚔ Oyuncu seç</Link>
         <Link href="/tablo" className="btn btn-ghost inline-flex items-center">🏆 Genel tablo</Link>
       </section>
       <section className="card flex flex-wrap items-center gap-4 border-warn p-5" aria-labelledby="halat-h">
-        <h2 id="halat-h" className="text-2xl font-extrabold">🪢 Halat çekme · 🏰 Kale yıkma · ⚽ Penaltı</h2>
-        <p className="min-w-60 flex-1 text-ink-soft">Sınırsız sorulu iki takımlı oyunlar. Doğru cevap halatı çeker, rakip kaleye mancınıkla taş atar ya da penaltı kazandırır. Her derste oynanabilir.</p>
+        <h2 id="halat-h" className="text-2xl font-extrabold">🪢 Halat çekme · 🏰 Kale yıkma · ⚽ Penaltı · 🎯 Dart</h2>
+        <p className="min-w-60 flex-1 text-ink-soft">Sınırsız sorulu iki takımlı oyunlar. Doğru cevap halatı çeker, rakip kaleye mancınıkla taş atar, penaltı ya da dart atışı kazandırır. Her derste oynanabilir.</p>
         <label className="flex items-center gap-2 text-lg">
           <span className="font-bold">Ders:</span>
           <select value={tugLesson} onChange={(e) => setTugLesson(e.target.value)} className="min-h-12 max-w-[60vw] rounded-xl border-2 border-line px-3 text-lg">
@@ -78,6 +78,16 @@ export function LessonMap() {
           }}
         >
           ⚽ Penaltı
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            startDart(tugLesson);
+            router.push("/dart");
+          }}
+        >
+          🎯 Dart
         </button>
       </section>
       {UNITS.map((u) => (

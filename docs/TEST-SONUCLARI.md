@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 58/58 geçti |
+| Otomatik testler (`npm test`) | 62/62 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,15 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Dart oyunu (29 Ekim 2026)
+
+- Gidip gelen çizgi soldan başlıyor, ortadan geçiyor, sağa varıp geri dönüyor: geçti.
+- Puan: kırmızı merkez 10; merkezden uzaklaştıkça 7, 5, 3, 1; tahtanın dışı 0: geçti.
+- İlk doğru cevap atışı yapıyor; “DUR” anındaki yere göre puan alıyor (merkezde 10, en solda 0); yanlışta atış rakibe geçiyor; dartta penaltı vuruşu kabul edilmiyor: geçti.
+- Önce 50 puana ulaşan kazanıyor; duraklatmada çizgi bekliyor, devam edince kaldığı yerden sürüyor: geçti.
+- Tarayıcıda: ana sayfadaki “🎯 Dart” düğmesi /dart oyununu açtı; halkalı tahta, kırmızı merkez ve tahtada gidip gelen çizgi, atış alanında halka renkli şerit, kayan işaret ve DUR düğmesi göründü. Öğretmen oyunu kendisi oynarken skor 10/50'den 17/50'ye çıktı (kırmızıya isabet dahil).
+- Denenmedi: bu değişiklikten sonra üretim derlemesi (`npm run build`) çalıştırılmadı; öğretmen tarayıcıda oynarken geliştirme sunucusu durdurulmadı. Tip denetimi, lint ve 62 test geçti.
 
 ## Penaltı vuruş süresi 5 saniye (29 Ekim 2026)
 

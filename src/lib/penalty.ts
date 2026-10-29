@@ -6,6 +6,9 @@
 // - Kaleci otomatik atlar (sol/orta/sağ); topla aynı tarafa atlarsa kurtarır.
 // - Kimse süre içinde cevap vermezse soru geçer. Yanlış cevap veren bir sonraki soruda 1 saniye geç başlar.
 // - Önce `target` gol atan kazanır.
+// Dart oyunu da aynı makineyi kullanır (kind: "dart"): atış sırası gelen öğrencinin tahtasında bir çizgi
+// gidip gelir; "DUR" dediği anda ok çizginin olduğu yere saplanır. Kırmızı merkez 10 puandır, merkezden
+// uzaklaştıkça puan azalır. Önce `target` puana ulaşan kazanır.
 import { roundOrder, SIDES, type DuelPlayer, type QuestionLite, type Side } from "./game.ts";
 import { hashSeed, mulberry32, shuffle } from "./rng.ts";
 
@@ -25,6 +28,34 @@ export interface PenaltySettings {
 }
 
 export const PENALTY_DEFAULTS: PenaltySettings = { target: 5, answerMs: 10000, kickMs: 5000, inputGuardMs: 400, resultMs: 1800, wrongDelayMs: 1000 };
+/** Dartta kazanmak için gereken puan (varsayılan). */
+export const DART_TARGET = 50;
+
+export type ShootoutKind = "penalty" | "dart";
+
+/** Dart çizgisinin bir gidiş-dönüş süresi (ms) ve tahtanın yarıçapına göre gidip geldiği genişlik. */
+export const DART_SWEEP_MS = 1600;
+export const DART_RANGE = 1.15;
+/** Halkalar: merkezden uzaklık (tahtanın yarıçapına oranla) → puan. Kırmızı merkez en yüksek puandır. */
+export const DART_RINGS: { upTo: number; points: number }[] = [
+  { upTo: 0.1, points: 10 },
+  { upTo: 0.3, points: 7 },
+  { upTo: 0.5, points: 5 },
+  { upTo: 0.75, points: 3 },
+  { upTo: 1, points: 1 },
+];
+
+/** Gidip gelen çizginin konumu: -DART_RANGE (sol) … +DART_RANGE (sağ); 0 tahtanın merkezi. Soldan başlar. */
+export function sweepPos(elapsedMs: number, periodMs = DART_SWEEP_MS): number {
+  const u = Math.max(0, elapsedMs) / periodMs;
+  return DART_RANGE * (2 * Math.abs(2 * (u - Math.floor(u + 0.5))) - 1);
+}
+
+/** Merkeze uzaklığa göre puan; tahtanın dışı 0. */
+export function dartPoints(pos: number): number {
+  const d = Math.abs(pos);
+  return DART_RINGS.find((r) => d <= r.upTo)?.points ?? 0;
+}
 
 export type Col = -1 | 0 | 1;
 export type PenaltyPhase = "loading" | "question" | "kick" | "flying" | "result" | "finished";
@@ -43,14 +74,19 @@ export interface Kick {
 
 export interface ShotResult {
   shooter: Side;
+  /** Penaltı vuruşu (dartta kullanılmaz). */
   kick: Kick;
   keeperCol: Col;
+  /** Penaltıda gol; dartta tahtaya isabet. */
   goal: boolean;
+  /** Dart: okun saplandığı yer (-DART_RANGE … +DART_RANGE) ve aldığı puan. */
+  dart?: { pos: number; points: number };
 }
 
 export interface PenaltyState {
   id: string;
-  kind: "penalty";
+  /** Eski kayıtlarda yoktur ve penaltı sayılır. */
+  kind: ShootoutKind;
   lessonId: string;
   seed: string;
   players?: Record<Side, DuelPlayer>;
@@ -62,11 +98,14 @@ export interface PenaltyState {
   inputOpensAt: Record<Side, number>;
   answerDeadline: number;
   kickDeadline: number;
+  /** Dart: çizginin gidip gelmeye başladığı an (duraklatmada kaydırılır). */
+  aimStart: number;
   continueAt: number;
   /** Bu sorudaki ilk (ve belirleyici) cevap. */
   first: { side: Side; optionId: string; correct: boolean } | null;
   shooter: Side | null;
   shot: ShotResult | null;
+  /** Penaltıda gol, dartta toplam puan. */
   goals: Record<Side, number>;
   correct: Record<Side, number>;
   wrong: Record<Side, number>;
@@ -85,6 +124,7 @@ export type PenaltyAction =
   | { type: "ANSWER"; side: Side; questionId: string; optionId: string; now: number }
   | { type: "TIMEOUT"; now: number }
   | { type: "KICK"; kick: Kick; now: number }
+  | { type: "STOP"; now: number }
   | { type: "LANDED"; now: number }
   | { type: "NEXT"; now: number }
   | { type: "PAUSE"; now: number }
@@ -96,6 +136,9 @@ export interface PenaltyContext {
 }
 
 const other = (s: Side): Side => (s === "left" ? "right" : "left");
+
+/** Süre dolunca yapılan zayıf vuruş: ortaya, alttan. */
+export const AUTO_KICK: Kick = { col: 0, row: 0, out: null };
 const keyOf = (q: QuestionLite | undefined, id: string) => q?.stimulus ?? id;
 const both = <T>(v: T): Record<Side, T> => ({ left: v, right: v });
 
@@ -110,15 +153,23 @@ export function makePenaltyDeck(pool: QuestionLite[], seed: string, cycle: numbe
   return order.map((q) => ({ questionId: q.id, order: { left: shuffle(q.optionIds, rand), right: shuffle(q.optionIds, rand) } }));
 }
 
-export function createPenalty(args: { lessonId: string; seed: string; pool: QuestionLite[]; settings?: Partial<PenaltySettings>; players?: Record<Side, DuelPlayer> }): PenaltyState {
+export function createPenalty(args: {
+  lessonId: string;
+  seed: string;
+  pool: QuestionLite[];
+  settings?: Partial<PenaltySettings>;
+  players?: Record<Side, DuelPlayer>;
+  kind?: ShootoutKind;
+}): PenaltyState {
   if (args.pool.length === 0) throw new Error("Oyun için soru havuzu boş");
+  const kind = args.kind ?? "penalty";
   return {
-    id: `penalty-${args.lessonId}-${args.seed}`,
-    kind: "penalty",
+    id: `${kind}-${args.lessonId}-${args.seed}`,
+    kind,
     lessonId: args.lessonId,
     seed: args.seed,
     ...(args.players ? { players: args.players } : {}),
-    settings: { ...PENALTY_DEFAULTS, ...args.settings },
+    settings: { ...PENALTY_DEFAULTS, ...(kind === "dart" ? { target: DART_TARGET } : {}), ...args.settings },
     deck: makePenaltyDeck(args.pool, args.seed, 0),
     index: 0,
     cycle: 0,
@@ -126,6 +177,7 @@ export function createPenalty(args: { lessonId: string; seed: string; pool: Ques
     inputOpensAt: both(0),
     answerDeadline: 0,
     kickDeadline: 0,
+    aimStart: 0,
     continueAt: 0,
     first: null,
     shooter: null,
@@ -176,8 +228,6 @@ export function kickFromSwipe(swipe: { x: number; y: number }, maxLen: number): 
   return { col, row, out: null };
 }
 
-/** Süre dolunca yapılan zayıf vuruş: ortaya, alttan. */
-export const AUTO_KICK: Kick = { col: 0, row: 0, out: null };
 
 export function reducePenalty(s: PenaltyState, a: PenaltyAction, ctx: PenaltyContext): PenaltyState {
   switch (a.type) {
@@ -208,6 +258,7 @@ export function reducePenalty(s: PenaltyState, a: PenaltyAction, ctx: PenaltyCon
         first: { side: a.side, optionId: a.optionId, correct },
         shooter: correct ? a.side : other(a.side),
         kickDeadline: a.now + s.settings.kickMs,
+        aimStart: a.now,
         correct: { ...s.correct, [a.side]: s.correct[a.side] + (correct ? 1 : 0) },
         wrong: { ...s.wrong, [a.side]: s.wrong[a.side] + (correct ? 0 : 1) },
         slow: { ...both(false), [a.side]: !correct },
@@ -217,8 +268,20 @@ export function reducePenalty(s: PenaltyState, a: PenaltyAction, ctx: PenaltyCon
       if (s.paused || s.winner || s.phase !== "question" || a.now < s.answerDeadline) return s;
       return { ...s, phase: "result", first: null, shooter: null, shot: null, continueAt: a.now + s.settings.resultMs };
     }
+    case "STOP": {
+      // Dart: ok, çizginin o anki yerine saplanır.
+      if (s.kind !== "dart" || s.paused || s.winner || s.phase !== "kick" || !s.shooter) return s;
+      const pos = sweepPos(a.now - s.aimStart);
+      const points = dartPoints(pos);
+      return {
+        ...s,
+        phase: "flying",
+        shot: { shooter: s.shooter, kick: AUTO_KICK, keeperCol: 0, goal: points > 0, dart: { pos, points } },
+        kicks: { ...s.kicks, [s.shooter]: s.kicks[s.shooter] + 1 },
+      };
+    }
     case "KICK": {
-      if (s.paused || s.winner || s.phase !== "kick" || !s.shooter) return s;
+      if (s.kind === "dart" || s.paused || s.winner || s.phase !== "kick" || !s.shooter) return s;
       const keeperCol = keeperFor(s.seed, s.cycle, s.index);
       const goal = a.kick.out === null && a.kick.col !== keeperCol;
       return {
@@ -232,7 +295,8 @@ export function reducePenalty(s: PenaltyState, a: PenaltyAction, ctx: PenaltyCon
       // Top havadayken oyun duraklatılsa bile sonuç işlenir.
       if (s.phase !== "flying" || !s.shot || s.winner) return s;
       const shooter = s.shot.shooter;
-      const goals = { ...s.goals, [shooter]: s.goals[shooter] + (s.shot.goal ? 1 : 0) };
+      const add = s.shot.dart ? s.shot.dart.points : s.shot.goal ? 1 : 0;
+      const goals = { ...s.goals, [shooter]: s.goals[shooter] + add };
       const winner = goals[shooter] >= s.settings.target ? shooter : null;
       return { ...s, goals, winner, phase: winner ? "finished" : "result", continueAt: a.now + s.settings.resultMs };
     }
@@ -265,6 +329,7 @@ export function reducePenalty(s: PenaltyState, a: PenaltyAction, ctx: PenaltyCon
         inputOpensAt: s.phase === "question" ? { left: Math.max(s.inputOpensAt.left + d, a.now + g), right: Math.max(s.inputOpensAt.right + d, a.now + g) } : s.inputOpensAt,
         answerDeadline: s.answerDeadline + d,
         kickDeadline: s.kickDeadline + d,
+        aimStart: (s.aimStart ?? 0) + d,
         continueAt: s.continueAt + d,
       };
     }
@@ -277,6 +342,7 @@ function shiftTimes(s: PenaltyState, delta: number): PenaltyState {
     inputOpensAt: { left: s.inputOpensAt.left + delta, right: s.inputOpensAt.right + delta },
     answerDeadline: s.answerDeadline + delta,
     kickDeadline: s.kickDeadline + delta,
+    aimStart: (s.aimStart ?? 0) + delta,
     continueAt: s.continueAt + delta,
   };
 }

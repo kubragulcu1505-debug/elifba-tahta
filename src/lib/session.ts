@@ -53,6 +53,14 @@ export function startPenalty(lessonId: string, players?: Players): PenaltyState 
   return state;
 }
 
+/** Dart oyununu başlatır (penaltıyla aynı kurallar; atış gidip gelen çizgiyi durdurarak). */
+export function startDart(lessonId: string, players?: Players): PenaltyState {
+  const pool = (TUG_POOLS[lessonId] ?? []).map(toLite);
+  const state = createPenalty({ lessonId, seed: newSeed(), pool, players, kind: "dart", settings: { target: read("settings").dartTarget } });
+  write("activeDart", { state, savedAtEpoch: Date.now(), fresh: true });
+  return state;
+}
+
 /** Bireysel düelloyu başlatır ve oyunun sayfa yolunu döndürür. */
 export function startDuel(game: DuelGame, lessonId: string, players: Record<Side, DuelPlayer>): string {
   if (game === "letters") {
@@ -62,6 +70,10 @@ export function startDuel(game: DuelGame, lessonId: string, players: Record<Side
   if (game === "penalty") {
     startPenalty(lessonId, players);
     return "/penalti";
+  }
+  if (game === "dart") {
+    startDart(lessonId, players);
+    return "/dart";
   }
   startSiege(lessonId, players);
   return "/kale";
@@ -159,13 +171,13 @@ export function recordFinishedSiege(state: TugState): void {
   );
 }
 
-/** Biten bireysel penaltıyı genel tabloya bir kez işler. */
+/** Biten bireysel penaltıyı ya da dartı genel tabloya bir kez işler. */
 export function recordFinishedPenalty(state: PenaltyState): void {
   if (!state.players || !state.winner) return;
   saveDuel(
     makeDuelRecord({
       id: state.id,
-      game: "penalty",
+      game: state.kind === "dart" ? "dart" : "penalty",
       lessonId: state.lessonId,
       finishedAtEpoch: Date.now(),
       players: state.players,

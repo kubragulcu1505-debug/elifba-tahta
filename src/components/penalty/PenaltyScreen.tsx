@@ -1,5 +1,6 @@
 "use client";
-// Penaltı oyunu ekranı: iki tarafa aynı soru, ilk cevap belirleyici; penaltıyı kullanan topu kaydırarak vurur.
+// Penaltı ve dart ekranı: iki tarafa aynı soru, ilk cevap belirleyici. Penaltıda atış sırası gelen topu
+// kaydırarak vurur; dartta gidip gelen çizgiyi "DUR" ile durdurur.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,8 +14,9 @@ import {
   type Kick,
   type PenaltyAction,
   type PenaltyState,
+  type ShootoutKind,
 } from "@/lib/penalty";
-import { lookupAnyLite, recordFinishedPenalty, sideNames, startPenalty, toLite } from "@/lib/session";
+import { lookupAnyLite, recordFinishedPenalty, sideNames, startDart, startPenalty, toLite } from "@/lib/session";
 import { read, write, usePersisted, useHydrated } from "@/lib/storage";
 import { LESSON_BY_ID } from "@/content/lessons";
 import { TUG_POOLS, getAnyQuestion } from "@/content/index";
@@ -24,15 +26,48 @@ import { Ar, RichText } from "@/components/Arabic";
 import { Confetti, Trophy } from "@/components/Celebration";
 import { PenaltyStage, shotText } from "./PenaltyStage";
 import { KickPad } from "./KickPad";
+import { DartStage, dartText } from "./DartStage";
+import { StopPad } from "./StopPad";
 
-/** Topun kaleye varma süresi (ms); CSS geçişiyle aynı. */
-const FLIGHT_MS = 750;
+/** Penaltı ve dart aynı ekranı kullanır; değişen yazılar ve süreler buradadır. */
+const KINDS = {
+  penalty: {
+    key: "activePenalty",
+    chip: "Penaltı · sınırsız soru",
+    none: "Aktif penaltı oyunu yok",
+    noneHint: "Bir ders sayfasından “Penaltı” oyununu başlatın.",
+    /** Topun kaleye varma süresi (ms); CSS geçişiyle aynı. */
+    flightMs: 750,
+    mine: "Doğru! Penaltıyı sen kullan.",
+    gift: (rival: string) => `${rival} yanlış cevap verdi, penaltı senin!`,
+    waiting: (shooter: string) => `🧤 ${shooter} penaltı kullanıyor…`,
+    moving: "Top gidiyor…",
+    stat: (score: number, shots: number) => `⚽ ${score} gol / ${shots} penaltı`,
+    rule: (t: number) => `İki tarafa aynı soru gelir; ilk cevap doğruysa penaltıyı o kullanır, yanlışsa penaltı rakibe geçer. Önce ${t} gol atan kazanır.`,
+    restartQ: "Penaltı oyunu yeniden başlasın mı?",
+  },
+  dart: {
+    key: "activeDart",
+    chip: "Dart · sınırsız soru",
+    none: "Aktif dart oyunu yok",
+    noneHint: "Bir ders sayfasından “Dart” oyununu başlatın.",
+    /** Okun tahtaya saplanma süresi (ms); CSS animasyonuyla aynı. */
+    flightMs: 450,
+    mine: "Doğru! Okunu sen at.",
+    gift: (rival: string) => `${rival} yanlış cevap verdi, atış senin!`,
+    waiting: (shooter: string) => `🎯 ${shooter} atış yapıyor…`,
+    moving: "Ok gidiyor…",
+    stat: (score: number, shots: number) => `🎯 ${score} puan / ${shots} atış`,
+    rule: (t: number) => `İki tarafa aynı soru gelir; ilk cevap doğruysa atışı o yapar, yanlışsa atış rakibe geçer. Kırmızı merkez 10, dışa doğru 7, 5, 3, 1 puan. Önce ${t} puana ulaşan kazanır.`,
+    restartQ: "Dart oyunu yeniden başlasın mı?",
+  },
+} as const;
 
 const isLongArabic = (s: string) => [...s].filter((c) => c !== " ").length > 7 || s.includes(" ");
 const isLongText = (s: string) => s.length > 22;
 
-function loadInitial(): PenaltyState | null {
-  const at = read("activePenalty");
+function loadInitial(kind: ShootoutKind): PenaltyState | null {
+  const at = read(KINDS[kind].key);
   if (!at) return null;
   return at.fresh ? at.state : restorePenalty(at.state, performance.now());
 }
@@ -53,18 +88,19 @@ function useNow(active: boolean): number {
   return now;
 }
 
-export function PenaltyScreen() {
+export function PenaltyScreen({ kind = "penalty" }: { kind?: ShootoutKind }) {
   const hydrated = useHydrated();
-  const active = usePersisted("activePenalty");
+  const active = usePersisted(KINDS[kind].key);
   if (!hydrated) return <div className="p-10 text-2xl">Hazırlanıyor…</div>;
   // Yeni oyun başlatılınca bileşen sıfırdan kurulsun (Next.js sayfa durumunu saklar).
-  return <PenaltyInner key={active?.state.id ?? "none"} />;
+  return <PenaltyInner key={active?.state.id ?? "none"} kind={kind} />;
 }
 
-function PenaltyInner() {
+function PenaltyInner({ kind }: { kind: ShootoutKind }) {
   const router = useRouter();
+  const cfg = KINDS[kind];
   const settings = usePersisted("settings");
-  const [state, setState] = useState<PenaltyState | null>(loadInitial);
+  const [state, setState] = useState<PenaltyState | null>(() => loadInitial(kind));
   const [aim, setAim] = useState<Kick | null>(null);
   const [isFs, setIsFs] = useState(false);
   const [confirmRestart, setConfirmRestart] = useState(false);
@@ -97,10 +133,10 @@ function PenaltyInner() {
   // Kaydet (başka bir oyun başlatıldıysa üzerine yazma).
   useEffect(() => {
     if (!state) return;
-    const cur = read("activePenalty");
+    const cur = read(cfg.key);
     if (!cur || cur.state.id !== state.id) return;
-    write("activePenalty", { state: snapshotPenalty(state, performance.now(), ctx), savedAtEpoch: Date.now(), fresh: false });
-  }, [state, ctx]);
+    write(cfg.key, { state: snapshotPenalty(state, performance.now(), ctx), savedAtEpoch: Date.now(), fresh: false });
+  }, [state, ctx, cfg.key]);
 
   // Soru ekrana çizilince süre başlar.
   const phase = state?.phase;
@@ -123,14 +159,16 @@ function PenaltyInner() {
     if (!state || state.winner) return;
     const at = (t: number, a: () => void) => setTimeout(a, Math.max(0, t - performance.now()) + 20);
     let timer: ReturnType<typeof setTimeout> | null = null;
-    if (state.phase === "flying") timer = setTimeout(() => dispatch({ type: "LANDED", now: performance.now() }), FLIGHT_MS);
+    if (state.phase === "flying") timer = setTimeout(() => dispatch({ type: "LANDED", now: performance.now() }), cfg.flightMs);
     else if (!state.paused && state.phase === "question") timer = at(state.answerDeadline, () => dispatch({ type: "TIMEOUT", now: performance.now() }));
-    else if (!state.paused && state.phase === "kick") timer = at(state.kickDeadline, () => kick(AUTO_KICK));
+    // Süre dolunca: penaltıda ortaya zayıf vuruş, dartta çizgi o an neredeyse oraya atış.
+    else if (!state.paused && state.phase === "kick")
+      timer = at(state.kickDeadline, () => (kind === "dart" ? dispatch({ type: "STOP", now: performance.now() }) : kick(AUTO_KICK)));
     else if (!state.paused && state.phase === "result") timer = at(state.continueAt, () => dispatch({ type: "NEXT", now: performance.now() }));
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [state, dispatch, kick]);
+  }, [state, dispatch, kick, kind, cfg.flightMs]);
 
   // Sekme gizlenince duraklat.
   useEffect(() => {
@@ -156,8 +194,8 @@ function PenaltyInner() {
   if (!state) {
     return (
       <main className="mx-auto max-w-3xl p-10 text-center">
-        <h1 className="text-3xl font-extrabold">Aktif penaltı oyunu yok</h1>
-        <p className="mt-4 text-xl text-ink-soft">Bir ders sayfasından “Penaltı” oyununu başlatın.</p>
+        <h1 className="text-3xl font-extrabold">{cfg.none}</h1>
+        <p className="mt-4 text-xl text-ink-soft">{cfg.noneHint}</p>
         <Link href="/" className="btn btn-primary mt-8 inline-flex items-center">Ders haritasına git</Link>
       </main>
     );
@@ -168,7 +206,8 @@ function PenaltyInner() {
   const names = duel ? sideNames(state.players) : settings.teamNames;
   const restart = () => {
     setConfirmRestart(false);
-    startPenalty(state.lessonId, state.players);
+    if (kind === "dart") startDart(state.lessonId, state.players);
+    else startPenalty(state.lessonId, state.players);
   };
   const toggleFs = async () => {
     try {
@@ -184,7 +223,7 @@ function PenaltyInner() {
       <header className="flex items-center gap-3 border-b-2 border-line bg-surface px-4 py-2">
         <div className="min-w-0 flex-1 truncate text-lg font-extrabold">
           {lesson?.title}
-          <span className="ml-3 chip bg-warn-soft text-warn">{duel ? "Bireysel düello · " : ""}Penaltı · sınırsız soru</span>
+          <span className="ml-3 chip bg-warn-soft text-warn">{duel ? "Bireysel düello · " : ""}{cfg.chip}</span>
         </div>
         <TapButton className="btn btn-primary" onTap={(now) => dispatch(state.paused ? { type: "RESUME", now } : { type: "PAUSE", now })}>
           {state.paused ? "▶ Devam" : "⏸ Duraklat"}
@@ -202,23 +241,38 @@ function PenaltyInner() {
         </TapButton>
       </header>
 
-      <PenaltyStage
-        names={names}
-        players={state.players}
-        goals={state.goals}
-        target={state.settings.target}
-        phase={state.phase}
-        shooter={state.shooter}
-        shot={state.shot}
-        aim={aim}
-        winner={state.winner}
-      />
+      {kind === "dart" ? (
+        <DartStage
+          names={names}
+          players={state.players}
+          scores={state.goals}
+          target={state.settings.target}
+          phase={state.phase}
+          shooter={state.shooter}
+          shot={state.shot}
+          aimStart={state.aimStart ?? 0}
+          pausedAt={state.paused ? state.pausedAt : null}
+          winner={state.winner}
+        />
+      ) : (
+        <PenaltyStage
+          names={names}
+          players={state.players}
+          goals={state.goals}
+          target={state.settings.target}
+          phase={state.phase}
+          shooter={state.shooter}
+          shot={state.shot}
+          aim={aim}
+          winner={state.winner}
+        />
+      )}
 
       <div className="relative min-h-0">
         <div className="halves h-full">
-          <PenaltyPanel side="left" state={state} names={names} dispatch={dispatch} onAim={setAim} onKick={kick} />
+          <PenaltyPanel side="left" kind={kind} state={state} names={names} dispatch={dispatch} onAim={setAim} onKick={kick} />
           <div className="divider" aria-hidden="true" />
-          <PenaltyPanel side="right" state={state} names={names} dispatch={dispatch} onAim={setAim} onKick={kick} />
+          <PenaltyPanel side="right" kind={kind} state={state} names={names} dispatch={dispatch} onAim={setAim} onKick={kick} />
         </div>
 
         {state.paused && !state.winner && (
@@ -247,7 +301,7 @@ function PenaltyInner() {
                   <div key={side} className={`rounded-2xl border-4 p-3 ${side === "left" ? "border-left bg-left-soft" : "border-right bg-right-soft"}`}>
                     <div className="font-extrabold">{names[side]}</div>
                     <div>
-                      {state.correct[side]} doğru · {state.wrong[side]} yanlış · ⚽ {state.goals[side]} gol / {state.kicks[side]} penaltı
+                      {state.correct[side]} doğru · {state.wrong[side]} yanlış · {cfg.stat(state.goals[side], state.kicks[side])}
                     </div>
                     {duel && (
                       <div className="font-extrabold text-ok" data-testid={`duel-points-${side}`}>+{state.correct[side] * 10} puan genel tabloya eklendi</div>
@@ -256,7 +310,7 @@ function PenaltyInner() {
                 ))}
               </div>
               <p className="text-base text-ink-soft">
-                İki tarafa aynı soru gelir; ilk cevap doğruysa penaltıyı o kullanır, yanlışsa penaltı rakibe geçer. Önce {state.settings.target} gol atan kazanır.{" "}
+                {cfg.rule(state.settings.target)}{" "}
                 {duel ? "Bireysel düelloda her doğru cevap 10 puandır; iki oyuncunun puanı da genel tabloya eklenir." : "Takım sonucu tek tek öğrencilerin düzeyini göstermez."}
               </p>
               <div className="flex flex-wrap justify-center gap-3">
@@ -277,7 +331,7 @@ function PenaltyInner() {
         {confirmRestart && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-ink/40">
             <div className="card flex flex-col items-center gap-6 p-10 text-center">
-              <div className="text-3xl font-extrabold">Penaltı oyunu yeniden başlasın mı?</div>
+              <div className="text-3xl font-extrabold">{cfg.restartQ}</div>
               <p className="text-xl text-ink-soft">Skor sıfırlanır, sorular yeniden karışır.</p>
               <div className="flex gap-4">
                 <TapButton className="big-btn btn-primary" onTap={restart}>Evet, yeniden başlat</TapButton>
@@ -293,6 +347,7 @@ function PenaltyInner() {
 
 function PenaltyPanel({
   side,
+  kind,
   state,
   names,
   dispatch,
@@ -300,12 +355,14 @@ function PenaltyPanel({
   onKick,
 }: {
   side: Side;
+  kind: ShootoutKind;
   state: PenaltyState;
   names: Record<Side, string>;
   dispatch: (a: PenaltyAction) => void;
   onAim: (k: Kick | null) => void;
   onKick: (k: Kick) => void;
 }) {
+  const cfg = KINDS[kind];
   const item = currentPenaltyItem(state);
   const q = item ? getAnyQuestion(item.questionId) : undefined;
   const now = useNow((state.phase === "question" || state.phase === "kick") && !state.paused);
@@ -320,7 +377,7 @@ function PenaltyPanel({
       <span className="ml-auto flex gap-2 text-[clamp(13px,2vh,22px)] font-bold">
         <span className="chip bg-ok-soft text-ok" data-testid={`correct-${side}`}>✓ {state.correct[side]}</span>
         <span className="chip bg-bad-soft text-bad">✗ {state.wrong[side]}</span>
-        <span className="chip bg-warn-soft text-warn">⚽ {state.goals[side]}</span>
+        <span className="chip bg-warn-soft text-warn">{kind === "dart" ? "🎯" : "⚽"} {state.goals[side]}</span>
       </span>
     </header>
   );
@@ -364,7 +421,7 @@ function PenaltyPanel({
             {slow && <div className="pen-slow">⏳ Önceki soruda yanlış: 1 saniye bekle…</div>}
           </div>
           <footer className="flex min-h-[clamp(40px,6vh,70px)] items-center justify-center">
-            <span className="text-[clamp(13px,2vh,22px)] font-semibold text-ink-soft">Önce doğru cevaplayan penaltıyı kullanır!</span>
+            <span className="text-[clamp(13px,2vh,22px)] font-semibold text-ink-soft">{kind === "dart" ? "Önce doğru cevaplayan atışı yapar!" : "Önce doğru cevaplayan penaltıyı kullanır!"}</span>
           </footer>
         </div>
       </section>
@@ -375,7 +432,7 @@ function PenaltyPanel({
   const note = (
     <>
       {state.phase === "kick" && iShoot && (
-        <p className="pen-note ok">{state.first?.side === side ? "Doğru! Penaltıyı sen kullan." : `${rival} yanlış cevap verdi, penaltı senin!`}</p>
+        <p className="pen-note ok">{state.first?.side === side ? cfg.mine : cfg.gift(rival)}</p>
       )}
       {reveal && (
         <div className="anim-in w-full rounded-2xl border-4 border-ok bg-ok-soft p-[clamp(6px,1vh,16px)] text-center" role="status">
@@ -395,7 +452,16 @@ function PenaltyPanel({
       {header}
       <div className="flex min-h-0 flex-1 flex-col gap-[clamp(4px,1vh,12px)]" data-qid={q.id} data-phase={state.phase}>
         {note}
-        {state.phase === "kick" && iShoot ? (
+        {state.phase === "kick" && iShoot && kind === "dart" ? (
+          <StopPad
+            side={side}
+            secondsLeft={Math.max(0, Math.ceil((state.kickDeadline - (now || state.kickDeadline - state.settings.kickMs)) / 1000))}
+            aimStart={state.aimStart ?? 0}
+            frozenAt={state.paused ? state.pausedAt : null}
+            disabled={state.paused || !!state.winner}
+            onStop={(t) => dispatch({ type: "STOP", now: t })}
+          />
+        ) : state.phase === "kick" && iShoot ? (
           <KickPad
             side={side}
             secondsLeft={Math.max(0, Math.ceil((state.kickDeadline - (now || state.kickDeadline - state.settings.kickMs)) / 1000))}
@@ -405,10 +471,14 @@ function PenaltyPanel({
           />
         ) : (
           <div className={`pen-wait ${state.phase === "result" && state.shot ? (state.shot.goal ? "goal" : "miss") : ""}`} data-testid={`pen-wait-${side}`}>
-            {state.phase === "kick" && `🧤 ${names[state.shooter!]} penaltı kullanıyor…`}
-            {state.phase === "flying" && "Top gidiyor…"}
+            {state.phase === "kick" && cfg.waiting(names[state.shooter!])}
+            {state.phase === "flying" && cfg.moving}
             {(state.phase === "result" || state.phase === "finished") &&
-              (state.shot ? `${shotText(state.shot)}${state.shot.goal ? ` ${names[state.shot.shooter]} attı.` : ""}` : "Kimse cevap vermedi.")}
+              (state.shot
+                ? state.shot.dart
+                  ? `${dartText(state.shot)} · ${names[state.shot.shooter]}`
+                  : `${shotText(state.shot)}${state.shot.goal ? ` ${names[state.shot.shooter]} attı.` : ""}`
+                : "Kimse cevap vermedi.")}
           </div>
         )}
       </div>
