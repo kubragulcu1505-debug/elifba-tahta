@@ -50,6 +50,10 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
 
+## Penaltı vuruş süresi 5 saniye (29 Ekim 2026)
+
+- Öğretmen isteğiyle penaltı vuruş süresi 3 saniyeden 5 saniyeye çıkarıldı (`kickMs: 5000`); cevap süresi 10 saniye olarak kaldı. Testler yeni süreyle geçti.
+
 ## Penaltı oyunu (29 Ekim 2026)
 
 - İki tarafa aynı soru geliyor, şık sıraları taraf başına ayrı: geçti.

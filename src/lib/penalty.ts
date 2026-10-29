@@ -24,7 +24,7 @@ export interface PenaltySettings {
   wrongDelayMs: number;
 }
 
-export const PENALTY_DEFAULTS: PenaltySettings = { target: 5, answerMs: 10000, kickMs: 3000, inputGuardMs: 400, resultMs: 1800, wrongDelayMs: 1000 };
+export const PENALTY_DEFAULTS: PenaltySettings = { target: 5, answerMs: 10000, kickMs: 5000, inputGuardMs: 400, resultMs: 1800, wrongDelayMs: 1000 };
 
 export type Col = -1 | 0 | 1;
 export type PenaltyPhase = "loading" | "question" | "kick" | "flying" | "result" | "finished";
