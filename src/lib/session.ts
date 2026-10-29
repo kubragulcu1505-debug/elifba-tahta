@@ -4,6 +4,7 @@ import { createGame, computeResult, objectiveStats, type DuelPlayer, type GameMo
 import { newSeed } from "./rng";
 import { questionsForLesson, getQuestion, TUG_POOLS, getAnyQuestion } from "@/content/index";
 import { createTug, type TugState } from "./tug";
+import { createPenalty, type PenaltyState } from "./penalty";
 import type { Question } from "@/content/types";
 import { read, update, write, type GameRecord } from "./storage";
 import { DUEL_LETTERS_LESSON, makeDuelRecord, type DuelGame, type DuelRecord } from "./roster";
@@ -44,11 +45,23 @@ export function startSiege(lessonId: string, players?: Players): TugState {
   return state;
 }
 
+/** Penaltı oyununu başlatır (dersin soru havuzu, sınırsız; iki tarafa aynı soru). Düelloda iki öğrenci verilir. */
+export function startPenalty(lessonId: string, players?: Players): PenaltyState {
+  const pool = (TUG_POOLS[lessonId] ?? []).map(toLite);
+  const state = createPenalty({ lessonId, seed: newSeed(), pool, players, settings: { target: read("settings").penaltyTarget } });
+  write("activePenalty", { state, savedAtEpoch: Date.now(), fresh: true });
+  return state;
+}
+
 /** Bireysel düelloyu başlatır ve oyunun sayfa yolunu döndürür. */
 export function startDuel(game: DuelGame, lessonId: string, players: Record<Side, DuelPlayer>): string {
   if (game === "letters") {
     startCompetition(DUEL_LETTERS_LESSON, players);
     return "/oyun";
+  }
+  if (game === "penalty") {
+    startPenalty(lessonId, players);
+    return "/penalti";
   }
   startSiege(lessonId, players);
   return "/kale";
@@ -140,6 +153,25 @@ export function recordFinishedSiege(state: TugState): void {
       stats: {
         left: { correct: state.teams.left.correct, wrong: state.teams.left.wrong },
         right: { correct: state.teams.right.correct, wrong: state.teams.right.wrong },
+      },
+      winner: state.winner,
+    }),
+  );
+}
+
+/** Biten bireysel penaltıyı genel tabloya bir kez işler. */
+export function recordFinishedPenalty(state: PenaltyState): void {
+  if (!state.players || !state.winner) return;
+  saveDuel(
+    makeDuelRecord({
+      id: state.id,
+      game: "penalty",
+      lessonId: state.lessonId,
+      finishedAtEpoch: Date.now(),
+      players: state.players,
+      stats: {
+        left: { correct: state.correct.left, wrong: state.wrong.left },
+        right: { correct: state.correct.right, wrong: state.wrong.right },
       },
       winner: state.winner,
     }),

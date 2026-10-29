@@ -4,6 +4,7 @@
 import { useSyncExternalStore } from "react";
 import type { GameState, Side, TeamResult, GameResult } from "./game";
 import type { TugState } from "./tug";
+import type { PenaltyState } from "./penalty";
 import { EMPTY_ROSTER, type DuelGame, type DuelRecord, type Roster } from "./roster";
 
 export const STORAGE_VERSION = 1;
@@ -21,6 +22,8 @@ export interface Settings {
   siegeTarget: number;
   /** Kale yıkmada kolay nişan: taşın gideceği yolun tamamı gösterilir. */
   easyAim: boolean;
+  /** Penaltıda kazanmak için gereken gol. */
+  penaltyTarget: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -30,6 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
   tugTarget: 7,
   siegeTarget: 15,
   easyAim: false,
+  penaltyTarget: 5,
 };
 
 export interface GameRecord {
@@ -69,6 +73,8 @@ export interface Schema {
   activeTug: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Kale yıkma oyunu (halat çekmeyle aynı durum makinesi, ayrı kayıt). */
   activeSiege: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
+  /** Penaltı oyunu. */
+  activePenalty: { state: PenaltyState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Sınıflar ve öğrenciler (fotoğraflar ayrıca IndexedDB'de). */
   roster: Roster;
   /** Bireysel düello maçları; genel puan tablosu bunlardan hesaplanır. */
@@ -85,6 +91,7 @@ const DEFAULTS: Schema = {
   activeGame: null,
   activeTug: null,
   activeSiege: null,
+  activePenalty: null,
   roster: EMPTY_ROSTER,
   duels: [],
   ui: {},

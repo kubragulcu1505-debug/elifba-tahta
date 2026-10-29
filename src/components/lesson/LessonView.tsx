@@ -5,7 +5,7 @@ import { useState } from "react";
 import { LESSON_BY_ID, UNIT_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { PRACTICE_POOLS, questionsForLesson, gameLessonOf, AUDIO_CATALOG } from "@/content/index";
 import { usePersisted } from "@/lib/storage";
-import { startCompetition, startReview, startSiege, startTug } from "@/lib/session";
+import { startCompetition, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
 import { Ar, RichText } from "@/components/Arabic";
 import { TapButton } from "@/components/TapButton";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -69,6 +69,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
     ["oyun", "Takım oyunu"],
     ["halat", "Halat çekme"],
     ["kale", "Kale yıkma"],
+    ["penalti", "Penaltı"],
     ["tekrar", "Tekrar"],
     ...(audioItems.length ? [["ses", "Dinle ve seç"]] : []),
     ...(lessonId === "u12-l1" ? [["okuma", "Yüzüne okuma"]] : []),
@@ -219,6 +220,24 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             }}
           >
             🏰 Kale yıkmayı başlat
+          </TapButton>
+        </Section>
+
+        <Section id="penalti" title="Penaltı oyunu">
+          <ul className="list-disc pl-6 text-lg">
+            <li>İki takıma aynı soru gelir. İlk cevap veren belirleyicidir: cevabı doğruysa penaltıyı o kullanır, yanlışsa penaltı rakibe geçer.</li>
+            <li>Penaltıyı kullanan, kendi alanında topu kaleye doğru kaydırır: yön köşeyi (sol, orta, sağ), uzunluk yüksekliği seçer. Çok yana ya da çok sert vurulan top dışarı gider.</li>
+            <li>Kaleci otomatik olarak bir yöne atlar; topla aynı yöne atlarsa kurtarır. Önce {settings.penaltyTarget} gol atan kazanır.</li>
+            <li>Yanlış cevap veren bir sonraki soruda 1 saniye geç başlar. Kimse 10 saniyede cevap vermezse soru geçer.</li>
+          </ul>
+          <TapButton
+            className="big-btn btn-primary mt-5"
+            onTap={() => {
+              startPenalty(lessonId);
+              router.push("/penalti");
+            }}
+          >
+            ⚽ Penaltıyı başlat
           </TapButton>
         </Section>
 

@@ -38,7 +38,7 @@ export function Leaderboard() {
         <Link href="/duello" className="btn btn-primary ml-auto inline-flex items-center">⚔ Yeni düello</Link>
       </div>
       <p className="mt-2 text-lg text-ink-soft">
-        Bireysel düellolarda (Harfler oyunu ve Kale yıkma) her doğru cevap 10 puandır; kazanan da kaybeden de doğruları kadar puan alır.
+        Bireysel düellolarda (Harfler oyunu, Kale yıkma ve Penaltı) her doğru cevap 10 puandır; kazanan da kaybeden de doğruları kadar puan alır.
         Sıralama önce toplam puana, eşitlikte galibiyet sayısına göredir. {matches > 0 && `Bu sınıfta ${matches} düello oynandı.`}
       </p>
 
@@ -64,6 +64,7 @@ export function Leaderboard() {
                 <span className="chip bg-ok-soft text-ok" title="Galibiyet">🏅 {r.wins} galibiyet</span>
                 <span className="chip bg-surface-2" title={DUEL_GAME_LABEL.letters}>🔤 {r.byGame.letters}</span>
                 <span className="chip bg-surface-2" title={DUEL_GAME_LABEL.siege}>🏰 {r.byGame.siege}</span>
+                <span className="chip bg-surface-2" title={DUEL_GAME_LABEL.penalty}>⚽ {r.byGame.penalty}</span>
               </span>
               <span className="w-32 text-right text-3xl font-extrabold tabular-nums text-brand" data-testid="board-points">{r.points} <span className="text-lg">puan</span></span>
             </li>

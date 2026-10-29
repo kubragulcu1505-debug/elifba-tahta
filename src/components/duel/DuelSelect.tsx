@@ -130,14 +130,14 @@ function DuelSelectInner() {
         )}
         {roster.classes.length === 1 && <span className="duel-chip">{roster.classes[0].name}</span>}
         <div className="duel-games" role="group" aria-label="Oyun">
-          {(["letters", "siege"] as DuelGame[]).map((g) => (
+          {(["letters", "siege", "penalty"] as DuelGame[]).map((g) => (
             <TapButton key={g} className={`duel-game ${game === g ? "on" : ""}`} onTap={() => setDuel({ game: g })}>
-              {g === "letters" ? "🔤 " : "🏰 "}
+              {g === "letters" ? "🔤 " : g === "siege" ? "🏰 " : "⚽ "}
               {DUEL_GAME_LABEL[g]}
             </TapButton>
           ))}
         </div>
-        {game === "siege" && (
+        {game !== "letters" && (
           <select value={lessonId} onChange={(e) => setDuel({ lessonId: e.target.value })} className="duel-select max-w-[28vw]" aria-label="Ders">
             {LESSON_ORDER.map((l) => (
               <option key={l.id} value={l.id}>{l.title}</option>
@@ -187,7 +187,7 @@ function DuelSelectInner() {
           <div className="duel-vs-side duel-vs-right">
             <Portrait side="right" student={right} onClear={() => {}} />
           </div>
-          <div className="duel-vs-game">{DUEL_GAME_LABEL[game]}{game === "siege" ? ` · ${LESSON_BY_ID.get(lessonId)?.title ?? ""}` : " · 28 harf, 30 soru"}</div>
+          <div className="duel-vs-game">{DUEL_GAME_LABEL[game]}{game !== "letters" ? ` · ${LESSON_BY_ID.get(lessonId)?.title ?? ""}` : " · 28 harf, 30 soru"}</div>
         </div>
       )}
     </div>

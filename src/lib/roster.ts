@@ -2,8 +2,8 @@
 // Öğrenciler kendini seçer ve bire bir oynar; her doğru cevap öğrencinin genel puanına eklenir.
 import type { DuelPlayer, Side } from "./game.ts";
 
-export type DuelGame = "letters" | "siege";
-export const DUEL_GAME_LABEL: Record<DuelGame, string> = { letters: "Harfler oyunu", siege: "Kale yıkma" };
+export type DuelGame = "letters" | "siege" | "penalty";
+export const DUEL_GAME_LABEL: Record<DuelGame, string> = { letters: "Harfler oyunu", siege: "Kale yıkma", penalty: "Penaltı" };
 /** Bireysel harfler oyunu: 28 harfin tamamını içeren yarışma dersi. */
 export const DUEL_LETTERS_LESSON = "u1-l6";
 export const POINTS_PER_CORRECT = 10;
@@ -85,7 +85,7 @@ export interface BoardRow {
  */
 export function leaderboard(students: Student[], records: DuelRecord[]): BoardRow[] {
   const rows = new Map<string, BoardRow>(
-    students.map((s) => [s.id, { student: s, rank: 0, points: 0, matches: 0, wins: 0, ties: 0, correct: 0, wrong: 0, byGame: { letters: 0, siege: 0 } }]),
+    students.map((s) => [s.id, { student: s, rank: 0, points: 0, matches: 0, wins: 0, ties: 0, correct: 0, wrong: 0, byGame: { letters: 0, siege: 0, penalty: 0 } }]),
   );
   for (const r of records) {
     for (const side of ["left", "right"] as Side[]) {
@@ -96,7 +96,7 @@ export function leaderboard(students: Student[], records: DuelRecord[]): BoardRo
       row.matches += 1;
       row.correct += p.correct;
       row.wrong += p.wrong;
-      row.byGame[r.game] += p.points;
+      row.byGame[r.game] = (row.byGame[r.game] ?? 0) + p.points;
       if (p.outcome === "win") row.wins += 1;
       if (p.outcome === "tie") row.ties += 1;
     }

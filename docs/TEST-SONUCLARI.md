@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 50/50 geçti |
+| Otomatik testler (`npm test`) | 58/58 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,18 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Penaltı oyunu (29 Ekim 2026)
+
+- İki tarafa aynı soru geliyor, şık sıraları taraf başına ayrı: geçti.
+- İlk cevap doğruysa penaltıyı o kullanıyor, yanlışsa penaltı rakibe geçiyor; geç kalan ikinci cevap yok sayılıyor: geçti.
+- Kaleci topla aynı tarafa atlarsa kurtarıyor, farklı tarafa atlarsa gol; auta giden top gol değil; gol top kaleye varınca sayılıyor: geçti.
+- Önce 5 gol atan kazanıyor, sonra soru gelmiyor: geçti.
+- Kimse cevap vermezse süre dolunca soru geçiyor; yanlış cevap veren sonraki soruda 1 saniye geç başlıyor (yalnızca o taraf): geçti.
+- Kaydırma: yön köşeyi, uzunluk yüksekliği belirliyor; çok yana ya da çok sert vuruş dışarı, geriye kaydırma kısa kalıyor, çok kısa kaydırma vuruş sayılmıyor: geçti.
+- Kaleci üç yöne de atlıyor; duraklatma süreleri uzatıyor; duraklatılmışken soru görünürse süre fazladan uzamıyor; kaydet/yüklede havadaki top sonuçlandırılıyor: geçti.
+- Tarayıcıda (1366×768): ana sayfadaki “⚽ Penaltı” düğmesi /penalti oyununu açtı; sahnede kale, file, kaleci ve top çizildi; iki tarafta aynı soru farklı şık sırasıyla göründü; ekran kaydırmasız sığdı (en alt 704 px). Sağ taraf yanlış cevap verince penaltı sola geçti (“Hilal Takımı yanlış cevap verdi, penaltı senin!”), sağda doğru cevap ve açıklama göründü. Sol vuruş alanında sola-yukarı uzun kaydırmada kalede sol üst köşe işaretlendi; bırakınca top oraya uçtu, kaleci ortada kaldı, “⚽ GOL!” ve 1/5 göründü. 3 saniye dolunca vuruş kendiliğinden yapıldı. Sayfa yenilenince oyun duraklatılmış olarak geri geldi. Düello seçim ekranında “⚽ Penaltı” seçilebildi ve ders listesi açıldı.
+- Tarayıcıda bulunup düzeltilen iki hata: duraklatılmışken görünen soruda sayaç 11'den başlıyordu; “1 saniye bekle” uyarısı yanlış cevap vermeyen tarafta da görünüyordu.
 
 ## Nişan süresi 3 saniye (29 Ekim 2026)
 
