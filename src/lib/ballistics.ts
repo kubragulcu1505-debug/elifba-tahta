@@ -69,25 +69,32 @@ export interface ShotPoint extends Pt {
 export interface Shot {
   points: ShotPoint[];
   hit: boolean;
+  /** Kalenin zayıf noktasına (arka kulenin tepesindeki hedef) isabet. */
+  critical: boolean;
   end: Pt;
   /** Uçuş süresi (saniye). */
   duration: number;
 }
 
-/** Taşın uçuşunu adım adım hesaplar; kaleye (taşın yarıçapı kadar genişletilmiş kutu) değerse isabet, yere düşerse ıska. */
-export function simulateShot(start: Pt, launch: Launch, target: Rect, dt = 1 / 120): Shot {
+const inside = (x: number, y: number, r: Rect, pad: number) => x >= r.x0 - pad && x <= r.x1 + pad && y >= r.y0 - pad && y <= r.y1 + pad;
+
+/**
+ * Taşın uçuşunu adım adım hesaplar. Kaleye (taşın yarıçapı kadar genişletilmiş kutu) değerse isabet,
+ * yere düşerse ıska. `weak` verilirse önce ona bakılır: zayıf noktaya değmek tam isabettir. Zayıf nokta
+ * küçük tutulur ve taşın yarıçapının yarısı kadar genişletilir; bu yüzden vurması zordur.
+ */
+export function simulateShot(start: Pt, launch: Launch, target: Rect, weak?: Rect, dt = 1 / 120): Shot {
   const points: ShotPoint[] = [{ x: start.x, y: start.y, t: 0 }];
   for (let t = dt; t <= 4; t += dt) {
     const x = start.x + launch.vx * t;
     const y = start.y + launch.vy * t - (GRAVITY * t * t) / 2;
     points.push({ x, y: Math.max(0, y), t });
-    if (x >= target.x0 - STONE_R && x <= target.x1 + STONE_R && y >= target.y0 - STONE_R && y <= target.y1 + STONE_R) {
-      return { points, hit: true, end: { x, y }, duration: t };
-    }
-    if (y <= 0 || x < -100 || x > WORLD_W + 100) return { points, hit: false, end: { x, y: Math.max(0, y) }, duration: t };
+    if (weak && inside(x, y, weak, STONE_R / 2)) return { points, hit: true, critical: true, end: { x, y }, duration: t };
+    if (inside(x, y, target, STONE_R)) return { points, hit: true, critical: false, end: { x, y }, duration: t };
+    if (y <= 0 || x < -100 || x > WORLD_W + 100) return { points, hit: false, critical: false, end: { x, y: Math.max(0, y) }, duration: t };
   }
   const last = points[points.length - 1];
-  return { points, hit: false, end: last, duration: last.t };
+  return { points, hit: false, critical: false, end: last, duration: last.t };
 }
 
 /** Nişan alırken gösterilen noktalı yol: normalde uçuşun ilk %30'u, kolay nişanda tamamı. */

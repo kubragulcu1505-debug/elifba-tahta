@@ -4,8 +4,9 @@
 // - Yanlış cevapta takım 5 saniye bekler; sonra soru kendiliğinden geçer. Doğruda da kendiliğinden geçer.
 // - Halatın ortasındaki bayrağı kendi çizgisine ilk çeken takım kazanır.
 // Kale yıkma oyunu da aynı makineyi kullanır (kind: "siege"): doğru cevaptan sonra öğrenci mancınığı
-// kendisi çekip bırakarak nişan alır (aim → flying). Taş kaleye değerse isabet sayılır; rakip kaleye
-// `target` taş ilk isabet ettiren kazanır. Iskalanan atış da sorunun geçmesini sağlar.
+// kendisi çekip bırakarak nişan alır (aim → flying). Taş kaleye değerse 1, kalenin zayıf noktasına
+// değerse WEAK_DAMAGE hasar verir; rakip kaleye `target` hasar ilk veren kazanır. Iskalanan atış da
+// sorunun geçmesini sağlar.
 import { roundOrder, SIDES, type DuelPlayer, type QueueItem, type QuestionLite, type Side } from "./game.ts";
 import { hashSeed, mulberry32, shuffle } from "./rng.ts";
 
@@ -38,6 +39,8 @@ export const TUG_DEFAULTS: TugSettings = {
   easyAim: false,
 };
 export const SIEGE_TARGET = 15;
+/** Kalenin zayıf noktasına (tam isabet) verilen hasar; normal isabet 1 hasardır. */
+export const WEAK_DAMAGE = 3;
 
 /** aim: kale oyununda nişan alınıyor; flying: taş havada. */
 export type TugPhase = "loading" | "question" | "feedback" | "aim" | "flying" | "finished";
@@ -56,10 +59,14 @@ export interface TugTeam {
   wrong: number;
   /** Kale: rakip kaleye isabet eden taş sayısı (eski kayıtlarda yoktur). */
   hits?: number;
+  /** Kale: bunlardan zayıf noktaya isabet eden (tam isabet) sayısı. */
+  crits?: number;
+  /** Kale: rakip kaleye verilen toplam hasar; kazananı bu belirler. */
+  damage?: number;
   /** Kale: nişan süresinin bittiği an. */
   aimDeadline?: number;
   /** Kale: son atışın sonucu (geri bildirim için). */
-  lastShot?: { hit: boolean } | null;
+  lastShot?: { hit: boolean; critical: boolean } | null;
 }
 
 export interface TugState {
@@ -84,7 +91,7 @@ export type TugAction =
   | { type: "ANSWER"; side: Side; questionId: string; optionId: string; now: number }
   | { type: "NEXT"; side: Side; now: number }
   | { type: "FIRE"; side: Side; now: number }
-  | { type: "LAND"; side: Side; hit: boolean; now: number }
+  | { type: "LAND"; side: Side; hit: boolean; critical?: boolean; now: number }
   | { type: "PAUSE"; now: number }
   | { type: "RESUME"; now: number };
 
@@ -197,13 +204,16 @@ export function reduceTug(s: TugState, a: TugAction, ctx: TugContext): TugState 
       // Taş havadayken oyun duraklatılsa bile uçuş tamamlanır ve sonucu işlenir.
       const t = s.teams[a.side];
       if (s.winner || t.phase !== "flying") return s;
-      const hits = (t.hits ?? 0) + (a.hit ? 1 : 0);
-      const winner: Side | null = hits >= s.settings.target ? a.side : null;
+      const critical = a.hit && !!a.critical;
+      const damage = (t.damage ?? 0) + (critical ? WEAK_DAMAGE : a.hit ? 1 : 0);
+      const winner: Side | null = damage >= s.settings.target ? a.side : null;
       let next = withTeam({ ...s, winner }, a.side, {
         ...t,
-        hits,
+        hits: (t.hits ?? 0) + (a.hit ? 1 : 0),
+        crits: (t.crits ?? 0) + (critical ? 1 : 0),
+        damage,
         phase: winner ? "finished" : "feedback",
-        lastShot: { hit: a.hit },
+        lastShot: { hit: a.hit, critical },
         continueAt: a.now + s.settings.landFeedbackMs,
       });
       if (winner) {

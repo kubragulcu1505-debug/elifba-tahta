@@ -160,7 +160,7 @@ function TeacherPanelInner() {
               <span className="text-base text-ink-soft">Varsayılan 7. Bir takım bu kadar çekiş öne geçince rakip takım ortadaki çukura düşer. Yeni başlatılan oyunlarda geçerlidir.</span>
             </label>
             <label className="flex flex-col gap-2 text-lg">
-              <span className="font-bold">Kale yıkma: kaleyi yıkmak için gereken taş</span>
+              <span className="font-bold">Kale yıkma: kaleyi yıkmak için gereken hasar</span>
               <input
                 type="number"
                 min={5}
@@ -171,7 +171,7 @@ function TeacherPanelInner() {
                 className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
                 data-testid="siege-target"
               />
-              <span className="text-base text-ink-soft">Varsayılan 15. Doğru cevap veren mancınığı çekip bırakarak taş atar; ıskalanan taş sayılmaz. Bu kadar taş isabet eden kale yıkılır. Yeni başlatılan oyunlarda geçerlidir.</span>
+              <span className="text-base text-ink-soft">Varsayılan 15. Doğru cevap veren mancınığı çekip bırakarak taş atar. Kaleye isabet 1, kuledeki küçük hedefe (zayıf nokta) isabet 3 hasar verir; ıskalanan taş sayılmaz. Bu kadar hasar alan kale yıkılır. Yeni başlatılan oyunlarda geçerlidir.</span>
             </label>
             <label className="flex items-start gap-3 text-lg">
               <input

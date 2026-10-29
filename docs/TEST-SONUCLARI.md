@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 48/48 geçti |
+| Otomatik testler (`npm test`) | 50/50 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,13 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Kale yıkmada zayıf nokta (29 Ekim 2026)
+
+- Durum makinesi: zayıf noktaya tam isabet 3, normal isabet 1 hasar; ıskada “tam isabet” işareti yok sayılıyor; kazananı toplam hasar belirliyor (hedef 7 iken 3+1+3 ile kazanıldı); isabet ve tam isabet sayıları ayrı tutuluyor: geçti.
+- Fizik: zayıf noktaya değen atış tam isabet sayılıyor; tarama ızgarasında tam isabetler isabetlerin %20'sinden az (zor ama mümkün): geçti.
+- Kalibrasyon (tipik ekran, 5183 atış): isabetlerin %10,6'sı tam isabet; 45°'de tam isabet için güç aralığı yalnızca %87–90.
+- Tarayıcıda (1366×768): iki kalede de arka kulenin tepesinde parlayan hedef göründü. Sayfadaki ölçülerden hesaplanan çekişle atılan taş zayıf noktaya isabet etti: “💥 Tam isabet! Zayıf nokta: 3 hasar”, sahnede “💥 +3”, güçlü sarsıntı, sayaç 3/15, rakip kalenin dayanıklılığı %80.
 
 ## Kale yıkmada çek-bırak nişan (29 Ekim 2026)
 

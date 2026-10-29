@@ -206,8 +206,9 @@ export function LessonView({ lessonId }: { lessonId: string }) {
 
         <Section id="kale" title="Kale yıkma oyunu">
           <ul className="list-disc pl-6 text-lg">
-            <li>Üstte iki takımın kalesi ve mancınığı vardır. Doğru cevap veren takımın mancınığı rakip kaleye bir taş atar.</li>
-            <li>Kale her taşta biraz daha parçalanır. Rakip kaleye {settings.siegeTarget} taş ilk isabet ettiren takım kazanır ve rakip kale yıkılır.</li>
+            <li>Üstte iki takımın kalesi ve mancınığı vardır.</li>
+            <li>Doğru cevap veren taşı kendi alanında geriye çekip bırakarak nişan alır. Kaleye isabet 1, kulenin tepesindeki küçük hedefe (zayıf nokta) isabet 3 hasar verir; ıskalanan taş hasar vermez.</li>
+            <li>Kale her hasarda biraz daha parçalanır. Rakip kaleye {settings.siegeTarget} hasar ilk veren takım kazanır ve rakip kale yıkılır.</li>
             <li>Sorular sınırsızdır ve kendiliğinden geçer. Yanlış cevapta o takım 5 saniye bekler; doğru cevap ekranda gösterilir.</li>
           </ul>
           <TapButton

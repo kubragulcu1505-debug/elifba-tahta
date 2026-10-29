@@ -1,12 +1,12 @@
 // Halat çekme oyunu testleri. Çalıştırma: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createTug, reduceTug, currentTugItem, snapshotTug, restoreTug, TUG_DEFAULTS, SIEGE_TARGET, type TugState } from "../src/lib/tug.ts";
+import { createTug, reduceTug, currentTugItem, snapshotTug, restoreTug, TUG_DEFAULTS, SIEGE_TARGET, WEAK_DAMAGE, type TugState } from "../src/lib/tug.ts";
 import type { QuestionLite, Side } from "../src/lib/game.ts";
 import { TUG_POOLS, getAnyQuestion } from "../src/content/index.ts";
 import { LESSONS, LESSON_BY_ID } from "../src/content/lessons.ts";
 import { detectFeatures, checkArabicChars } from "../src/content/arabic.ts";
-import { ANGLE_MAX, ANGLE_MIN, AUTO_POWER, launchFromAngle, launchFromPull, previewPath, simulateShot } from "../src/lib/ballistics.ts";
+import { ANGLE_MAX, ANGLE_MIN, AUTO_POWER, STONE_R, launchFromAngle, launchFromPull, previewPath, simulateShot } from "../src/lib/ballistics.ts";
 
 const lite = (lessonId: string): QuestionLite[] =>
   TUG_POOLS[lessonId].map((q) => ({ id: q.id, objectiveId: q.objectiveId, correctOptionId: q.correctOptionId, optionIds: q.options.map((o) => o.id), difficulty: q.difficulty, stimulus: q.stimulus }));
@@ -182,6 +182,7 @@ test("kale yıkma: doğru cevaptan sonra nişan alınır; yalnızca isabet eden 
   assert.equal(s.rope, 0, "kale oyununda halat kullanılmaz");
   assert.equal(s.teams.left.correct, 15, "ıskalanan atışın doğru cevabı yine sayılır (puan için)");
   assert.equal(s.teams.left.hits, 14);
+  assert.equal(s.teams.left.damage, 14, "normal isabet 1 hasar");
   assert.equal(s.teams.right.wrong, 1);
   ({ s, now } = shoot(s, "left", true, now, ctx));
   assert.equal(s.winner, "left");
@@ -254,4 +255,52 @@ test("kale yıkma hedefi öğretmen ayarından gelir; eski kayıtlar halat çekm
   const byId = new Map(pool.map((q) => [q.id, q]));
   const { s: after } = step(old, "left", true, 0, { pool, lookup: (id: string) => byId.get(id) });
   assert.equal(after.rope, -1);
+});
+
+test("kale yıkma: zayıf noktaya tam isabet 3 hasar verir; kazananı toplam hasar belirler", () => {
+  const pool = lite("u1-l1");
+  const byId = new Map(pool.map((q) => [q.id, q]));
+  const ctx = { pool, lookup: (id: string) => byId.get(id) };
+  let s = createTug({ lessonId: "u1-l1", seed: "zayif", pool, kind: "siege", settings: { target: 7 } });
+  assert.equal(WEAK_DAMAGE, 3);
+  const crit = (st: TugState, now: number) => {
+    st = reduceTug(st, { type: "QUESTION_VISIBLE", side: "left", now }, ctx);
+    const q = ctx.lookup(currentTugItem(st.teams.left)!.questionId)!;
+    st = reduceTug(st, { type: "ANSWER", side: "left", questionId: q.id, optionId: q.correctOptionId, now: now + G + 10 }, ctx);
+    st = reduceTug(st, { type: "FIRE", side: "left", now: now + G + 100 }, ctx);
+    st = reduceTug(st, { type: "LAND", side: "left", hit: true, critical: true, now: now + G + 900 }, ctx);
+    if (!st.winner) st = reduceTug(st, { type: "NEXT", side: "left", now: now + G + 2000 }, ctx);
+    return { s: st, now: now + G + 2500 };
+  };
+  let now = 0;
+  ({ s, now } = crit(s, now));
+  assert.deepEqual([s.teams.left.damage, s.teams.left.hits, s.teams.left.crits], [3, 1, 1]);
+  assert.equal(s.teams.left.lastShot?.critical, true);
+  ({ s, now } = shoot(s, "left", true, now, ctx));
+  assert.deepEqual([s.teams.left.damage, s.teams.left.hits, s.teams.left.crits], [4, 2, 1]);
+  // Iskada "tam isabet" işareti yok sayılır.
+  ({ s, now } = shoot(s, "left", false, now, ctx));
+  assert.equal(s.teams.left.damage, 4);
+  ({ s, now } = crit(s, now));
+  assert.equal(s.teams.left.damage, 7);
+  assert.equal(s.winner, "left", "7 hasara ulaşınca kale yıkılır");
+});
+
+test("mancınık fiziği: zayıf noktaya değen atış tam isabettir; zayıf nokta küçük olduğundan çoğu isabet normaldir", () => {
+  const start = { x: 205, y: 100 };
+  const target = { x0: 905, x1: 985, y0: 0, y1: 187 };
+  const weak = { x0: 968, x1: 976, y0: 197, y1: 222 };
+  let hits = 0, crits = 0;
+  for (let a = 8; a <= 80; a += 2) for (let p = 0.3; p <= 1.0001; p += 0.02) {
+    const s = simulateShot(start, launchFromAngle(p, a, "left"), target, weak);
+    if (s.hit) hits++;
+    if (s.critical) {
+      crits++;
+      assert.ok(s.hit, "tam isabet aynı zamanda isabettir");
+      assert.ok(s.end.x >= weak.x0 - STONE_R && s.end.y >= weak.y0 - STONE_R);
+    }
+  }
+  assert.ok(crits > 0, "zayıf nokta vurulabilir");
+  assert.ok(crits / hits < 0.2, `zayıf nokta zor olmalı: ${crits}/${hits}`);
+  assert.equal(simulateShot(start, launchFromAngle(0.8, 45, "left"), target).critical, false, "zayıf nokta verilmezse tam isabet yok");
 });

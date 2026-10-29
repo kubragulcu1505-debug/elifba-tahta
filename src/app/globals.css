@@ -1020,3 +1020,45 @@ html[data-motion="reduce"] .confetti {
 }
 .shot-result.hit { background: var(--ok-soft); color: var(--ok); border: 4px solid var(--ok); }
 .shot-result.miss { background: var(--surface-2); color: var(--ink-soft); border: 4px solid var(--line); }
+
+/* ── Kale yıkma: zayıf nokta ve tam isabet ── */
+.siege-weak {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: siege-weak-glow 1.4s ease-in-out infinite;
+}
+@keyframes siege-weak-glow {
+  0%, 100% { filter: drop-shadow(0 0 1px #facc15); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 4px #facc15); transform: scale(1.12); }
+}
+.siege-crit {
+  animation: siege-crit 650ms ease-out;
+}
+@keyframes siege-crit {
+  0%, 100% { transform: none; filter: none; }
+  10% { filter: brightness(1.8); }
+  20% { transform: translateX(-7%) rotate(-4deg); }
+  40% { transform: translateX(6%) rotate(3deg); }
+  60% { transform: translateX(-4%) rotate(-2deg); }
+  80% { transform: translateX(2%); }
+}
+.siege-dmg {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-weight: 900;
+  font-size: clamp(16px, 2.6vh, 30px);
+  color: #b91c1c;
+  text-shadow: 0 2px 0 #fff, 0 0 6px #fff;
+  white-space: nowrap;
+  animation: siege-dmg 1100ms ease-out both;
+}
+.siege-dmg.crit {
+  font-size: clamp(22px, 3.6vh, 42px);
+  color: #dc2626;
+}
+@keyframes siege-dmg {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -80%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -220%) scale(1); }
+}
+.shot-result.crit { background: #fee2e2; color: #b91c1c; border: 4px solid #dc2626; }

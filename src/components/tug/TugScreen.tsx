@@ -42,7 +42,7 @@ const KINDS = {
     noneHint: "Bir ders sayfasından “Kale yıkma” oyununu başlatın.",
     winLine: "Rakip kale yıkıldı!",
     praise: "İki takım da çok güzel nişan aldı. Tebrikler!",
-    rule: (t: number) => `Doğru cevap veren, mancınığı kendisi çekip bırakarak rakip kaleye taş atar. Rakip kaleye ${t} taş ilk isabet ettiren kazanır.`,
+    rule: (t: number) => `Doğru cevap veren, mancınığı kendisi çekip bırakarak rakip kaleye taş atar. Kaleye isabet 1, kuledeki hedefe (zayıf nokta) isabet 3 hasar verir. Rakip kaleye ${t} hasar ilk veren kazanır.`,
     restartQ: "Kale yıkma yeniden başlasın mı?",
     restartHint: "Kaleler onarılır, sorular yeniden karışır.",
     correctMsg: "Doğru! Şimdi nişan al",
@@ -117,7 +117,7 @@ function TugInner({ kind }: { kind: TugKind }) {
 
   const plan = useCallback((side: Side, launch: Launch) => {
     const g = geometry.current?.(side);
-    return g ? simulateShot(g.start, launch, g.target) : null;
+    return g ? simulateShot(g.start, launch, g.target, g.weak) : null;
   }, []);
   const onPull = useCallback(
     (side: Side, pull: Pt | null, maxPull: number) => {
@@ -153,8 +153,8 @@ function TugInner({ kind }: { kind: TugKind }) {
     (side: Side) => {
       const fl = flightsRef.current[side];
       if (!fl) return;
-      dispatch({ type: "LAND", side, hit: fl.shot.hit, now: performance.now() });
-      setImpacts((i) => ({ ...i, [side]: { id: fl.id, at: fl.shot.end, hit: fl.shot.hit } }));
+      dispatch({ type: "LAND", side, hit: fl.shot.hit, critical: fl.shot.critical, now: performance.now() });
+      setImpacts((i) => ({ ...i, [side]: { id: fl.id, at: fl.shot.end, hit: fl.shot.hit, critical: fl.shot.critical } }));
       setFlights((f) => ({ ...f, [side]: null }));
     },
     [dispatch],
@@ -276,7 +276,7 @@ function TugInner({ kind }: { kind: TugKind }) {
           names={names}
           players={state.players}
           winner={state.winner}
-          hits={{ left: state.teams.left.hits ?? 0, right: state.teams.right.hits ?? 0 }}
+          damage={{ left: state.teams.left.damage ?? 0, right: state.teams.right.damage ?? 0 }}
           cock={{ left: aims.left?.power ?? 0, right: aims.right?.power ?? 0 }}
           preview={{ left: aims.left?.path ?? [], right: aims.right?.path ?? [] }}
           flights={flights}
@@ -330,7 +330,7 @@ function TugInner({ kind }: { kind: TugKind }) {
                     <div className="font-extrabold">{names[side]}</div>
                     <div>
                       {state.teams[side].correct} doğru · {state.teams[side].wrong} yanlış
-                      {kind === "siege" && ` · 🎯 ${state.teams[side].hits ?? 0} isabet`}
+                      {kind === "siege" && ` · 🎯 ${state.teams[side].hits ?? 0} isabet (${state.teams[side].crits ?? 0} tam isabet)`}
                     </div>
                     {duel && (
                       <div className="font-extrabold text-ok" data-testid={`duel-points-${side}`}>+{state.teams[side].correct * 10} puan genel tabloya eklendi</div>
@@ -435,7 +435,7 @@ function TugPanel({
       <span className="ml-auto flex gap-2 text-[clamp(13px,2vh,22px)] font-bold">
         <span className="chip bg-ok-soft text-ok" data-testid={`correct-${side}`}>✓ {team.correct}</span>
         <span className="chip bg-bad-soft text-bad">✗ {team.wrong}</span>
-        {state.kind === "siege" && <span className="chip bg-warn-soft text-warn" data-testid={`hits-${side}`}>🎯 {team.hits ?? 0}</span>}
+        {state.kind === "siege" && <span className="chip bg-warn-soft text-warn" data-testid={`hits-${side}`}>💥 {team.damage ?? 0}</span>}
       </span>
     </header>
   );
@@ -456,8 +456,8 @@ function TugPanel({
               onRelease={onRelease}
             />
           ) : (
-            <div className={`shot-result anim-pop ${shotResult!.hit ? "hit" : "miss"}`} role="status" data-testid={`shot-${side}`}>
-              {shotResult!.hit ? "🎯 İsabet! Kale sarsıldı" : "Iska! Bir dahaki sefere"}
+            <div className={`shot-result anim-pop ${shotResult!.critical ? "crit" : shotResult!.hit ? "hit" : "miss"}`} role="status" data-testid={`shot-${side}`}>
+              {shotResult!.critical ? "💥 Tam isabet! Zayıf nokta: 3 hasar" : shotResult!.hit ? "🎯 İsabet! 1 hasar" : "Iska! Bir dahaki sefere"}
             </div>
           )}
         </div>

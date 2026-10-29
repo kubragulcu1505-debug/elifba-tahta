@@ -19,10 +19,14 @@ const HOLES: Record<string, string> = {
   h4: "M66 50 l7 1 l2 8 l-8 3 l-4 -6 z",
 };
 
-/** Kale çizimi. `hits` aldığı isabet, `target` yıkılması için gereken isabet. */
-function Castle({ side, hits, target }: { side: Side; hits: number; target: number }) {
-  const lost = new Set(DAMAGE_ORDER.slice(0, Math.min(DAMAGE_ORDER.length, Math.round((hits / target) * DAMAGE_ORDER.length))));
-  const ratio = hits / target;
+/**
+ * Kale çizimi. `damage` aldığı hasar, `target` yıkılması için gereken hasar.
+ * Arka kulenin (atana uzak olan) tepesinde parlayan küçük bir hedef vardır: kalenin zayıf noktası.
+ * Sağ kale aynalandığı için çizimdeki sol kule her iki kalede de atana uzak taraftadır.
+ */
+function Castle({ side, damage, target }: { side: Side; damage: number; target: number }) {
+  const lost = new Set(DAMAGE_ORDER.slice(0, Math.min(DAMAGE_ORDER.length, Math.round((damage / target) * DAMAGE_ORDER.length))));
+  const ratio = damage / target;
   const color = side === "left" ? "var(--left)" : "var(--right)";
   return (
     <svg viewBox="0 0 120 100" aria-hidden="true">
@@ -47,6 +51,13 @@ function Castle({ side, hits, target }: { side: Side; hits: number; target: numb
       {ratio >= 0.25 && <path d="M24 100l-4-12 5-8-4-10" stroke="#1f2937" strokeWidth="1.6" fill="none" />}
       {ratio >= 0.5 && <path d="M80 42l-4 9 6 7-3 10" stroke="#1f2937" strokeWidth="1.6" fill="none" />}
       {ratio >= 0.75 && <path d="M108 100l3-14-6-9 4-12M40 42l3 10-5 8" stroke="#1f2937" strokeWidth="1.6" fill="none" />}
+      {/* Zayıf nokta: vurulması zor, isabette fazla hasar */}
+      <g className="siege-weak" data-testid={`siege-weak-${side}`}>
+        <line x1="19" y1="10" x2="19" y2="3" stroke="#334155" strokeWidth="1.5" />
+        <circle cx="19" cy="-1" r="6" fill="#dc2626" stroke="#7f1d1d" strokeWidth="1" />
+        <circle cx="19" cy="-1" r="4" fill="#fff" />
+        <circle cx="19" cy="-1" r="2" fill="#dc2626" />
+      </g>
     </svg>
   );
 }
@@ -123,10 +134,11 @@ export interface Impact {
   id: number;
   at: Pt;
   hit: boolean;
+  critical: boolean;
 }
 
-/** Nişan için sahne ölçüleri: taşın çıkış noktası ve rakip kalenin isabet kutusu (dünya koordinatı). */
-export type SiegeGeometry = (side: Side) => { start: Pt; target: Rect } | null;
+/** Nişan için sahne ölçüleri: taşın çıkış noktası, rakip kalenin isabet kutusu ve zayıf noktası (dünya koordinatı). */
+export type SiegeGeometry = (side: Side) => { start: Pt; target: Rect; weak?: Rect } | null;
 
 /**
  * Kale yıkma sahnesi: iki tarafın kalesi ve mancınığı. Doğru cevaptan sonra öğrenci kendi alanında
@@ -136,7 +148,7 @@ export type SiegeGeometry = (side: Side) => { start: Pt; target: Rect } | null;
 export function SiegeStage({
   target,
   names,
-  hits,
+  damage,
   winner,
   players,
   cock,
@@ -149,8 +161,8 @@ export function SiegeStage({
   target: number;
   names: Record<Side, string>;
   players?: Record<Side, DuelPlayer>;
-  /** Tarafın rakip kaleye isabet ettirdiği taş sayısı. */
-  hits: Record<Side, number>;
+  /** Tarafın rakip kaleye verdiği hasar. */
+  damage: Record<Side, number>;
   winner: Side | null;
   /** Nişan alınırken mancınığın gerilmesi (0–1). */
   cock: Record<Side, number>;
@@ -164,20 +176,30 @@ export function SiegeStage({
   const stageRef = useRef<HTMLDivElement>(null);
   const catapults = useRef<Record<Side, HTMLDivElement | null>>({ left: null, right: null });
   const castles = useRef<Record<Side, HTMLDivElement | null>>({ left: null, right: null });
-  const hitsOn: Record<Side, number> = { left: hits.right, right: hits.left };
+  const hitsOn: Record<Side, number> = { left: damage.right, right: damage.left };
+  const other = (side: Side): Side => (side === "left" ? "right" : "left");
   const left = (side: Side) => Math.max(0, target - hitsOn[side]);
 
   useEffect(() => {
     geometryRef.current = (side) => {
       const st = stageRef.current?.getBoundingClientRect();
       const cat = catapults.current[side]?.getBoundingClientRect();
-      const castle = castles.current[side === "left" ? "right" : "left"]?.getBoundingClientRect();
+      const castleEl = castles.current[side === "left" ? "right" : "left"];
+      const castle = castleEl?.getBoundingClientRect();
+      const weakEl = castleEl?.querySelector(".siege-weak circle");
       if (!st || !cat || !castle || st.width === 0) return null;
       // Taş, mancınığın kolunun ucundan (öne bakan üst köşe) çıkar.
       const startPx = { x: side === "left" ? cat.left + cat.width * 0.75 : cat.right - cat.width * 0.75, y: cat.top + cat.height * 0.15 };
       const a = toWorld({ x: castle.left, y: castle.top + castle.height * 0.1 }, st);
       const b = toWorld({ x: castle.right, y: castle.bottom }, st);
-      return { start: toWorld(startPx, st), target: { x0: a.x, x1: b.x, y0: 0, y1: a.y } };
+      let weak: Rect | undefined;
+      if (weakEl) {
+        const w = weakEl.getBoundingClientRect();
+        const p = toWorld({ x: w.left, y: w.top }, st);
+        const q = toWorld({ x: w.right, y: w.bottom }, st);
+        weak = { x0: Math.min(p.x, q.x), x1: Math.max(p.x, q.x), y0: Math.min(p.y, q.y), y1: Math.max(p.y, q.y) };
+      }
+      return { start: toWorld(startPx, st), target: { x0: a.x, x1: b.x, y0: 0, y1: a.y }, weak };
     };
     return () => {
       geometryRef.current = null;
@@ -196,7 +218,7 @@ export function SiegeStage({
       }
       data-testid="siege-stage"
     >
-      <div className="tug-title">KALE YIKMA · doğru cevap → mancınığı çek, bırak!</div>
+      <div className="tug-title">KALE YIKMA · çek, bırak! Kuledeki hedef 💥 3 hasar</div>
       {(["left", "right"] as Side[]).map((side) => (
         <div key={side} className="tug-label" style={side === "left" ? { left: 8 } : { right: 8, flexDirection: "row-reverse" }}>
           <span className={side === "left" ? "text-left" : "text-right"}>
@@ -207,7 +229,7 @@ export function SiegeStage({
             <span style={{ width: `${(left(side) / target) * 100}%` }} />
           </span>
           <span className={`chip ${side === "left" ? "bg-left-soft text-left" : "bg-right-soft text-right"}`} data-testid={`siege-shots-${side}`}>
-            🎯 {hits[side]}/{target}
+            💥 {damage[side]}/{target}
           </span>
         </div>
       ))}
@@ -223,9 +245,9 @@ export function SiegeStage({
               ref={(n) => {
                 castles.current[side] = n;
               }}
-              className={`siege-castle ${hitsOn[side] > 0 && !lost ? "siege-hit" : ""} ${lost ? "siege-collapse" : ""} ${winner === side ? "siege-win" : ""}`}
+              className={`siege-castle ${hitsOn[side] > 0 && !lost ? (impacts[other(side)]?.critical ? "siege-crit" : "siege-hit") : ""} ${lost ? "siege-collapse" : ""} ${winner === side ? "siege-win" : ""}`}
             >
-              <Castle side={side} hits={hitsOn[side]} target={target} />
+              <Castle side={side} damage={hitsOn[side]} target={target} />
             </div>
             {hitsOn[side] > 0 && <div key={`p${hitsOn[side]}`} className="siege-puff" />}
             {lost && <div className="siege-rubble" />}
@@ -255,6 +277,16 @@ export function SiegeStage({
             {flights[side] && <FlyingStone key={flights[side]!.id} flight={flights[side]!} onDone={() => onLanded(side)} />}
             {impacts[side] && !impacts[side]!.hit && (
               <span key={`i${impacts[side]!.id}`} className="siege-dust" style={{ left: `${toStagePct(impacts[side]!.at).left}%`, top: `${toStagePct(impacts[side]!.at).top}%` }} />
+            )}
+            {impacts[side]?.hit && (
+              <span
+                key={`d${impacts[side]!.id}`}
+                className={`siege-dmg ${impacts[side]!.critical ? "crit" : ""}`}
+                style={{ left: `${toStagePct(impacts[side]!.at).left}%`, top: `${toStagePct(impacts[side]!.at).top}%` }}
+                data-testid={`siege-dmg-${side}`}
+              >
+                {impacts[side]!.critical ? "💥 +3" : "+1"}
+              </span>
             )}
           </Fragment>
         ))}
