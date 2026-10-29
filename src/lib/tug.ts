@@ -34,7 +34,7 @@ export const TUG_DEFAULTS: TugSettings = {
   wrongLockMs: 5000,
   correctFeedbackMs: 900,
   inputGuardMs: 400,
-  aimMs: 8000,
+  aimMs: 3000,
   landFeedbackMs: 700,
   easyAim: false,
 };

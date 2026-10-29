@@ -50,6 +50,10 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
 
+## Nişan süresi 3 saniye (29 Ekim 2026)
+
+- Öğretmen isteğiyle nişan süresi 8 saniyeden 3 saniyeye indirildi (`aimMs: 3000`); süre dolunca zayıf atış kendiliğinden yapılır. Nişan süresi, duraklatma ve kaydet/yükle testleri yeni süreyle geçti.
+
 ## Kale yıkmada zayıf nokta (29 Ekim 2026)
 
 - Durum makinesi: zayıf noktaya tam isabet 3, normal isabet 1 hasar; ıskada “tam isabet” işareti yok sayılıyor; kazananı toplam hasar belirliyor (hedef 7 iken 3+1+3 ile kazanıldı); isabet ve tam isabet sayıları ayrı tutuluyor: geçti.
