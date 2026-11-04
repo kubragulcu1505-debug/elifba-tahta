@@ -152,6 +152,11 @@ for (const lesson of LESSONS) {
   else if (LESSON_POOLS[lesson.id]) TUG_POOLS[lesson.id] = LESSON_POOLS[lesson.id];
   else if (LESSON_QUESTION_IDS[lesson.id]) TUG_POOLS[lesson.id] = questionsForLesson(lesson.id);
 }
+/** Lava düşme oyunu: Kur’an harfleri, üstünlü ve cezimli harflerden karışık havuz (çocukların istediği konular). */
+export const LAVA_LESSON = "karisik-lava";
+export const LAVA_LESSON_TITLE = "Karışık: harfler, üstün, cezim";
+export const LAVA_POOL: Question[] = [...TUG_POOLS["u1-l6"], ...TUG_POOLS["u3-l1"], ...TUG_POOLS["u4-l1"]];
+TUG_POOLS[LAVA_LESSON] = LAVA_POOL;
 const ANY_QUESTION = new Map<string, Question>();
 for (const q of Object.values(TUG_POOLS).flat()) ANY_QUESTION.set(q.id, q);
 for (const q of QUESTION_BY_ID.values()) ANY_QUESTION.set(q.id, q);

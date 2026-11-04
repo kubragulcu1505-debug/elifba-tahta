@@ -2,8 +2,8 @@
 // Oyun oturumu yardımcıları: başlatma, tekrar, sonuç kaydı.
 import { createGame, computeResult, objectiveStats, type DuelPlayer, type GameMode, type GameState, type QuestionLite, type Side } from "./game";
 import { newSeed } from "./rng";
-import { questionsForLesson, getQuestion, TUG_POOLS, getAnyQuestion } from "@/content/index";
-import { createTug, type TugState } from "./tug";
+import { questionsForLesson, getQuestion, TUG_POOLS, getAnyQuestion, LAVA_LESSON } from "@/content/index";
+import { createTug, type Racer, type TugState } from "./tug";
 import { createPenalty, type PenaltyState } from "./penalty";
 import type { Question } from "@/content/types";
 import { read, update, write, type GameRecord } from "./storage";
@@ -79,6 +79,42 @@ export function startDuel(game: DuelGame, lessonId: string, players: Record<Side
   return "/kale";
 }
 
+/** Araba yarışının garaj ekranını açar (oyuncular adını yazar, arabasını ve rengini seçer). */
+export function openRaceSetup(lessonId: string): void {
+  update("ui", (u) => ({ ...u, raceSetup: { lessonId } }));
+}
+
+/** Cezalı araba yarışını başlatır. Sınıf listesinden seçilen öğrenciler varsa puanları genel tabloya işlenir. */
+export function startRace(lessonId: string, racers: Record<Side, Racer>, players?: Players): TugState {
+  const pool = (TUG_POOLS[lessonId] ?? []).map(toLite);
+  const state = createTug({
+    lessonId,
+    seed: newSeed(),
+    pool,
+    kind: "race",
+    players,
+    racers,
+    teamNames: { left: racers.left.name, right: racers.right.name },
+    settings: { target: read("settings").raceTarget },
+  });
+  write("activeRace", { state, savedAtEpoch: Date.now(), fresh: true });
+  update("ui", (u) => ({ ...u, raceSetup: undefined, lastRacers: racers }));
+  return state;
+}
+
+/** Lava düşme oyununun takım adı ekranını açar. Varsayılan sorular harfler, üstün ve cezimden karışıktır. */
+export function openLavaSetup(lessonId: string = LAVA_LESSON): void {
+  update("ui", (u) => ({ ...u, lavaSetup: { lessonId } }));
+}
+
+export function startLava(lessonId: string, teamNames: Record<Side, string>): TugState {
+  const pool = (TUG_POOLS[lessonId] ?? []).map(toLite);
+  const state = createTug({ lessonId, seed: newSeed(), pool, kind: "lava", teamNames, settings: { target: read("settings").lavaLives } });
+  write("activeLava", { state, savedAtEpoch: Date.now(), fresh: true });
+  update("ui", (u) => ({ ...u, lavaSetup: undefined, lavaNames: teamNames }));
+  return state;
+}
+
 /** Halat çekme sorularını da kapsayan arama. */
 export function lookupAnyLite(id: string): QuestionLite | undefined {
   const q = getAnyQuestion(id);
@@ -152,13 +188,13 @@ export function recordFinishedGame(state: GameState): void {
   write("history", [rec, ...history].slice(0, 300));
 }
 
-/** Biten bireysel kale yıkmayı genel tabloya bir kez işler. */
+/** Biten bireysel kale yıkmayı ya da araba yarışını genel tabloya bir kez işler. */
 export function recordFinishedSiege(state: TugState): void {
-  if (state.kind !== "siege" || !state.players || !state.winner) return;
+  if ((state.kind !== "siege" && state.kind !== "race") || !state.players || !state.winner) return;
   saveDuel(
     makeDuelRecord({
       id: state.id,
-      game: "siege",
+      game: state.kind,
       lessonId: state.lessonId,
       finishedAtEpoch: Date.now(),
       players: state.players,

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { startDart, startPenalty, startSiege, startTug } from "@/lib/session";
+import { openLavaSetup, openRaceSetup, startDart, startPenalty, startSiege, startTug } from "@/lib/session";
 import { LESSON_ORDER } from "@/content/lessons";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID } from "@/content/lessons";
 import { usePersisted } from "@/lib/storage";
@@ -37,6 +37,22 @@ export function LessonMap() {
         </p>
         <Link href="/duello" className="btn btn-primary inline-flex items-center">⚔ Oyuncu seç</Link>
         <Link href="/tablo" className="btn btn-ghost inline-flex items-center">🏆 Genel tablo</Link>
+      </section>
+      <section className="card flex flex-wrap items-center gap-4 border-bad p-5" aria-labelledby="lava-h">
+        <h2 id="lava-h" className="text-2xl font-extrabold">🌋 Lava düşme</h2>
+        <p className="min-w-60 flex-1 text-ink-soft">
+          İki takımlı, süresiz, 30 soruluk oyun: Kur’an harfleri, üstünlü ve cezimli harfler karışık. Her yanlış ipi uzatır; hakkı biten takım lava düşer, kazanan televizyonda kupayı gösterir.
+        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            openLavaSetup();
+            router.push("/lava");
+          }}
+        >
+          🌋 Lava düşme
+        </button>
       </section>
       <section className="card flex flex-wrap items-center gap-4 border-warn p-5" aria-labelledby="halat-h">
         <h2 id="halat-h" className="text-2xl font-extrabold">🪢 Halat çekme · 🏰 Kale yıkma · ⚽ Penaltı · 🎯 Dart</h2>
@@ -88,6 +104,16 @@ export function LessonMap() {
           }}
         >
           🎯 Dart
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            openRaceSetup(tugLesson);
+            router.push("/araba");
+          }}
+        >
+          🚗 Araba yarışı
         </button>
       </section>
       {UNITS.map((u) => (

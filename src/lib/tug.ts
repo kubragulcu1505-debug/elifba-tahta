@@ -7,10 +7,15 @@
 // kendisi çekip bırakarak nişan alır (aim → flying). Taş kaleye değerse 1, kalenin zayıf noktasına
 // değerse WEAK_DAMAGE hasar verir; rakip kaleye `target` hasar ilk veren kazanır. Iskalanan atış da
 // sorunun geçmesini sağlar.
+// Cezalı araba yarışı (kind: "race"): doğru cevap arabayı 1 basamak ileri götürür; arka arkaya 3 yanlışta
+// araba 1 basamak geri gider. Bitiş çizgisine (`target` basamak) ilk ulaşan kazanır.
+// Lava düşme (kind: "lava"): her yanlış takımı lava biraz daha yaklaştırır; `target` yanlışta takım lava
+// düşer ve elenir. İki oyunda da her tarafa en fazla `questionLimit` soru sorulur; sorular bitince araba
+// yarışında önde olan, lavda daha az yanlış yapan kazanır. Eşitlikte birer soruluk uzatma yapılır.
 import { roundOrder, SIDES, type DuelPlayer, type QueueItem, type QuestionLite, type Side } from "./game.ts";
 import { hashSeed, mulberry32, shuffle } from "./rng.ts";
 
-export type TugKind = "tug" | "siege";
+export type TugKind = "tug" | "siege" | "race" | "lava";
 
 export interface TugSettings {
   /** Kazanmak için gereken net çekiş sayısı (halat) ya da rakip kaleye isabet eden taş sayısı (kale). */
@@ -27,6 +32,10 @@ export interface TugSettings {
   landFeedbackMs: number;
   /** Kale: kolay nişan (taşın yolunun tamamı gösterilir). */
   easyAim: boolean;
+  /** Araba ve lava: her tarafa sorulacak en fazla soru (uzatmada birer artar). */
+  questionLimit: number;
+  /** Araba: arka arkaya bu kadar yanlışta araba 1 basamak geri gider. */
+  raceBackAfter: number;
 }
 
 export const TUG_DEFAULTS: TugSettings = {
@@ -37,13 +46,30 @@ export const TUG_DEFAULTS: TugSettings = {
   aimMs: 3000,
   landFeedbackMs: 700,
   easyAim: false,
+  questionLimit: 30,
+  raceBackAfter: 3,
 };
+/** Araba yarışında bitiş çizgisine kadar basamak sayısı (varsayılan). */
+export const RACE_TARGET = 15;
+/** Lava düşmede lava düşmeye kadar yanlış hakkı (varsayılan). */
+export const LAVA_LIVES = 5;
+/** Araba ve lavda yanlış cevaptan sonra doğru cevabın gösterildiği süre (ms). */
+export const RACE_LAVA_WRONG_MS = 2500;
+
+/** Araba yarışında oyuncunun seçtiği araba. */
+export type CarType = "racer" | "jeep" | "pickup" | "bus" | "truck";
+export interface Racer {
+  name: string;
+  car: CarType;
+  color: string;
+  number: string;
+}
 export const SIEGE_TARGET = 15;
 /** Kalenin zayıf noktasına (tam isabet) verilen hasar; normal isabet 1 hasardır. */
 export const WEAK_DAMAGE = 3;
 
-/** aim: kale oyununda nişan alınıyor; flying: taş havada. */
-export type TugPhase = "loading" | "question" | "feedback" | "aim" | "flying" | "finished";
+/** aim: kale oyununda nişan alınıyor; flying: taş havada; waiting: araba/lavda soruları bitti, rakip bekleniyor. */
+export type TugPhase = "loading" | "question" | "feedback" | "aim" | "flying" | "waiting" | "finished";
 
 export interface TugTeam {
   side: Side;
@@ -67,6 +93,12 @@ export interface TugTeam {
   aimDeadline?: number;
   /** Kale: son atışın sonucu (geri bildirim için). */
   lastShot?: { hit: boolean; critical: boolean } | null;
+  /** Araba: pistteki basamak. */
+  pos?: number;
+  /** Araba: arka arkaya yanlış sayısı. */
+  streak?: number;
+  /** Araba: son yanlışta araba geri gitti mi. */
+  lastBack?: boolean;
 }
 
 export interface TugState {
@@ -75,6 +107,12 @@ export interface TugState {
   kind?: TugKind;
   /** Bireysel düelloda iki öğrenci; takım oyununda yoktur. */
   players?: Record<Side, DuelPlayer>;
+  /** Oyunun başında yazılan taraf adları (araba ve lav). */
+  teamNames?: Record<Side, string>;
+  /** Araba yarışında seçilen arabalar. */
+  racers?: Record<Side, Racer>;
+  /** Araba ve lav: uzatmaya geçildi mi. */
+  overtime?: boolean;
   lessonId: string;
   seed: string;
   /** Halatın konumu: eksi = sol takıma doğru, artı = sağ takıma doğru. */
@@ -113,7 +151,12 @@ export function makeDeck(pool: QuestionLite[], seed: string, side: Side, cycle: 
   return order.map((q) => ({ questionId: q.id, optionOrder: shuffle(q.optionIds, rand) }));
 }
 
-export function createTug(args: { lessonId: string; seed: string; pool: QuestionLite[]; settings?: Partial<TugSettings>; kind?: TugKind; players?: Record<Side, DuelPlayer> }): TugState {
+export function createTug(args: { lessonId: string; seed: string; pool: QuestionLite[]; settings?: Partial<TugSettings>;
+  kind?: TugKind;
+  players?: Record<Side, DuelPlayer>;
+  teamNames?: Record<Side, string>;
+  racers?: Record<Side, Racer>;
+}): TugState {
   if (args.pool.length === 0) throw new Error("Oyun için soru havuzu boş");
   const kind = args.kind ?? "tug";
   const team = (side: Side): TugTeam => ({
@@ -132,10 +175,18 @@ export function createTug(args: { lessonId: string; seed: string; pool: Question
     id: `${kind}-${args.lessonId}-${args.seed}`,
     kind,
     ...(args.players ? { players: args.players } : {}),
+    ...(args.teamNames ? { teamNames: args.teamNames } : {}),
+    ...(args.racers ? { racers: args.racers } : {}),
     lessonId: args.lessonId,
     seed: args.seed,
     rope: 0,
-    settings: { ...TUG_DEFAULTS, ...(kind === "siege" ? { target: SIEGE_TARGET } : {}), ...args.settings },
+    settings: {
+      ...TUG_DEFAULTS,
+      ...(kind === "siege" ? { target: SIEGE_TARGET } : {}),
+      ...(kind === "race" ? { target: RACE_TARGET, wrongLockMs: RACE_LAVA_WRONG_MS } : {}),
+      ...(kind === "lava" ? { target: LAVA_LIVES, wrongLockMs: RACE_LAVA_WRONG_MS } : {}),
+      ...args.settings,
+    },
     paused: false,
     pausedAt: null,
     winner: null,
@@ -177,6 +228,43 @@ export function reduceTug(s: TugState, a: TugAction, ctx: TugContext): TugState 
           correct: t.correct + (correct ? 1 : 0),
           wrong: t.wrong + (correct ? 0 : 1),
         });
+      }
+      if (s.kind === "race" || s.kind === "lava") {
+        let pos = t.pos ?? 0;
+        let streak = t.streak ?? 0;
+        let back = false;
+        let winner: Side | null = null;
+        if (s.kind === "race") {
+          if (correct) {
+            pos += 1;
+            streak = 0;
+          } else {
+            streak += 1;
+            if (streak >= s.settings.raceBackAfter) {
+              back = pos > 0;
+              pos = Math.max(0, pos - 1);
+              streak = 0;
+            }
+          }
+          if (pos >= s.settings.target) winner = a.side;
+        } else if (!correct && t.wrong + 1 >= s.settings.target) {
+          winner = a.side === "left" ? "right" : "left";
+        }
+        let next = withTeam({ ...s, winner }, a.side, {
+          ...t,
+          phase: winner ? "finished" : "feedback",
+          lastAnswer,
+          pos,
+          streak,
+          lastBack: back,
+          continueAt: a.now + (correct ? s.settings.correctFeedbackMs : s.settings.wrongLockMs),
+          correct: t.correct + (correct ? 1 : 0),
+          wrong: t.wrong + (correct ? 0 : 1),
+        });
+        if (winner) {
+          for (const side of SIDES) next = withTeam(next, side, { ...next.teams[side], phase: "finished" });
+        }
+        return next;
       }
       const rope = correct ? s.rope + (a.side === "left" ? -1 : 1) : s.rope;
       const winner: Side | null = rope <= -s.settings.target ? "left" : rope >= s.settings.target ? "right" : null;
@@ -234,7 +322,11 @@ export function reduceTug(s: TugState, a: TugAction, ctx: TugContext): TugState 
         deck = makeDeck(ctx.pool, s.seed, a.side, cycle, lastKey);
         index = 0;
       }
-      return withTeam(s, a.side, { ...t, deck, index, cycle, phase: "loading", lastAnswer: null });
+      const moved = withTeam(s, a.side, { ...t, deck, index, cycle, phase: "loading", lastAnswer: null, lastBack: false });
+      if ((s.kind === "race" || s.kind === "lava") && t.correct + t.wrong >= s.settings.questionLimit) {
+        return decideAtLimit(withTeam(moved, a.side, { ...moved.teams[a.side], phase: "waiting" }));
+      }
+      return moved;
     }
     case "PAUSE": {
       if (s.paused || s.winner) return s;
@@ -253,6 +345,27 @@ export function reduceTug(s: TugState, a: TugAction, ctx: TugContext): TugState 
       return { ...s, paused: false, pausedAt: null, teams };
     }
   }
+}
+
+/**
+ * Araba ve lav: iki tarafın da soruları bittiyse kazananı belirler. Araba yarışında önde olan, lavda daha
+ * az yanlış yapan kazanır. Eşitse soru sınırı birer artar ve iki taraf uzatma sorusuna geçer.
+ */
+function decideAtLimit(s: TugState): TugState {
+  if (!SIDES.every((side) => s.teams[side].phase === "waiting")) return s;
+  const L = s.teams.left;
+  const R = s.teams.right;
+  const diff = s.kind === "race" ? (L.pos ?? 0) - (R.pos ?? 0) : R.wrong - L.wrong;
+  if (diff !== 0) {
+    const winner: Side = diff > 0 ? "left" : "right";
+    return { ...s, winner, teams: { left: { ...L, phase: "finished" }, right: { ...R, phase: "finished" } } };
+  }
+  return {
+    ...s,
+    overtime: true,
+    settings: { ...s.settings, questionLimit: s.settings.questionLimit + 1 },
+    teams: { left: { ...L, phase: "loading" }, right: { ...R, phase: "loading" } },
+  };
 }
 
 /** Kaydetmeye uygun anlık görüntü: kalan bekleme süreleri saklanır, oyun duraklatılmış kaydedilir. */

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { LESSON_BY_ID, UNIT_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { PRACTICE_POOLS, questionsForLesson, gameLessonOf, AUDIO_CATALOG } from "@/content/index";
 import { usePersisted } from "@/lib/storage";
-import { startCompetition, startDart, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
+import { openRaceSetup, startCompetition, startDart, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
 import { Ar, RichText } from "@/components/Arabic";
 import { TapButton } from "@/components/TapButton";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -71,6 +71,7 @@ export function LessonView({ lessonId }: { lessonId: string }) {
     ["kale", "Kale yıkma"],
     ["penalti", "Penaltı"],
     ["dart", "Dart"],
+    ["araba", "Araba yarışı"],
     ["tekrar", "Tekrar"],
     ...(audioItems.length ? [["ses", "Dinle ve seç"]] : []),
     ...(lessonId === "u12-l1" ? [["okuma", "Yüzüne okuma"]] : []),
@@ -257,6 +258,23 @@ export function LessonView({ lessonId }: { lessonId: string }) {
             }}
           >
             🎯 Dartı başlat
+          </TapButton>
+        </Section>
+
+        <Section id="araba" title="Cezalı araba yarışı">
+          <ul className="list-disc pl-6 text-lg">
+            <li>Başta iki oyuncu adını yazar (ya da sınıf listesinden seçer), arabasını, rengini ve numarasını seçer.</li>
+            <li>Her doğru cevap arabayı 1 basamak ileri götürür. Arka arkaya 3 yanlışta araba 1 basamak geri gider.</li>
+            <li>Bitiş çizgisine ({settings.raceTarget} basamak) ilk ulaşan kazanır. Her oyuncuya en fazla 30 soru sorulur; sorular biterse önde olan kazanır, eşitlikte uzatma sorusu gelir.</li>
+          </ul>
+          <TapButton
+            className="big-btn btn-primary mt-5"
+            onTap={() => {
+              openRaceSetup(lessonId);
+              router.push("/araba");
+            }}
+          >
+            🚗 Garaja git
           </TapButton>
         </Section>
 

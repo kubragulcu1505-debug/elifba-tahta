@@ -6,7 +6,7 @@ Tarih: 18 Ekim 2026. Ortam: Windows 11, Node.js 22.12, Next.js 16.4.2, React 19.
 
 | Denetim | Sonuç |
 |---|---|
-| Otomatik testler (`npm test`) | 62/62 geçti |
+| Otomatik testler (`npm test`) | 68/68 geçti |
 | Tür denetimi (`tsc --noEmit`) | Hata yok |
 | Lint (`eslint src tests scripts`) | Hata ve uyarı yok |
 | Üretim derlemesi (`npm run build`) | Başarılı, 39 sayfa statik üretildi |
@@ -49,6 +49,18 @@ Not: Ekran yerleşimi ölçümleri bu değişiklikten önce yapıldı. Türkçe 
 - Ünitede yalnızca bir oyun var ve bu oyun 28 harfin hepsini içeriyor: geçti.
 - 1–5. dersler var olan bu oyuna yönlendiriyor: geçti.
 - Her takımda ilk 28 soru 28 farklı harf; son 2 soru tekrar: test ve tarayıcıda doğrulandı.
+
+## Cezalı araba yarışı ve lava düşme (4 Kasım 2026)
+
+Öğrencilerin kâğıda yazıp çizdiği iki oyun.
+
+- Araba: doğru cevap 1 basamak ileri; arka arkaya 3 yanlışta 1 basamak geri; başlangıçtan geriye gidilmiyor; araya doğru cevap girince sayaç sıfırlanıyor: geçti.
+- Araba: bitişe ilk ulaşan kazanıyor; sorular bitince önde olan kazanıyor; soruları biten taraf rakibini bekliyor; berabere ise birer soruluk uzatma: geçti.
+- Lava: her yanlış lava yaklaştırıyor; 5. yanlışta takım lava düşüyor ve rakip kazanıyor; sorular bitince daha az yanlış yapan kazanıyor; berabere ise uzatma: geçti.
+- Lava soru havuzu Kur’an harfleri (1. ünite), üstün (3. ünite) ve cezimden (4. ünite) karışık: geçti.
+- Tarayıcıda (1366×768): ana sayfadaki “🚗 Araba yarışı” garajı açtı; iki ad yazıldı, sağ oyuncu pembe otobüs seçti; yarış başladı, arabalar doğru cevaplarla ilerledi, arka arkaya 3 yanlışta sağ araba başlangıca geri döndü ve “⚠ 1/3” uyarısı göründü. Başlangıçtaki arabanın isim etiketinin altında kalması ve pistin alçak olması düzeltildi (pist 192 px).
+- Tarayıcıda: “🌋 Lava düşme” takım adı ekranını açtı (Ay Takımı, Beşik Takımı); sorular harf adı ile üstünlü/cezimli hece okunuşundan karışık geldi; her yanlışta ip uzadı ve kalan hak gösterildi; 5. yanlışta Beşik Takımı lava düştü; televizyonda kupa, “● CANLI”, kayan “ŞAMPİYON: AY TAKIMI!” bandı ve konfeti açıldı. Sahne yükseltildi (230 px); ekran kaydırmasız sığdı.
+- Denenmedi: araba yarışının bitiş çizgisine kadar oynanması (kazanma ekranı halat/kale ile aynı bileşen) ve gerçek akıllı tahtada dokunmatik klavyeyle ad yazma.
 
 ## Dart oyunu (29 Ekim 2026)
 

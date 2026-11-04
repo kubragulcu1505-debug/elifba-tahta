@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { UNITS, lessonsOfUnit, LESSON_BY_ID, LESSON_ORDER, SOURCE_TITLES } from "@/content/lessons";
 import { questionsForLesson, GAME_LESSONS } from "@/content/index";
 import { usePersisted, update, write, exportAll, resetAll, downloadJson, storageAvailable, useHydrated, DEFAULT_SETTINGS, type Settings } from "@/lib/storage";
-import { startCompetition, startDart, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
+import { openRaceSetup, startCompetition, startDart, startPenalty, startReview, startSiege, startTug } from "@/lib/session";
 import { formatMs } from "@/lib/game";
 import { Ar, RichText } from "@/components/Arabic";
 import { TeamBadge } from "@/components/TeamBadge";
@@ -108,6 +108,9 @@ function TeacherPanelInner() {
                       <button type="button" className="btn btn-ghost !min-h-10 !py-1 text-sm" onClick={() => { startDart(l.id); router.push("/dart"); }}>
                         Dart
                       </button>
+                      <button type="button" className="btn btn-ghost !min-h-10 !py-1 text-sm" onClick={() => { openRaceSetup(l.id); router.push("/araba"); }}>
+                        Araba
+                      </button>
                       {l.gameLessonId ? (
                         <span className="text-sm text-ink-soft">Oyun: {LESSON_BY_ID.get(l.gameLessonId)?.title}</span>
                       ) : (
@@ -206,6 +209,34 @@ function TeacherPanelInner() {
                 data-testid="dart-target"
               />
               <span className="text-base text-ink-soft">Varsayılan 50. Kırmızı merkez 10, dışa doğru 7, 5, 3, 1 puan. Bu kadar puana ulaşan kazanır. Yeni başlatılan oyunlarda geçerlidir.</span>
+            </label>
+            <label className="flex flex-col gap-2 text-lg">
+              <span className="font-bold">Araba yarışı: bitişe kadar basamak</span>
+              <input
+                type="number"
+                min={5}
+                max={30}
+                step={1}
+                value={settings.raceTarget}
+                onChange={(e) => setSettings({ raceTarget: Math.min(30, Math.max(5, Number(e.target.value) || 15)) })}
+                className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
+                data-testid="race-target"
+              />
+              <span className="text-base text-ink-soft">Varsayılan 15. Doğru cevap 1 basamak ilerletir; arka arkaya 3 yanlışta araba 1 basamak geri gider. Her oyuncuya en fazla 30 soru sorulur.</span>
+            </label>
+            <label className="flex flex-col gap-2 text-lg">
+              <span className="font-bold">Lava düşme: lava düşmeye kadar yanlış hakkı</span>
+              <input
+                type="number"
+                min={2}
+                max={15}
+                step={1}
+                value={settings.lavaLives}
+                onChange={(e) => setSettings({ lavaLives: Math.min(15, Math.max(2, Number(e.target.value) || 5)) })}
+                className="min-h-12 w-40 rounded-xl border-2 border-line px-3 text-xl"
+                data-testid="lava-lives"
+              />
+              <span className="text-base text-ink-soft">Varsayılan 5. Her yanlış cevap takımı lava yaklaştırır; hakkı biten takım lava düşer. 30 soru biterse daha az yanlış yapan kazanır.</span>
             </label>
             <label className="flex items-start gap-3 text-lg">
               <input

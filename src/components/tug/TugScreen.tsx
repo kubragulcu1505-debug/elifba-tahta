@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SIDES, type Side } from "@/lib/game";
 import { reduceTug, snapshotTug, restoreTug, currentTugItem, type TugAction, type TugKind, type TugState } from "@/lib/tug";
-import { lookupAnyLite, recordFinishedSiege, sideNames, startSiege, startTug, toLite } from "@/lib/session";
+import { lookupAnyLite, openLavaSetup, openRaceSetup, recordFinishedSiege, sideNames, startSiege, startTug, toLite } from "@/lib/session";
 import { read, write, usePersisted, useHydrated } from "@/lib/storage";
 import { LESSON_BY_ID } from "@/content/lessons";
-import { TUG_POOLS, getAnyQuestion } from "@/content/index";
+import { TUG_POOLS, getAnyQuestion, LAVA_LESSON, LAVA_LESSON_TITLE } from "@/content/index";
 import { TapButton } from "@/components/TapButton";
 import { SideIcon } from "@/components/PlayerAvatar";
 import { Ar, RichText } from "@/components/Arabic";
@@ -16,6 +16,10 @@ import { SiegeStage, type Flight, type Impact, type SiegeGeometry } from "./Sieg
 import { AimPad } from "./AimPad";
 import { AUTO_POWER, launchFromAngle, launchFromPull, previewPath, simulateShot, type Launch, type Pt } from "@/lib/ballistics";
 import { Confetti, Trophy } from "@/components/Celebration";
+import { RaceStage } from "@/components/race/RaceStage";
+import { LavaStage } from "@/components/race/LavaStage";
+import { TvCelebration } from "@/components/race/TvCelebration";
+import { LavaSetup, RaceSetup } from "@/components/race/Setup";
 
 const isLongArabic = (s: string) => [...s].filter((c) => c !== " ").length > 7 || s.includes(" ");
 const isLongText = (s: string) => s.length > 22;
@@ -48,6 +52,32 @@ const KINDS = {
     correctMsg: "Doğru! Şimdi nişan al",
     winDelayMs: 2000,
   },
+  race: {
+    key: "activeRace",
+    chip: "Cezalı araba yarışı",
+    none: "Aktif araba yarışı yok",
+    noneHint: "Ana sayfadan ya da bir ders sayfasından “Araba yarışı”nı başlatın.",
+    winLine: "Bitiş çizgisine ilk o ulaştı!",
+    praise: "İki yarışçı da çok güzel yarıştı. Tebrikler!",
+    rule: (t: number) => `Doğru cevap arabayı 1 basamak ileri götürür; arka arkaya 3 yanlışta araba 1 basamak geri gider. Bitişe (${t} basamak) ilk ulaşan kazanır; 30 soru biterse önde olan kazanır.`,
+    restartQ: "Yarış yeniden başlasın mı?",
+    restartHint: "Arabalar başlangıç çizgisine döner, sorular yeniden karışır.",
+    correctMsg: "Doğru! Araban 1 basamak ilerledi",
+    winDelayMs: 1400,
+  },
+  lava: {
+    key: "activeLava",
+    chip: "Lava düşme · süresiz",
+    none: "Aktif lava düşme oyunu yok",
+    noneHint: "Ana sayfadan “Lava düşme” oyununu başlatın.",
+    winLine: "Rakip takım lava düştü!",
+    praise: "İki takım da çok güzel oynadı. Tebrikler!",
+    rule: (t: number) => `Her yanlış cevap takımı lava biraz daha yaklaştırır; ${t}. yanlışta takım lava düşer. 30 soru biterse daha az yanlış yapan kazanır.`,
+    restartQ: "Lava düşme yeniden başlasın mı?",
+    restartHint: "İpler kısalır, sorular yeniden karışır.",
+    correctMsg: "Doğru! İpin sağlam",
+    winDelayMs: 2200,
+  },
 } as const;
 
 function loadInitial(kind: TugKind): TugState | null {
@@ -75,7 +105,11 @@ function useNow(active: boolean): number {
 export function TugScreen({ kind = "tug" }: { kind?: TugKind }) {
   const hydrated = useHydrated();
   const active = usePersisted(KINDS[kind].key);
+  const ui = usePersisted("ui");
   if (!hydrated) return <div className="p-10 text-2xl">Hazırlanıyor…</div>;
+  // Araba yarışı ve lava düşme önce başlangıç ekranını (garaj / takım adları) gösterir.
+  if (kind === "race" && ui.raceSetup) return <RaceSetup lessonId={ui.raceSetup.lessonId} />;
+  if (kind === "lava" && ui.lavaSetup) return <LavaSetup lessonId={ui.lavaSetup.lessonId} />;
   // Yeni oyun başlatılınca bileşen sıfırdan kurulsun (Next.js sayfa durumunu saklar).
   return <TugInner key={active?.state.id ?? "none"} kind={kind} />;
 }
@@ -231,11 +265,16 @@ function TugInner({ kind }: { kind: TugKind }) {
   }
 
   const lesson = LESSON_BY_ID.get(state.lessonId);
+  const lessonTitle = state.lessonId === LAVA_LESSON ? LAVA_LESSON_TITLE : lesson?.title;
   const duel = !!state.players;
-  const names = duel ? sideNames(state.players) : settings.teamNames;
+  const names = duel ? sideNames(state.players) : (state.teamNames ?? settings.teamNames);
+  const exitTo = duel ? "/duello" : LESSON_BY_ID.has(state.lessonId) ? `/ders/${state.lessonId}` : "/";
   const restart = () => {
     setConfirmRestart(false);
     if (kind === "siege") startSiege(state.lessonId, state.players);
+    // Araba ve lav: yeniden başlarken başlangıç ekranı açılır (arabalar / adlar hazır gelir).
+    else if (kind === "race") openRaceSetup(state.lessonId);
+    else if (kind === "lava") openLavaSetup(state.lessonId);
     else startTug(state.lessonId);
   };
   const toggleFs = async () => {
@@ -251,8 +290,9 @@ function TugInner({ kind }: { kind: TugKind }) {
     <div className="game-root tug-root" data-testid="tug-root">
       <header className="flex items-center gap-3 border-b-2 border-line bg-surface px-4 py-2">
         <div className="min-w-0 flex-1 truncate text-lg font-extrabold">
-          {lesson?.title}
+          {lessonTitle}
           <span className="ml-3 chip bg-warn-soft text-warn">{duel ? `Bireysel düello · ${cfg.chip}` : cfg.chip}</span>
+          {state.overtime && !state.winner && <span className="ml-2 chip bg-bad-soft text-bad">⏱ Uzatma!</span>}
         </div>
         <TapButton className="btn btn-primary" onTap={(now) => dispatch(state.paused ? { type: "RESUME", now } : { type: "PAUSE", now })}>
           {state.paused ? "▶ Devam" : "⏸ Duraklat"}
@@ -263,7 +303,7 @@ function TugInner({ kind }: { kind: TugKind }) {
           className="btn btn-ghost"
           onTap={(now) => {
             dispatch({ type: "PAUSE", now });
-            router.push(`/ders/${state.lessonId}`);
+            router.push(exitTo);
           }}
         >
           Çık
@@ -283,6 +323,28 @@ function TugInner({ kind }: { kind: TugKind }) {
           impacts={impacts}
           onLanded={landed}
           geometryRef={geometry}
+        />
+      ) : kind === "race" ? (
+        <RaceStage
+          names={names}
+          players={state.players}
+          racers={state.racers}
+          pos={{ left: state.teams.left.pos ?? 0, right: state.teams.right.pos ?? 0 }}
+          streak={{ left: state.teams.left.streak ?? 0, right: state.teams.right.streak ?? 0 }}
+          backKey={{
+            left: state.teams.left.lastBack ? `b${state.teams.left.wrong}` : "",
+            right: state.teams.right.lastBack ? `b${state.teams.right.wrong}` : "",
+          }}
+          target={state.settings.target}
+          winner={state.winner}
+        />
+      ) : kind === "lava" ? (
+        <LavaStage
+          names={names}
+          players={state.players}
+          wrong={{ left: state.teams.left.wrong, right: state.teams.right.wrong }}
+          lives={state.settings.target}
+          winner={state.winner}
         />
       ) : (
         <RopeStage rope={state.rope} target={state.settings.target} names={names} winner={state.winner} pulls={{ left: state.teams.left.correct, right: state.teams.right.correct }} />
@@ -314,7 +376,19 @@ function TugInner({ kind }: { kind: TugKind }) {
           </div>
         )}
 
-        {state.winner && showWin && (
+        {state.winner && showWin && kind === "lava" && (
+          <TvCelebration winnerName={names[state.winner]} color={state.winner === "left" ? "var(--left)" : "var(--right)"}>
+            <div className="card flex flex-wrap items-center justify-center gap-3 p-4 text-center" data-testid="tug-winner">
+              <span className="text-[clamp(16px,2.6vh,28px)] font-bold">
+                {names.left}: {state.teams.left.correct} doğru, {state.teams.left.wrong} yanlış · {names.right}: {state.teams.right.correct} doğru, {state.teams.right.wrong} yanlış
+              </span>
+              <TapButton className="big-btn btn-primary" onTap={restart}>↻ Yeniden oyna</TapButton>
+              <Link href={exitTo} className="big-btn btn-ghost inline-flex items-center border-2 border-line">Çık</Link>
+            </div>
+          </TvCelebration>
+        )}
+
+        {state.winner && showWin && kind !== "lava" && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-ink/45 p-4" data-testid="tug-winner">
             <Confetti />
             <div className="card anim-pop flex w-full max-w-3xl flex-col items-center gap-4 p-8 text-center">
@@ -331,6 +405,7 @@ function TugInner({ kind }: { kind: TugKind }) {
                     <div>
                       {state.teams[side].correct} doğru · {state.teams[side].wrong} yanlış
                       {kind === "siege" && ` · 🎯 ${state.teams[side].hits ?? 0} isabet (${state.teams[side].crits ?? 0} tam isabet)`}
+                      {kind === "race" && ` · 🏁 ${state.teams[side].pos ?? 0}/${state.settings.target} basamak`}
                     </div>
                     {duel && (
                       <div className="font-extrabold text-ok" data-testid={`duel-points-${side}`}>+{state.teams[side].correct * 10} puan genel tabloya eklendi</div>
@@ -349,7 +424,7 @@ function TugInner({ kind }: { kind: TugKind }) {
                     <Link href="/duello" className="big-btn btn-ghost inline-flex items-center border-2 border-line">⚔ Yeni düello</Link>
                   </>
                 ) : (
-                  <Link href={`/ders/${state.lessonId}`} className="big-btn btn-ghost inline-flex items-center border-2 border-line">Ders sayfası</Link>
+                  <Link href={exitTo} className="big-btn btn-ghost inline-flex items-center border-2 border-line">Çık</Link>
                 )}
               </div>
             </div>
@@ -404,6 +479,7 @@ function TugPanel({
   const item = currentTugItem(team);
   const q = item ? getAnyQuestion(item.questionId) : undefined;
   const now = useNow((team.phase === "feedback" || team.phase === "aim") && !state.paused);
+  const raceLava = state.kind === "race" || state.kind === "lava";
   const fb = team.phase === "feedback" ? team.lastAnswer : null;
   const aiming = team.phase === "aim" || team.phase === "flying";
   const shotResult = team.phase === "feedback" && team.lastShot ? team.lastShot : null;
@@ -436,9 +512,26 @@ function TugPanel({
         <span className="chip bg-ok-soft text-ok" data-testid={`correct-${side}`}>✓ {team.correct}</span>
         <span className="chip bg-bad-soft text-bad">✗ {team.wrong}</span>
         {state.kind === "siege" && <span className="chip bg-warn-soft text-warn" data-testid={`hits-${side}`}>💥 {team.damage ?? 0}</span>}
+        {raceLava && (
+          <span className="chip bg-surface-2" data-testid={`qcount-${side}`}>
+            Soru {Math.min(team.correct + team.wrong + (team.phase === "question" || team.phase === "loading" ? 1 : 0), state.settings.questionLimit)}/{state.settings.questionLimit}
+          </span>
+        )}
       </span>
     </header>
   );
+
+  // Araba ve lav: soruları biten taraf rakibini bekler.
+  if (team.phase === "waiting") {
+    return (
+      <section className="team-panel compact" data-side={side} aria-label={`${name} alanı`} data-testid={`team-${side}`}>
+        {header}
+        <div className="flex min-h-0 flex-1 flex-col" data-qid={q.id} data-phase={team.phase}>
+          <div className="pen-wait">⏳ Soruların bitti. Rakibin bitirmesini bekle…</div>
+        </div>
+      </section>
+    );
+  }
 
   // Kale: doğru cevaptan sonra soru alanı nişan alanına döner; atıştan sonra kısa bir sonuç gösterilir.
   if (aiming || shotResult) {
@@ -478,9 +571,25 @@ function TugPanel({
               <p className="text-[clamp(14px,2.1vh,24px)] leading-snug">
                 <RichText text={q.explanation} />
               </p>
-              <p className="mt-1 text-[clamp(16px,2.6vh,30px)] font-extrabold text-bad" data-testid={`wait-${side}`}>
-                {secondsLeft} saniye bekleyin…
-              </p>
+              {state.kind === "race" && (
+                <p className="mt-1 text-[clamp(15px,2.4vh,28px)] font-extrabold text-bad" data-testid={`race-note-${side}`}>
+                  {team.lastBack
+                    ? "Arka arkaya 3 yanlış: araban 1 basamak geri gitti!"
+                    : (team.streak ?? 0) === 2
+                      ? "⚠ Arka arkaya 2 yanlış! Bir yanlış daha olursa araban geri gider."
+                      : "Araban yerinde kaldı."}
+                </p>
+              )}
+              {state.kind === "lava" && (
+                <p className="mt-1 text-[clamp(15px,2.4vh,28px)] font-extrabold text-bad" data-testid={`lava-note-${side}`}>
+                  İp uzadı, lava yaklaştın! Kalan hak: {Math.max(0, state.settings.target - team.wrong)}
+                </p>
+              )}
+              {!raceLava && (
+                <p className="mt-1 text-[clamp(16px,2.6vh,30px)] font-extrabold text-bad" data-testid={`wait-${side}`}>
+                  {secondsLeft} saniye bekleyin…
+                </p>
+              )}
             </div>
           ) : (
             <>

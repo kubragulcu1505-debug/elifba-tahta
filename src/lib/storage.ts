@@ -3,7 +3,7 @@
 // Tüm okuma/yazmalar try/catch içindedir; depolama kapalıysa uygulama varsayılanlarla çalışır.
 import { useSyncExternalStore } from "react";
 import type { GameState, Side, TeamResult, GameResult } from "./game";
-import type { TugState } from "./tug";
+import type { Racer, TugState } from "./tug";
 import type { PenaltyState } from "./penalty";
 import { EMPTY_ROSTER, type DuelGame, type DuelRecord, type Roster } from "./roster";
 
@@ -26,6 +26,10 @@ export interface Settings {
   penaltyTarget: number;
   /** Dartta kazanmak için gereken puan. */
   dartTarget: number;
+  /** Araba yarışında bitiş çizgisine kadar basamak. */
+  raceTarget: number;
+  /** Lava düşmede lava düşmeye kadar yanlış hakkı. */
+  lavaLives: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -37,6 +41,8 @@ export const DEFAULT_SETTINGS: Settings = {
   easyAim: false,
   penaltyTarget: 5,
   dartTarget: 50,
+  raceTarget: 15,
+  lavaLives: 5,
 };
 
 export interface GameRecord {
@@ -80,12 +86,25 @@ export interface Schema {
   activePenalty: { state: PenaltyState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Dart oyunu (penaltıyla aynı durum makinesi, ayrı kayıt). */
   activeDart: { state: PenaltyState; savedAtEpoch: number; fresh?: boolean } | null;
+  /** Cezalı araba yarışı. */
+  activeRace: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
+  /** Lava düşme oyunu. */
+  activeLava: { state: TugState; savedAtEpoch: number; fresh?: boolean } | null;
   /** Sınıflar ve öğrenciler (fotoğraflar ayrıca IndexedDB'de). */
   roster: Roster;
   /** Bireysel düello maçları; genel puan tablosu bunlardan hesaplanır. */
   duels: DuelRecord[];
   /** Ders sayfasında açık bırakılan sekme vb. küçük kolaylıklar */
-  ui: { lastLessonId?: string; duel?: { game: DuelGame; lessonId: string; classId?: string } };
+  ui: {
+    lastLessonId?: string;
+    duel?: { game: DuelGame; lessonId: string; classId?: string };
+    /** Araba yarışı / lava düşme başlangıç ekranı açık (hangi dersle başlayacağı). */
+    raceSetup?: { lessonId: string };
+    lavaSetup?: { lessonId: string };
+    /** Son seçilen arabalar ve lav takım adları (bir sonraki oyunda hazır gelir). */
+    lastRacers?: Record<Side, Racer>;
+    lavaNames?: Record<Side, string>;
+  };
 }
 
 const DEFAULTS: Schema = {
@@ -98,6 +117,8 @@ const DEFAULTS: Schema = {
   activeSiege: null,
   activePenalty: null,
   activeDart: null,
+  activeRace: null,
+  activeLava: null,
   roster: EMPTY_ROSTER,
   duels: [],
   ui: {},

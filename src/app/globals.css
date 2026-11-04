@@ -1355,3 +1355,427 @@ html[data-motion="reduce"] .confetti {
   transform: translateY(5px);
   box-shadow: 0 3px 0 #7f1d1d;
 }
+
+/* ── Cezalı araba yarışı ── */
+.race-stage {
+  height: clamp(150px, 25vh, 280px);
+  background: linear-gradient(180deg, #4ade80 0 8%, #475569 8% 92%, #4ade80 92%);
+}
+.race-stage::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 4px dashed #f8fafc;
+  opacity: 0.8;
+}
+.race-steps {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+}
+.race-steps > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 900;
+  font-size: clamp(10px, 1.6vh, 16px);
+  padding-left: 3px;
+}
+.race-finish {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  width: 2.2%;
+  background: conic-gradient(#111 25%, #fff 0 50%, #111 0 75%, #fff 0) 0 0 / 50% 12%;
+  box-shadow: 0 0 0 2px #111;
+}
+.race-startline {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  width: 4px;
+  background: #fff;
+}
+.race-lane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 42%;
+}
+.race-lane.lane-0 { top: 8%; }
+.race-lane.lane-1 { top: 50%; }
+.race-name {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+  font-size: clamp(12px, 1.9vh, 20px);
+}
+.race-count { color: var(--ink-soft); }
+.race-warn {
+  color: #b91c1c;
+  animation: duel-blink 1s ease-in-out infinite;
+}
+.race-car {
+  position: absolute;
+  bottom: 6%;
+  height: 72%;
+  aspect-ratio: 2;
+  transform: translateX(-100%);
+  transition: left 600ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.race-car svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
+}
+.race-car > div {
+  width: 100%;
+  height: 100%;
+}
+.race-back {
+  animation: race-back 700ms ease-out;
+}
+@keyframes race-back {
+  0%, 100% { transform: none; filter: none; }
+  20% { transform: translateX(-6%) rotate(-6deg); filter: sepia(1) hue-rotate(-50deg) saturate(4); }
+  45% { transform: translateX(4%) rotate(4deg); }
+  70% { transform: translateX(-2%) rotate(-2deg); }
+}
+.race-car.won svg {
+  animation: tug-cheer 520ms ease-in-out 4;
+}
+
+/* ── Lava düşme ── */
+.lava-stage {
+  height: clamp(170px, 30vh, 320px);
+  background: linear-gradient(180deg, #1e1b4b 0%, #4c1d95 55%, #7c2d12 100%);
+}
+.lava-stage .tug-title {
+  color: #fde68a;
+}
+.lava-hearts {
+  display: inline-flex;
+  gap: 2px;
+  font-size: clamp(13px, 2vh, 22px);
+  color: #cbd5e1;
+}
+.lava-hearts > span.on { color: #ef4444; }
+.lava-beam {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 22%;
+  height: 7px;
+  border-radius: 4px;
+  background: #78350f;
+  box-shadow: 0 2px 0 #451a03;
+}
+.lava-pool {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  background: linear-gradient(180deg, #fb923c, #ef4444 45%, #7f1d1d);
+  border-radius: 40% 40% 0 0 / 30% 30% 0 0;
+  box-shadow: 0 -6px 18px rgba(249, 115, 22, 0.7);
+  overflow: hidden;
+}
+.lava-pool .bubble {
+  position: absolute;
+  bottom: -10%;
+  width: 12px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fde047;
+  opacity: 0.8;
+  animation: lava-bubble 2.4s ease-in infinite;
+}
+.lava-pool .b1 { left: 15%; animation-delay: 0s; }
+.lava-pool .b2 { left: 38%; animation-delay: 0.7s; }
+.lava-pool .b3 { left: 63%; animation-delay: 1.3s; }
+.lava-pool .b4 { left: 85%; animation-delay: 1.9s; }
+@keyframes lava-bubble {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translateY(-160%) scale(1.3); opacity: 0; }
+}
+.lava-hanger {
+  position: absolute;
+  top: 22%;
+  bottom: 0;
+  width: 0;
+}
+.lava-rope {
+  position: absolute;
+  left: -1.5px;
+  top: 0;
+  width: 3px;
+  background: #a16207;
+  transition: height 600ms ease-out;
+}
+.lava-kid {
+  position: absolute;
+  height: 50%;
+  aspect-ratio: 60 / 100;
+  transform: translate(-50%, -18%);
+  transition: top 600ms ease-out;
+}
+.lava-kid svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.lava-fall .lava-rope {
+  animation: lava-rope-snap 400ms ease-in forwards;
+}
+.lava-fall .lava-kid {
+  animation: lava-fall 1300ms ease-in 300ms forwards;
+}
+@keyframes lava-rope-snap {
+  to { height: 0; opacity: 0; }
+}
+@keyframes lava-fall {
+  0% { transform: translate(-50%, -18%) rotate(0); opacity: 1; }
+  25% { transform: translate(-50%, -30%) rotate(-12deg); opacity: 1; }
+  100% { transform: translate(-50%, 160%) rotate(30deg); opacity: 0; }
+}
+.lava-splash {
+  position: absolute;
+  width: 90px;
+  height: 40px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #fde047, #f97316 55%, transparent 72%);
+  opacity: 0;
+  animation: lava-splash 900ms ease-out 1200ms forwards;
+}
+@keyframes lava-splash {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.4); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.8); }
+}
+.lava-cheer .lava-kid {
+  animation: lava-cheer 520ms ease-in-out 5;
+}
+@keyframes lava-cheer {
+  0%, 100% { transform: translate(-50%, -18%); }
+  50% { transform: translate(-50%, -34%); }
+}
+
+/* ── Televizyonda kupa ── */
+.tv {
+  position: relative;
+  width: min(70vw, 640px);
+  z-index: 41;
+}
+.tv-antenna {
+  position: absolute;
+  left: 50%;
+  top: -42px;
+  width: 110px;
+  height: 46px;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(60deg, transparent 47%, #334155 47% 53%, transparent 53%) left / 50% 100% no-repeat,
+    linear-gradient(-60deg, transparent 47%, #334155 47% 53%, transparent 53%) right / 50% 100% no-repeat;
+}
+.tv-screen {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border: 18px solid #78350f;
+  border-radius: 28px;
+  background: radial-gradient(circle at 50% 40%, #1e3a8a, #0f172a 75%);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7), 0 10px 0 #451a03;
+  overflow: hidden;
+}
+.tv-live {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 900;
+  font-size: clamp(12px, 2vh, 20px);
+  animation: duel-blink 1.2s ease-in-out infinite;
+}
+.tv-champ {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  height: 62%;
+  aspect-ratio: 80 / 110;
+  transform: translateX(-50%);
+  animation: tv-cheer 700ms ease-in-out infinite;
+}
+@keyframes tv-cheer {
+  0%, 100% { transform: translateX(-50%); }
+  50% { transform: translateX(-50%) translateY(-6%); }
+}
+.tv-kid {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.tv-cup {
+  position: absolute;
+  left: 50%;
+  top: -22%;
+  transform: translateX(-50%);
+}
+.tv-ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6px 0;
+  background: #facc15;
+  color: #1f2430;
+  font-weight: 900;
+  font-size: clamp(14px, 2.6vh, 28px);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tv-ticker > span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: tv-ticker 9s linear infinite;
+}
+@keyframes tv-ticker {
+  to { transform: translateX(-100%); }
+}
+.tv-stand {
+  width: 46%;
+  height: 22px;
+  margin: 8px auto 0;
+  border-radius: 0 0 16px 16px;
+  background: #451a03;
+}
+
+/* ── Başlangıç ekranları (garaj, takım adları) ── */
+.setup-root {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--surface-2);
+}
+.setup-panel {
+  gap: clamp(6px, 1.2vh, 14px);
+  overflow-y: auto;
+}
+.setup-preview {
+  align-self: center;
+  width: min(60%, 320px);
+  aspect-ratio: 2;
+}
+.setup-preview svg { width: 100%; height: 100%; display: block; }
+.setup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(16px, 2.4vh, 24px);
+}
+.setup-input {
+  flex: 1;
+  min-width: 10rem;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 3px solid var(--line);
+  background: var(--surface);
+  font-size: clamp(18px, 2.8vh, 28px);
+  font-weight: 700;
+}
+.setup-students {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.setup-student {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 64px;
+  padding: 4px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+}
+.setup-student.on { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand); }
+.setup-cars {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.setup-car {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 14px;
+  border: 3px solid var(--line);
+  background: var(--surface);
+  font-size: clamp(11px, 1.6vh, 15px);
+  font-weight: 800;
+}
+.setup-car svg { width: 100%; aspect-ratio: 2; display: block; }
+.setup-car.on { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand); }
+.setup-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+.setup-color {
+  width: clamp(36px, 5.5vh, 54px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  padding: 3px;
+  background: var(--surface);
+}
+.setup-color > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.setup-color.on { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink); }
+.setup-kid {
+  height: clamp(120px, 30vh, 280px);
+  aspect-ratio: 60 / 100;
+}
+.setup-kid svg { width: 100%; height: 100%; display: block; }
+.setup-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 16px 14px;
+  border-top: 2px solid var(--line);
+  background: var(--surface);
+  text-align: center;
+}
