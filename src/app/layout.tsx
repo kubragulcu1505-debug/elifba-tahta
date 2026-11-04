@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
 import { MotionPreference } from "@/components/MotionPreference";
 
@@ -15,6 +16,10 @@ const scheherazade = localFont({
   preload: true,
 });
 
+// Baloo 2 (başlık, düğme) ve Nunito (metin) — SIL OFL; derleme sırasında indirilip projeyle birlikte sunulur.
+const baloo = Baloo_2({ subsets: ["latin", "latin-ext"], weight: ["600", "700", "800"], variable: "--font-baloo", display: "swap" });
+const nunito = Nunito({ subsets: ["latin", "latin-ext"], weight: ["400", "600", "700", "800", "900"], variable: "--font-nunito", display: "swap" });
+
 export const metadata: Metadata = {
   title: "Elifba Tahtası",
   description:
@@ -24,12 +29,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0f766e",
+  themeColor: "#6d28d9",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="tr" className={`${scheherazade.variable} h-full antialiased`}>
+    <html lang="tr" className={`${scheherazade.variable} ${baloo.variable} ${nunito.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <MotionPreference />
         {children}

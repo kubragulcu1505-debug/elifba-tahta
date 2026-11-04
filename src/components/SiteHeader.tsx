@@ -2,28 +2,27 @@ import Link from "next/link";
 
 export function SiteHeader({ current }: { current?: "home" | "teacher" | "check" | "duel" | "board" }) {
   const item = (href: string, label: string, key: string) => (
-    <Link
-      href={href}
-      className={`btn inline-flex items-center ${current === key ? "btn-primary" : "btn-ghost"}`}
-      aria-current={current === key ? "page" : undefined}
-    >
+    <Link href={href} className={`nav-pill ${current === key ? "on" : ""}`} aria-current={current === key ? "page" : undefined}>
       {label}
     </Link>
   );
   return (
-    <header className="border-b-2 border-line bg-surface">
+    <header className="site-head">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-5 py-3">
         <Link href="/" className="mr-auto flex items-center gap-3">
-          <span className="ar text-4xl leading-none text-brand" aria-hidden="true">
-            اَ بَ
+          <span className="site-logo" aria-hidden="true">
+            <span className="ar">اَبَ</span>
           </span>
-          <span className="text-2xl font-extrabold">Elifba Tahtası</span>
+          <span className="site-title">
+            Elifba Tahtası
+            <small>Oyna · Öğren · Kazan</small>
+          </span>
         </Link>
-        {item("/", "Ders haritası", "home")}
+        {item("/", "🗺 Ders haritası", "home")}
         {item("/duello", "⚔ Düello", "duel")}
         {item("/tablo", "🏆 Genel tablo", "board")}
-        {item("/ogretmen", "Öğretmen paneli", "teacher")}
-        {item("/kontrol", "Cihaz ve görüntü testi", "check")}
+        {item("/ogretmen", "👩‍🏫 Öğretmen", "teacher")}
+        {item("/kontrol", "🖥 Cihaz testi", "check")}
       </div>
     </header>
   );
